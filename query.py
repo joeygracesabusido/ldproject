@@ -1,0 +1,1417 @@
+import mysql.connector
+from reportlab.lib import colors, pagesizes
+from tabulate import tabulate
+from prettytable import PrettyTable
+import xlsxwriter
+from os import startfile
+import csv
+
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate,Paragraph,Table,TableStyle
+from PollyReports import *
+
+
+mydb = mysql.connector.connect(
+            host="192.46.225.247",
+            user="joeysabusido",
+            password="Genesis@11",
+            database="ldglobal",
+            auth_plugin='mysql_native_password')
+cursor = mydb.cursor()
+
+# THIS IS TO CREATE TABLE FOR allowance
+cursor.execute(
+        "CREATE TABLE IF NOT EXISTS allowance (employee_id VARCHAR(250),\
+             lastname VARCHAR(250) ,\
+              firstname VARCHAR(250),\
+                allowance DECIMAL (18,2),\
+                id INT AUTO_INCREMENT PRIMARY KEY)")
+mydb.commit()
+
+def selection():
+
+    """This function is for selection of transactions"""
+    print('1001-Search for Rental Summary')
+    print('1002-Search for Equipment')
+    print('1003-Search for employee activate and Below 475')
+    print('1004-Search for employee activate and above 475')
+    print('1005-Search for DT Driver')
+    print('1006-Enter Employee Allowance')
+    print('1007-Search for Payroll')
+    print('1008-Delete Payroll')
+    print('1009-Total Diesel')
+    print('1010-Diesel Running Balance')
+    print('1011-Cost Entry')
+    print('1012-Calculate Cost')
+    print('1013- Test Cost Entry')
+    print('1014- Test Test')
+    print('1015- Classification')
+    print('1016- Testing Cost')
+    print('1017- Inner Join')
+    print('1018- Rental Export')
+    print('1019- Update Employee')
+    print('1020- MWE Employee Computation')
+    print('x-Exit')
+
+    ans = input('Please enter code for your Desire transactio: ')
+
+    if ans == '1001':
+        return search_rental_sum()
+    elif ans == '1002':
+        return search_for_equipment()
+    elif ans == '1003':
+        return search_for_employee_below475()
+    elif ans == '1004':
+        return search_for_employee_above475()
+
+    elif ans == '1005':
+        return search_for_employee_driver()
+
+    elif ans == '1006':
+        return insert_allowance()
+
+    elif ans == '1007':
+        return search_payroll()
+
+    elif ans == '1008':
+        return delete_payroll()
+
+    elif ans == '1009':
+        return search_totaldiesel()
+    elif ans == '1010':
+        return search_totaldiesel2()
+    elif ans == '1011':
+        return search_costEntry()
+    elif ans == '1012':
+        return calculate_cost()
+
+    elif ans == '1013':
+        return test_cost()
+
+    elif ans == '1014':
+        return test_test()
+
+    elif ans == '1015':
+        return classification()
+    
+    elif ans == '1016':
+        return test_test2()
+
+    elif ans == '1017':
+        return innerjoin()
+
+    elif ans == '1018':
+        return rental_export()
+
+    elif ans == '1019':
+        return update_employee_details_on()
+
+    elif ans == '1020':
+        return mwe_selection()
+
+
+    elif ans == 'x' or ans =='X':
+        exit
+
+def search_rental_sum():
+    """This function is for searching Rental Data"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    date1 = input("Enter Date From: ")
+    date2 = input("Enter Date To: ")
+
+
+    query = "Select\
+                equipment_id,\
+                sum(total_rental_hour) as TotalRental\
+                from equipment_rental\
+                where transaction_date\
+                BETWEEN '" + date1 + "' and\
+                '" + date2 + "' \
+                GROUP BY equipment_id \
+                ORDER BY equipment_id \
+                "
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+
+    #print(tabulate(myresult, headers =['Equipment ID','Total Hours'], tablefmt='psql'))
+
+
+
+    transDate = ''
+    equipID = ''
+    rental_hour = 0
+    totalrow = 0
+
+    rental_report = {}
+    for i in myresult:
+        data = {i[0]:
+                    {'totalHours': i[1]
+                     }
+                }
+
+        rental_report.update(data)
+
+    menu = PrettyTable()
+    menu.field_names=['ID','Total Hours']
+        
+    for emp in rental_report:
+        menu.add_row([emp,
+                    rental_report[emp]['totalHours']])
+                                
+        print(menu)
+    selection()
+
+def search_for_equipment():
+    """This function is to search for Equipment"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    query = """
+            Select * 
+            from equipment_details
+            order by equipment_id
+            """
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+
+    equipment ={}
+    for row in myresult:
+        equipment.update({row[0]:
+        {
+            'id': row[0],
+            'equipmentID': row[1],
+            'rentalRate': row[5],
+
+        }
+        })
+
+    
+    menu = PrettyTable()
+    menu.field_names=['ID','EQUIPMENT ID','RENTAL RATE']
+        
+    for emp in equipment:      
+        menu.add_row([emp,
+                    equipment[emp]['equipmentID'],
+                    equipment[emp]['rentalRate']])            
+    print(menu)
+
+
+def search_for_employee_below475():
+    """This function is to query for employee <= 475"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    query = """
+        SELECT employee_id,lastName,firstName,position,salary_rate
+        FROM employee_details
+        WHERE employment_status = 'Employeed' and 
+        salary_rate <= 475
+    """
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+
+    countTotal = 0
+
+    for row in myresult:
+        countTotal+=1
+
+
+    print(tabulate(myresult, headers =['EMPLOYEE ID',
+                                    'LAST NAME','FIRST NAME',
+                                    'POSITION','SALARY RATE'], tablefmt='psql'))
+    print('Total employee: ',countTotal)
+    selection()
+
+def search_for_employee_above475():
+    """This function is to query for employee <= 475"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    query = """
+        SELECT employee_id,lastName,firstName,position,salary_rate      
+        FROM employee_details
+        WHERE employment_status = 'Employeed' and
+        salary_rate > 475
+    """
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+    countTotal = 0
+
+    for row in myresult:
+        countTotal+=1
+    
+
+    print(tabulate(myresult, headers =['EMPLOYEE ID',
+                                    'LAST NAME','FIRST NAME',
+                                    'POSITION','SALARY RATE','TOTAL'], tablefmt='psql'))
+    print('Total employee: ',countTotal)
+    selection()
+
+def search_for_employee_driver():
+    """This function is to query for employee <= 475"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    dt = 'DT Driver'
+    status = 'Employeed'
+
+    #query = 'SELECT employee_id,lastName,firstName,position,salary_rate  FROM employee_details  WHERE employment_status = 'Employeed' and  salary_rate > 475 and position = '" + dt + "' \
+    
+    cursor.execute("SELECT employee_id,lastName,firstName,position,salary_rate \
+                                  FROM employee_details\
+                                where employment_status = '" + status + "' and  salary_rate <= 475\
+                                     and position = '" + dt + "' ")
+
+    # cursor.execute("SELECT employee_id,lastName,firstName,position,salary_rate \
+    #      FROM employee_details \
+    #     WHERE employment_status = 'Employeed' and  salary_rate < 475 and position = 'DT Driver' ")
+    myresult = cursor.fetchall()
+    countTotal = 0
+
+    for row in myresult:
+        countTotal+=1
+    
+
+    print(tabulate(myresult, headers =['EMPLOYEE ID',
+                                    'LAST NAME','FIRST NAME',
+                                    'POSITION','SALARY RATE','TOTAL'], tablefmt='psql'))
+    print('Total employee: ',countTotal)
+    selection()
+
+def insert_allowance():
+    """This function is to insert allowance for Employee"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    empID = input('Enter employee ID: ')
+    lname = input('Enter Last Name: ')
+    fname = input('Enter First Name: ')
+    amount = input('Enter Allowance: ')
+
+    try:
+        cursor.execute("INSERT INTO allowance (employee_id,"
+                           "lastname,firstname,allowance)"
+                           
+                           " VALUES(%s, %s, %s, %s)",
+
+                           (empID, lname, fname, amount))
+
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        selection()
+   
+    except Exception as ex:
+        print("Error", f"Error due to :{str(ex)}")
+
+def search_payroll():
+    """This function is to insert allowance for Employee"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date to: ')
+
+    cursor.execute("SELECT id,employee_id,last_name, SUM(grosspay_save) as totalGross,department,on_off_details,\
+                        sum(totalDem_save) as TotalDem, \
+                        sum(otherforms_save) as Total_otherForms, sum(taxable_amount) as TotalAmount,taxable_mwe_detail,\
+                            sum(cashadvance_save) as CashAdvance, cut_off_date \
+                        FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
+                      GROUP BY id,employee_id,last_name, department,on_off_details ,taxable_mwe_detail,cut_off_date")
+   
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['ID','EMPLOYEE ID',
+                                    'LAST NAME','GROSS PAY','DEPARTMENT','On & Off Status','Total Deminimis','OTHERFORMS',
+                                    'Tax Amount','Tax/MWE','Cash Advance','Cut off'], tablefmt='psql'))
+    
+def delete_payroll():
+    
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date to: ')
+
+    cursor.execute("SELECT id,employee_id,last_name, SUM(grosspay_save) as totalGross,department,on_off_details \
+                        FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
+                      GROUP BY id,employee_id,last_name, department,on_off_details ")
+   
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['ID','EMPLOYEE ID',
+                                    'LAST NAME','GROSS PAY','DEPARTMENT','On & Off Status'], tablefmt='psql'))
+
+    transID = input('Enter trans id :  ')
+
+    cursor.execute("Delete from payroll_computation where id = '"+ transID +"' ")
+    mydb.commit
+    mydb.close
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    cursor.execute("SELECT id,employee_id,last_name, SUM(grosspay_save) as totalGross,department,on_off_details \
+                        FROM payroll_computation  \
+                      GROUP BY id,employee_id,last_name, department,on_off_details ")
+   
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['ID','EMPLOYEE ID',
+                                    'LAST NAME','GROSS PAY','DEPARTMENT','On & Off Status'], tablefmt='psql'))
+
+    selection()
+
+def search_totaldiesel():
+    """This function is to insert allowance for Employee"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date to: ')
+
+    cursor.execute("SELECT sum(use_liter) as totaldiesel FROM diesel_consumption \
+                    where transaction_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
+                      ")
+   
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['TOTAL DIESEL'], tablefmt='psql'))
+    selection()
+
+def search_totaldiesel2():
+    """This function is to insert allowance for Employee"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date to: ')
+
+    cursor.execute("SELECT equipment_id, sum(use_liter) as totaldiesel FROM diesel_consumption \
+                    where transaction_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
+                      GROUP BY equipment_id ORDER BY equipment_id ")
+    
+    diesel ={}
+    count = 0
+    balance = 0
+    myresult = cursor.fetchall()
+
+    for row in myresult:
+        count+= 1
+        totaldiesel = row[1]
+        balance+= totaldiesel
+        totaldiesel1 = '{:,.2f}'.format(totaldiesel)
+        balance2 = '{:,.2f}'.format(balance)
+
+        diesel.update({row[0]:
+        {
+            'totalDiesel': totaldiesel1,
+            'balance': balance2,
+            'count': count
+        }
+        })
+
+    
+    menu = PrettyTable()
+    menu.field_names=['EQUIPMENT ID','TOTAL LITERS','RUNNING BALANCE','COUNT']
+        
+    for emp in diesel:      
+        menu.add_row([emp,
+                    diesel[emp]['totalDiesel'],
+                    diesel[emp]['balance'],
+                    diesel[emp]['count']])            
+    print(menu)
+    selection()
+
+
+
+def search_costEntry():
+    """This function is to insert allowance for Employee"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    cursor.execute("Select * from cost_entry")
+    myresult = cursor.fetchall()
+
+    for row in myresult:
+        print(row)
+   
+def calculate_cost():
+    """This function is to calculate """
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date To: ')
+
+    
+
+    query = "Select\
+                equipment_id,\
+                sum(total_rental_hour) as TotalRental,\
+                sum(rental_amount) as TotalRental \
+                from equipment_rental\
+                where transaction_date\
+                BETWEEN '" + date1 + "' and\
+                '" + date2 + "' \
+                GROUP BY equipment_id \
+                "
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+
+    transDate = ''
+    equipID = ''
+    rental_hour = 0
+    totalrow = 0
+
+    rental_report = {}
+    for i in myresult:
+        data = {i[0]:
+                    {'totalHours': i[1],
+                    'total_rental_amount': i[2]
+                     }
+                }
+
+        rental_report.update(data)
+
+    for j in rental_report:
+        equipmID = j
+        total1 = rental_report[j]['totalHours']
+
+        query2 = "Select\
+                    equipment_id,\
+                    sum(use_liter) as diesel,\
+                    sum(amount) as totalAmount \
+                    from diesel_consumption\
+                    where transaction_date\
+                    BETWEEN '" + date1 + "' and\
+                    '" + date2 + "'  \
+                    GROUP BY equipment_id \
+                "
+        cursor.execute(query2)
+        myresult = cursor.fetchall()
+
+        diesel_report = {}
+        for h in myresult:
+            data2 = {h[0]:
+                         {'totalliters': h[1],
+                            'totalAmount': h[2]
+                          }
+                     }
+            diesel_report.update(data2)
+        liters_per_hour = 0
+        for k in diesel_report:
+            total2 = diesel_report[k]['totalliters']
+            # if k == j:
+            #     # liters_per_hour = diesel_report[k]['totalliters'] / rental_report[j]['totalHours']
+            #     liters_per_hour =  total2 / total1
+            #     liters_per_hour2 = '{:,.2f}'.format(liters_per_hour)
+            #     # print(f'Liters/Hour: {liters_per_hour2}')
+            #     totalliters =diesel_report[k]['totalliters']
+            #     totalliters2 = '{:,.2f}'.format(totalliters)
+
+            #     totalhours= rental_report[j]['totalHours']
+            #     totalhours2 = '{:,.2f}'.format(totalhours)
+            #     print(k,totalhours2,totalliters2, liters_per_hour2)
+            
+
+           
+
+            query2 = "Select\
+                    equipment_id, clasification,\
+                    sum(cost_amount) as TotalCost\
+                    from cost_entry\
+                    where trans_date\
+                    BETWEEN '" + date1 + "' and\
+                    '" + date2 + "'  \
+                    GROUP BY equipment_id,clasification \
+                "
+            cursor.execute(query2)
+            myresult = cursor.fetchall()
+
+            cost_report = {}
+            for c in myresult:
+                data2 = {c[0]:
+                            {'classification': c[1],
+                             'totalCost': c[2]
+                            }
+                        }
+                cost_report.update(data2)
+            total_cost = 0
+            totalhours= 0
+            total_dieselAmount = 0
+            costing = 0
+            cost_per_equipment = 0
+
+            workbook = xlsxwriter.Workbook("cost.xlsx")
+            worksheet = workbook.add_worksheet('rental')
+            
+            worksheet.write('A1', 'EQUIPMENT ID')
+            worksheet.write('B1', 'TOTAL RENTAL HOURS')
+            worksheet.write('C1', 'TOTAL DIESEL AMOUNT')
+            worksheet.write('D1', 'EXPENSES')
+            worksheet.write('E1', 'TOTAL EXPENSE')
+            worksheet.write('F1', 'COST PER EQUIPMENT')
+                
+            
+            
+            rowIndex = 2
+
+
+            for cost in cost_report:
+               
+
+                
+                if k == cost and cost == j :
+                    
+                    totalhours= rental_report[j]['totalHours']
+                    totalhours2 = '{:,.2f}'.format(totalhours)
+
+                    total_dieselAmount =diesel_report[k]['totalAmount']
+                    total_dieselAmount2 = '{:,.2f}'.format(total_dieselAmount)
+
+
+                    costing =cost_report[cost]['totalCost']
+                    costing2 = '{:,.2f}'.format(costing)
+
+                    totalCost = total_dieselAmount + costing
+                    totalCost2 = '{:,.2f}'.format(totalCost)
+
+                    cost_per_equipment = totalCost / totalhours
+                    cost_per_equipment2 = '{:,.2f}'.format(cost_per_equipment)
+
+                    # print(k, totalhours2, total_dieselAmount2,  costing2, totalCost2, cost_per_equipment2)
+                    # print('')
+
+                    
+                    
+            
+                    worksheet.write('A' + str(rowIndex),k)
+                    worksheet.write('B' + str(rowIndex),totalhours)
+                    worksheet.write('C' + str(rowIndex),total_dieselAmount)
+                    worksheet.write('D' + str(rowIndex), costing)
+                    worksheet.write('E' + str(rowIndex),totalCost)
+                    worksheet.write('F' + str(rowIndex),cost_per_equipment)
+                    
+                
+                    
+                    rowIndex += 1
+
+                    workbook.close()
+                    
+
+            # from os import startfile
+            # startfile("cost.xlsx")
+
+                # selection()
+
+def test_cost():
+    """This is for testing only for data for cost entry"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date To: ')
+
+    query2 = "Select\
+                    equipment_id, clasification,\
+                    sum(cost_amount) as TotalCost\
+                    from cost_entry\
+                    where trans_date\
+                    BETWEEN '" + date1 + "' and\
+                    '" + date2 + "'  \
+                    GROUP BY equipment_id,clasification \
+                "
+    cursor.execute(query2)
+    myresult = cursor.fetchall()
+
+    cost_report = {}
+    for c in myresult:
+        data2 = {c[0]:
+                    {'classification': c[1],
+                        'totalCost': c[2]
+                    }
+                }
+        cost_report.update(data2)
+    for row in cost_report:
+
+        print(row,cost_report[row]['classification'],cost_report[row]['totalCost'])
+
+def test_test():
+    """This is for testing only for data for cost entry"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date To: ')
+
+    query2 = "Select\
+                    equipment_id,\
+                    sum(use_liter) as diesel,\
+                    sum(amount) as totalAmount \
+                    from diesel_consumption\
+                    where transaction_date\
+                    BETWEEN '" + date1 + "' and\
+                    '" + date2 + "'  \
+                    GROUP BY equipment_id \
+                "
+    cursor.execute(query2)
+    myresult = cursor.fetchall()
+    for row in myresult:
+        equipID_diesel = row[0]
+        totalAmount_diesel = row[2]
+
+
+        query2 = "Select\
+                        equipment_id,\
+                        sum(cost_amount) as TotalCost\
+                        from cost_entry\
+                        where trans_date\
+                        BETWEEN '" + date1 + "' and\
+                        '" + date2 + "' and equipment_id = '" + equipID_diesel + "' \
+                        GROUP BY equipment_id \
+                    "
+        cursor.execute(query2)
+        myresult = cursor.fetchall()
+
+        for row in myresult:
+            equipID_cost = row[0]
+            amount_cost = row[1]
+
+           
+            print(equipID_cost, amount_cost)
+
+        
+        # print(tabulate(myresult, headers =['EQUIPMENT ID','CLASSIFICATION','AMOUNT'], tablefmt='psql'))
+
+def classification():
+    """This function is for displaying classificaion"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date To: ')
+
+    query2 = "Select\
+                        clasification,\
+                        sum(cost_amount) as TotalCost\
+                        from cost_entry\
+                        where trans_date\
+                        BETWEEN '" + date1 + "' and\
+                        '" + date2 + "'  \
+                        GROUP BY clasification \
+                    "
+    cursor.execute(query2)
+    myresult = cursor.fetchall()
+
+    
+    print(tabulate(myresult, headers =['EQUIPMENT ID','CLASSIFICATION','AMOUNT'], tablefmt='psql'))
+
+
+def test_test2():
+    """This is for testing only for data for cost entry"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date To: ')
+
+    query = "Select\
+                equipment_id,\
+                sum(total_rental_hour) as TotalRental,\
+                sum(rental_amount) as TotalRental \
+                from equipment_rental\
+                where transaction_date\
+                BETWEEN '" + date1 + "' and\
+                '" + date2 + "' \
+                GROUP BY equipment_id \
+                "
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+
+    for row  in myresult:
+        equipID_rental = row[0]
+        total_rental_hour = row[1]
+        total_rental_amount = row[2]
+
+        query2 = "Select\
+                        equipment_id,\
+                        sum(use_liter) as diesel,\
+                        sum(amount) as totalAmount \
+                        from diesel_consumption\
+                        where transaction_date\
+                        BETWEEN '" + date1 + "' and\
+                        '" + date2 + "' and equipment_id = '" + equipID_rental + "' \
+                        GROUP BY equipment_id \
+                    "
+        cursor.execute(query2)
+        myresult = cursor.fetchall()
+        for row in myresult:
+            equipID_diesel = row[0]
+            totalAmount_diesel = row[2]
+
+           
+
+
+            query2 = "Select\
+                            equipment_id,\
+                            sum(cost_amount) as TotalCost\
+                            from cost_entry\
+                            where trans_date\
+                            BETWEEN '" + date1 + "' and\
+                            '" + date2 + "' and equipment_id = '" + equipID_diesel + "' \
+                            GROUP BY equipment_id \
+                        "
+            cursor.execute(query2)
+            myresult = cursor.fetchall()
+
+            file_name = 'cost_report'
+            pdf = SimpleDocTemplate(file_name + '.pdf', pagesizes =(letter))
+
+            flow_obj = []
+            td =[['EQUIPMENT ID','TOTAL RENTAL HOURS','TOTAL DIESEL AMOUNT','EXPENSES','TOTAL EXPENSE','COST PER EQUIPMENT']]
+
+            result = []
+            for row in myresult:
+                equipID_cost = row[0]
+                amount_cost = row[1]
+
+
+                totalhours = total_rental_hour
+                totalhours2 = '{:,.2f}'.format(totalhours)
+
+                total_dieselAmount = totalAmount_diesel
+                total_dieselAmount2 = '{:,.2f}'.format(total_dieselAmount)
+
+
+                costing = amount_cost
+                costing2 = '{:,.2f}'.format(costing)
+
+                totalCost = total_dieselAmount + costing
+                totalCost2 = '{:,.2f}'.format(totalCost)
+
+                cost_per_equipment = totalCost / totalhours
+                cost_per_equipment2 = '{:,.2f}'.format(cost_per_equipment)
+
+                
+
+                data = [equipID_cost,totalhours2, total_dieselAmount2,
+                        costing2,totalCost2,cost_per_equipment2]
+                td.append(data)
+
+               
+                table = Table(td)
+                ts = TableStyle([("GRID", (0,0), (1,1), 1, colors.red)
+
+                ])
+            
+                table.setStyle(ts)
+                flow_obj.append(table)
+                pdf.build(flow_obj)
+
+            # startfile("costing_report.pdf")
+
+                
+
+                # with open("cost.csv", "w",newline='') as file:
+
+                #     fieldnames = ['EQUIPMENT ID','TOTAL RENTAL HOURS','TOTAL DIESEL AMOUNT','EXPENSES',\
+                #         'TOTAL EXPENSE','COST PER EQUIPMENT']
+                #     thewriter = csv.DictWriter(file,fieldnames=fieldnames)
+                #     thewriter.writeheader()
+                #     for row in myresult:
+                #         thewriter.writerow({'EQUIPMENT ID':equipID_cost,'TOTAL RENTAL HOURS':totalhours,
+                #                             'TOTAL DIESEL AMOUNT':total_dieselAmount,'EXPENSES': costing,
+                #                             'TOTAL EXPENSE':totalCost,'COST PER EQUIPMENT':cost_per_equipment})
+
+               
+                        
+               
+                    # startfile("cost.csv")
+
+
+                # print(equipID_cost, totalhours2, total_dieselAmount2, costing2, totalCost2, cost_per_equipment2)
+              
+def innerjoin():
+    """This function is for inner join""" 
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date To: ')
+
+
+    query = "Select equipment_rental.equipment_id,\
+            sum(equipment_rental.total_rental_hour) as TotalRental,\
+            sum(cost_entry.cost_amount) as TotalAmount\
+            from equipment_rental\
+            INNER JOIN cost_entry\
+                ON equipment_rental.equipment_id = cost_entry.equipment_id\
+            where transaction_date\
+            BETWEEN '" + date1 + "' and\
+            '" + date2 + "' \
+            GROUP BY equipment_rental.equipment_id, cost_entry.equipment_id, equipment_rental.total_rental_hour,cost_entry.cost_amount\
+                "
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+
+    for row in myresult:
+        print(row)
+
+def rental_export():
+    """This function is for generating Excel for Rental"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date To: ')
+
+    workbook = xlsxwriter.Workbook("rental_report.xlsx")
+    worksheet = workbook.add_worksheet('rental')
+    
+    worksheet.write('A1', 'EQUIPMENT ID')
+    worksheet.write('B1', 'TOTAL RENTAL HOURS')
+    worksheet.write('C1', 'RENTAL RATE')
+    worksheet.write('D1', 'TOTAL AMOUNT ')
+  
+
+    rowIndex = 2
+    query = "Select\
+                equipment_id,\
+                sum(total_rental_hour) as TotalRental,\
+                rental_rate,\
+                sum(rental_amount) as TotalRental \
+                from equipment_rental\
+                where transaction_date\
+                BETWEEN '" + date1 + "' and\
+                '" + date2 + "' \
+                GROUP BY equipment_id,rental_rate \
+                "
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+
+    for row  in myresult:
+        equipID_rental = row[0]
+        total_rental_hour = row[1]
+        total_rental_rate = row[2]
+        total_rental_amount = row[3]
+
+        worksheet.write('A' + str(rowIndex),equipID_rental)
+        worksheet.write('B' + str(rowIndex),total_rental_hour)
+        worksheet.write('C' + str(rowIndex),total_rental_rate)
+        worksheet.write('D' + str(rowIndex),total_rental_amount)
+       
+    
+        rowIndex += 1
+
+    workbook.close()
+            
+
+        # from os import startfile
+    startfile("rental_report.xlsx")
+
+
+def update_employee_details_on():
+    """This function is to update employee for on off details"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    query ='Select employee_id,lastName,firstName,\
+            salary_rate, taxCode,off_on_details,user,update_date,id from employee_details ORDER BY employee_id'
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+    print(tabulate(myresult, headers =['ID','LAST NAME', 'FIRST NAME',
+                                       'SALARY RATE','TAX CODE','On/Off Details',
+                                       'USER','TIME','ID'], tablefmt='psql'))
+
+    employeeID = input("Enter employee ID: ")
+    off_on_Details = input("Enter details on/off: ")
+
+    key = input("Would you like to update data yes/no?: ").lower()
+
+    if key == 'yes':
+
+        cursor.execute(
+                    "UPDATE employee_details SET off_on_details ='"+ off_on_Details +"'\
+                    WHERE employee_id =%s", (employeeID,)
+                )
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        print("Data has been updated")
+        print('')
+
+        update_employee_details_on()
+    else:
+        selection()
+
+def test_on():
+    """This function is for test of on query"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date To: ')
+    miminum_wage = str(420)
+
+    # cursor.execute("SELECT employee_id,on_off_details\
+    #                    FROM payroll_computation \
+    #                    where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
+    #                      and on_off_details = 'on' ")
+
+    cursor.execute("SELECT sum(grosspay_save) as GROSS, SUM(total_mandatory) AS TOTALMAN\
+                       FROM payroll_computation \
+                       where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
+                         and on_off_details = 'on' ")
+
+
+    myresult = cursor.fetchall()
+    print(tabulate(myresult, headers =['Gross','Total Mandatory'], tablefmt='psql'))
+
+
+def update_employee_details_mwe_taxable():
+    """This function is to update employee for on off details"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    query ='Select employee_id,lastName,firstName,\
+            salary_rate, taxCode,off_on_details,user,update_date,id from employee_details ORDER BY employee_id'
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+    print(tabulate(myresult, headers =['ID','LAST NAME', 'FIRST NAME',
+                                       'SALARY RATE','TAX CODE','On/Off Details',
+                                       'USER','TIME','ID'], tablefmt='psql'))
+
+    employeeID = input("Enter employee ID: ")
+    omwe_Details = input("Enter details Taxble/MWE: ")
+
+    key = input("Would you like to update data yes/no?: ").lower()
+
+    if key == 'yes':
+
+        cursor.execute(
+                    "UPDATE employee_details SET taxCode ='"+ omwe_Details +"'\
+                    WHERE employee_id =%s", (employeeID,)
+                )
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        print("Data has been updated")
+        print('')
+
+        update_employee_details_mwe_taxable()
+
+
+def mwe_selection():
+    """This function is for MWE """
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date To: ')
+
+    cursor.execute("SELECT \
+                       employee_id,last_name,grosspay_save\
+                       FROM payroll_computation \
+                       where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
+                        AND  taxable_mwe_detail = 'MWE'  and on_off_details = 'on' ")
+
+    myresult = cursor.fetchall()
+    print(tabulate(myresult, headers =['EMPLOYEE ID','LASTNAME','GROSS PAY'], tablefmt='psql'))
+
+def mwe_1601c_print():
+    """This is for sample only for mwe for 1601c"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date To: ')
+
+    cursor.execute("SELECT employee_id, last_name, sum(grosspay_save) as GROSS, SUM(total_mandatory) AS TOTALMAN,\
+                       sum(regularday_ot_cal) as REGOT,sum(regularsunday_ot_cal) as SUNOT,\
+                       sum(spl_ot_cal) as SPLOT,sum(legal_day_ot_cal) as LGL2OT,\
+                       sum(proviRate_day_ot_cal) as PROVIOT,sum(provisun_day_ot_cal) as PROVISUNOT,\
+                       sum(nightdiff_day_cal) as NDIFF \
+                       FROM payroll_computation \
+                       where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
+                        AND  taxable_mwe_detail = 'MWE'  and on_off_details = 'on'\
+                            GROUP BY employee_id, last_name ")
+
+    myresult = cursor.fetchall()
+
+    for row in myresult:
+        empID = row[0]
+        lastName = row[1]
+
+def total_notsubject():
+    """This is not subject to tax"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date To: ')
+
+    workbook = xlsxwriter.Workbook("notsubject.xlsx")
+    worksheet = workbook.add_worksheet('notsubject')
+    worksheet.write('A1', 'EMPLOYEE ID')
+    worksheet.write('B1', 'LASTNAME')
+    worksheet.write('C1', 'NOT SUBJECT')
+
+    rowIndex = 2
+    cursor.execute("SELECT employee_id, last_name, sum(taxable_amount) as totaltaxable_amount\
+                                        FROM payroll_computation\
+                                        where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
+                                            AND  taxable_mwe_detail = 'Taxable'  and on_off_details = 'on'\
+                                            AND taxable_amount < 10417 \
+                                                GROUP BY employee_id, last_name")
+    myresult = cursor.fetchall()
+    
+    for data in myresult:
+        empIDxlx = data[0]
+        lastnamexlx = data[1]
+        TAXaMOUNTxls = data[2]
+    
+        worksheet.write('A' + str(rowIndex),empIDxlx)
+        worksheet.write('B' + str(rowIndex),lastnamexlx)
+        worksheet.write('C' + str(rowIndex),TAXaMOUNTxls)
+
+        rowIndex += 1
+
+    workbook.close()
+   
+    # from os import startfile
+    startfile("notsubject.xlsx")
+
+
+def taxable_amount():
+    """This is for taxable amount manual edit"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    search_payroll()
+    transID = input('Enter Trans ID :')
+    tax_amount = input('Enter Amount: ')
+
+    key = input("Would you like to update data yes/no?: ").lower()
+
+    if key == 'yes':
+    
+        cursor.execute(
+            "UPDATE payroll_computation SET taxable_amount ='"+ tax_amount +"' \
+                WHERE id = '" + transID + "' ")
+        
+
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+
+        print('data has been updated')
+
+    taxable_amount()
+
+def equipment_registry():
+    """This function is for registration of Equipment"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    search_for_equipment()
+
+    equipmentID = input('Enter Equipment ID :')
+    rentalRate = input('Enter Rental Rate: ')
+
+
+    try:
+        cursor.execute("INSERT INTO equipment_details (equipment_id,"
+                            "rental_rate)"
+                            
+                            " VALUES(%s, %s)",
+
+                            (equipmentID, rentalRate))
+
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        
+   
+    except Exception as ex:
+        print("Error", f"Error due to :{str(ex)}")
+
+def insert_sssloan_deduction():
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    
+    
+    employee_id =input('Enter employee ID: ')
+    last_name = input('Enter Last Name: ')
+    first_name = input('Enter First Name: ')
+    loan_deduction = input('Enter Amount Deduction: ')
+    
+
+    cursor.execute(
+        "INSERT INTO sss_loanDeduction (employee_id,lastname,"
+        "firstname,loan_deduction)"
+        " VALUES(%s,%s,%s,%s)",
+        (employee_id,last_name,first_name,loan_deduction))
+
+    mydb.commit()
+    mydb.close()
+    cursor.close()
+    
+
+    
+    key = input('would you like to Transact another: ').lower()
+    if key == 'yes':
+        return insert_sssloan_deduction()
+    else:
+        exit
+
+def showdatabases():
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    query =("SHOW DATABASES")
+    cursor.execute(query)
+    
+    for db in cursor:
+        print(db)
+
+def showtables():
+    """This function is to show all Tables"""
+    cursor.execute("Show tables;")
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['TABLE'], tablefmt='psql'))
+
+    # for x in myresult:
+    #     print(x)
+
+def showColumns():
+    query ='SHOW COLUMNS FROM ldglobal.tax_table;'
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['TABLE'], tablefmt='psql'))
+
+    # for x in myresult:
+    #    print(x)
+
+def show_sss_loandeduction():
+    query ='Select * FROM sss_loanDeduction'
+    cursor.execute(query)
+    myresult = cursor
+    for x in myresult:
+        print(x)
+
+def update_sssloan_deduction():
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    show_sss_loandeduction()
+    
+    trans_id =input('Enter id: ')
+    employee_id =input('Enter Employee ID: ')
+    loan_deduction = input('Enter Amount Deduction: ')
+    
+
+    cursor.execute(
+        "UPDATE sss_loanDeduction SET loan_deduction='" + loan_deduction +"' \
+            WHERE id = '" + trans_id +"' ")
+       
+
+    mydb.commit()
+    mydb.close()
+    cursor.close()
+    
+
+    
+    key = input('would you like to Transact another: ').lower()
+    if key == 'yes':
+        return update_sssloan_deduction()
+    else:
+        exit
+
+def cash_advance_data():
+    """This function is for cash advance list"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    query ='Select * FROM cash_advance'
+    cursor.execute(query)
+    myresult = cursor
+    for x in myresult:
+        print(x)
+def insert_equipment():
+    """This function is to insert equipment"""   
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    equipID = input('Enter Equipment ID: ')
+    rental_rate = input('Enter rental Rate: ')
+    
+
+    try:
+        cursor.execute("INSERT INTO equipment_details (equipment_id,"
+                           "rental_rate)"
+                           
+                           " VALUES(%s, %s)",
+
+                           (equipID,rental_rate))
+
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        selection()
+   
+    except Exception as ex:
+        print("Error", f"Error due to :{str(ex)}")
+
+def edit_tax_table():
+    """This function is for editing taxable"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    query ='SELECT * FROM ldglobal.tax_table;'
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['ID', 'AMOUNT FROM','AMOUNT TO','AMOUNTBASE','PERCENTAGE'], tablefmt='psql'))
+
+def search_payroll_withUpdate():
+    """This function is to insert allowance for Employee"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date to: ')
+
+    cursor.execute("SELECT id,employee_id,last_name, SUM(grosspay_save) as totalGross,\
+                        sum(otherforms_save) as Total_otherForms, sum(taxable_amount) as TotalAmount,\
+                            sum(cashadvance_save) as CashAdvance, cut_off_date,on_off_details,taxable_amount \
+                        FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
+                      GROUP BY id,employee_id,last_name, cut_off_date,on_off_details,taxable_amount")
+   
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['ID','EMPLOYEE ID',
+                                    'LAST NAME','GROSS PAY''OTHERFORMS',
+                                    'Tax Amount','Cash Advance','Cut off','On-Off','T-Amount'], tablefmt='psql'))
+
+def diesel_search():
+    """This function is to search for Diesel Registry"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    Date1 = input("Entry Date From: ")
+    Date2 = input("Entry Date To: ")
+    equipmentID = input('Equipment ID :')
+    cursor.execute("Select \
+            `transaction_date`,\
+            `equipment_id` ,\
+            `withdrawal_slip`, \
+            `use_liter`, \
+            `price`,\
+            `amount`,\
+            `id`\
+            FROM  diesel_consumption\
+            WHERE transaction_date BETWEEN '" + Date1 +"' AND '"+ Date2 + "' \
+            AND equipment_id = '"+ equipmentID + "' \
+            ORDER by id DESC\
+                ")
+
+    fetch = cursor.fetchall()
+
+    print(tabulate(fetch, headers =['Date','Eqtp ID',
+                                    'W Slip','Liter','price',
+                                    'Amount','ID'], tablefmt='psql'))
+    
+def diesel_edit():
+    """This function is to edit Diesel Registry"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    diesel_search()
+    TransID = input('Transaction ID :')
+    equipmentID = input('Equipment ID :')
+
+    cursor.execute(
+        "UPDATE diesel_consumption SET equipment_id='" + equipmentID +"' \
+            WHERE id = '" + TransID +"' ")
+       
+
+    mydb.commit()
+    mydb.close()
+    cursor.close()
+    
+
+    
+    key = input('would you like to Transact another: ').lower()
+    if key == 'yes':
+        return diesel_edit()
+    else:
+        exit
+
+
+def search_for_splOT():
+    """This function is for searching spl ot"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input("Enter Date from :")
+    date2 = input("Enter date to :")
+    employeID = input("Enter EmpID: ")
+    cursor.execute(
+            "SELECT last_name,spl_ot\
+            from payroll_computation \
+                WHERE employee_id = '" + employeID +"' AND cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"' ")
+
+    myresult = cursor.fetchall()
+
+    for row in myresult:
+        name1= row[0]
+        spl_ot = row[1]
+
+        print(name1)
+        print(spl_ot)
+
+
+# search_for_splOT()
+# diesel_edit()
+
+# diesel_search()
+    
+# edit_tax_table()
+# insert_equipment()
+# insert_sssloan_deduction()
+# taxable_amount()
+# total_notsubject()
+# showdatabases() 
+# update_sssloan_deduction()
+# show_sss_loandeduction()
+# showColumns()
+# equipment_registry()
+# mwe_selection()
+# test_on()
+selection()
+# update_employee_details_mwe_taxable()
+# update_employee_details_on()
+# showtables()
+# cash_advance_data()
+# search_payroll_withUpdate()
