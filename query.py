@@ -1391,7 +1391,100 @@ def search_for_splOT():
         print(name1)
         print(spl_ot)
 
+def updatesalaryRate():
+    """
+    This function is to update salary rate
+    of Employee
 
+    """
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    query ='Select employee_id,lastName,firstName,\
+            salary_rate, taxCode,off_on_details,user,update_date,id from employee_details ORDER BY employee_id'
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+    print(tabulate(myresult, headers =['ID','LAST NAME', 'FIRST NAME',
+                                       'SALARY RATE','TAX CODE','On/Off Details',
+                                       'USER','TIME','ID'], tablefmt='psql'))
+
+    employeeID = input("Enter employee ID: ")
+    salaryRate = input("Enter new Rate: ")
+
+    key = input("Would you like to update data yes/no?: ").lower()
+
+    if key == 'yes':
+
+        cursor.execute(
+                    "UPDATE employee_details SET salary_rate ='"+ salaryRate +"'\
+                    WHERE employee_id =%s", (employeeID,)
+                )
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        print("Data has been updated")
+        print('')
+
+        
+    else:
+        selection()
+
+
+def comp13thMonth():
+    """
+    This function is for compution of 13 month fee
+    for 
+    """
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter Date From : ')
+    date2 = input('Enter date to : ')
+
+    department = 'Rizal-R&F'
+
+    cursor.execute(
+            "SELECT employee_id,last_name,\
+                sum(regularday_cal)  as TotalRegday,\
+                sum(regularsunday_cal) / 1.30  as TotalRegSun,\
+                sum(spl_cal) / 1.30 as TotalSpl,\
+                sum(legal_day_cal) / 2 as Totallgl2,\
+                sum(shoprate_day_cal)  as Totalshoprate,\
+                sum(proviRate_day_cal)  as TotalproviRate,\
+                sum(provisun_day_cal)  as TotalproviSun\
+            from payroll_computation \
+            WHERE department = '" + department +"' AND \
+                 cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"'  \
+            GROUP BY employee_id ,last_name  ")
+
+    myresult = cursor.fetchall()
+    count = 0
+    for row in myresult:
+        count+=1
+        empId = row[0]
+        lastName = row[1]
+        regdayCal = row[2]
+        regsunCal = row[3]
+        splCal = row[4]
+        lgl2Cal = row[5]
+        shoprateCal = row[6]
+        provirateCal = row[7]
+        sunproviRateCal  = row[8]
+
+        comp13th = float(regdayCal + regsunCal + splCal + lgl2Cal
+                    + shoprateCal + provirateCal + sunproviRateCal) / 12
+
+        print(empId, lastName, regdayCal,regsunCal,
+         splCal, lgl2Cal, shoprateCal, provirateCal,
+         sunproviRateCal, comp13th)
+        
+    print(count)
+        
+comp13thMonth()
+
+
+# updatesalaryRate()
 # search_for_splOT()
 # diesel_edit()
 
@@ -1409,7 +1502,7 @@ def search_for_splOT():
 # equipment_registry()
 # mwe_selection()
 # test_on()
-selection()
+# selection()
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()
