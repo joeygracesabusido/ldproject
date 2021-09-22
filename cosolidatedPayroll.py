@@ -3273,11 +3273,12 @@ def search_employee_reg():
 
 def employee_registry():
     """This function is to insert employee or Employee Registry"""
-    ts = time.time()
+    # ts = time.time()
     mydb._open_connection()
     cursor = mydb.cursor()
     user_name = userName_entry.get()
-    update_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    # update_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    update_time = datetime.now()
     try:
         if employee_id_entry.get() == "":
             messagebox.showerror("Error","Employee ID Must be required")
