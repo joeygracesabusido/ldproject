@@ -588,42 +588,51 @@ def update_salary_comp():
     gross_pay_update = gross_pay_entry.get()
     spltOT_update = splOT_entry.get()
 
-    # try:
-    if id_searchTrans_entry.get()== "":
-        messagebox.showerror("Error", "Search  fields  Must be required")
+    lastname = lastname_entry.get()
+    firstname = firstname_entry.get()
+    posittion = position_entry.get()
+    salRate_entry = salaryRate_entry.get()
+    empID = empID_entry.get()
 
-    else:
-        cursor.execute(
-            "UPDATE payroll_computation SET sss_save ='"+ sss_update +"', \
-            phic_save ='"+ phic_update +"',\
-            hmdf_save ='"+ hdmf_update +"',\
-            sss_provi_save ='"+ sss_provi_update +"',\
-            on_off_details='" + on_off_update + "',\
-            taxwitheld_save='" + witheld_save_update + "',\
-            provicaial_rate='" + provi_rate_update + "',\
-            total_mandatory ='"+total_mandatory_update+"',\
-            uniform_save='"+uniform_update+"',\
-            rice_save='" + rice_save_update + "',\
-            laundry_save ='" + laundry_save_update + "',\
-            medical1_save='" + medical1_save_update + "',\
-            medical2_save='" + medical2_save_update + "',\
-            totalDem_save='" + totalDem_save_update + "',\
-            otherforms_save='" + otherforms_save_update + "',\
-            taxable_amount = '" + taxable_amount_update2 + "',\
-            taxable_mwe_detail = '" + mwe_taxable_update + "',\
-            netpay_save = '" + net_pay_update + "',\
-            cashadvance_save = '" + cash_advace_update + "',\
-            hdmfloan_save = '" + hdmf_loan_update + "',\
-            sssloan_save = '" + sss_loan_update + "',\
-            grosspay_save = '" + gross_pay_update + "',\
-            spl_ot = '" + spltOT_update + "',\
-            cut_off_date = '" + date_update_edit + "'\
-            WHERE id =%s", (id_searchTrans_entry.get(),)
-        )
-        mydb.commit()
-        mydb.close()
-        cursor.close()
-        messagebox.showinfo('JRS', 'Data has been updated')
+    try:
+        if id_searchTrans_entry.get()== "":
+            messagebox.showerror("Error", "Search  fields  Must be required")
+
+        else:
+            cursor.execute(
+                "UPDATE payroll_computation SET sss_save ='"+ sss_update +"', \
+                phic_save ='"+ phic_update +"',\
+                hmdf_save ='"+ hdmf_update +"',\
+                sss_provi_save ='"+ sss_provi_update +"',\
+                on_off_details='" + on_off_update + "',\
+                taxwitheld_save='" + witheld_save_update + "',\
+                provicaial_rate='" + provi_rate_update + "',\
+                total_mandatory ='"+total_mandatory_update+"',\
+                uniform_save='"+uniform_update+"',\
+                rice_save='" + rice_save_update + "',\
+                laundry_save ='" + laundry_save_update + "',\
+                medical1_save='" + medical1_save_update + "',\
+                medical2_save='" + medical2_save_update + "',\
+                totalDem_save='" + totalDem_save_update + "',\
+                otherforms_save='" + otherforms_save_update + "',\
+                taxable_amount = '" + taxable_amount_update2 + "',\
+                taxable_mwe_detail = '" + mwe_taxable_update + "',\
+                netpay_save = '" + net_pay_update + "',\
+                cashadvance_save = '" + cash_advace_update + "',\
+                hdmfloan_save = '" + hdmf_loan_update + "',\
+                sssloan_save = '" + sss_loan_update + "',\
+                grosspay_save = '" + gross_pay_update + "',\
+                employee_id = '" + empID + "',\
+                last_name = '" + lastname + "',\
+                first_name = '" + firstname + "',\
+                salary_rate = '" + salRate_entry + "',\
+                cut_off_date = '" + date_update_edit + "'\
+                WHERE id =%s", (id_searchTrans_entry.get(),)
+            )
+            mydb.commit()
+            mydb.close()
+            cursor.close()
+            messagebox.showinfo('JRS', 'Data has been updated')
        
          
         #   taxable_amount='" + taxable_amount_update + "'\  
@@ -641,8 +650,8 @@ def update_salary_comp():
 # netpay_save = '" + net_pay_update + "'\
 #  cut_off_date = '" + date_update_edit + "'\
 
-    # except Exception as ex:
-    #     messagebox.showerror("Error", f"Error due to :{str(ex)}")   
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")   
    
 
 
@@ -1734,7 +1743,7 @@ def computation_cosolidated():
 
     date1 = payCal_date.get() 
     
-    date2 = str((date.fromisoformat(date1)) - timedelta(16))
+    date2 = str((date.fromisoformat(date1)) - timedelta(15))
 
     # date2 = payCal_conso_date.get()
     empID_conso = empID_entry.get()
@@ -1750,6 +1759,7 @@ def computation_cosolidated():
         medical2_conso = 0
         totaldem_conso = 0
         otherforms_conso = 0
+        taxable_conso = 0
         try:
             cursor.execute("Select * from payroll_computation \
                             where cut_off_date BETWEEN '" + date2 + "' and '" + date1 + "'\
@@ -1819,7 +1829,9 @@ def computation_cosolidated():
             messagebox.showerror("Error", f"Error due to :{str(ex)}") 
         
         gross_conso_cal = grosspay + float(gross_pay_conso)
+        # this is for taxabale amount consolidated
         taxable_amount_conso_cal = taxable_amount + float(taxable_conso)
+        # taxable_amount_conso_cal = taxable_amount + taxable_conso
 
 # THIS PART IS FOR  COMPUTATION OF TAXWITHHELD
         taxWithheld = 0

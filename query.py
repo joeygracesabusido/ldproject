@@ -12,6 +12,9 @@ from reportlab.platypus import SimpleDocTemplate,Paragraph,Table,TableStyle
 from PollyReports import *
 
 
+from datetime import date, timedelta
+
+
 mydb = mysql.connector.connect(
             host="192.46.225.247",
             user="joeysabusido",
@@ -1444,6 +1447,23 @@ def comp13thMonth():
 
     department = 'Rizal-R&F'
 
+    workbook = xlsxwriter.Workbook("payroll.xlsx")
+    worksheet = workbook.add_worksheet('rental')
+    worksheet.write('A1', 'EMPLOYEE ID')
+    worksheet.write('B1', 'LAST NAME')
+    worksheet.write('C1', 'FIRST NAME')
+    worksheet.write('D1', 'REGDAY CAL')
+    worksheet.write('E1', 'REGSUN CAL')
+    worksheet.write('F1', 'SPL CAL')
+    worksheet.write('G1', 'LGL2 CAL')
+    worksheet.write('G1', 'SHOP RATE CAL')
+    worksheet.write('H1', 'PROVI RATE CAL')
+    worksheet.write('I1', 'SUNDAY PROVI CAL')
+    worksheet.write('J1', '13TH MONTH FEE CALL')
+   
+
+    rowIndex = 2
+
     cursor.execute(
             "SELECT employee_id,last_name,\
                 sum(regularday_cal)  as TotalRegday,\
@@ -1452,11 +1472,12 @@ def comp13thMonth():
                 sum(legal_day_cal) / 2 as Totallgl2,\
                 sum(shoprate_day_cal)  as Totalshoprate,\
                 sum(proviRate_day_cal)  as TotalproviRate,\
-                sum(provisun_day_cal)  as TotalproviSun\
+                sum(provisun_day_cal)/1.30  as TotalproviSun,\
+                first_name\
             from payroll_computation \
             WHERE department = '" + department +"' AND \
                  cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"'  \
-            GROUP BY employee_id ,last_name  ")
+            GROUP BY employee_id ,last_name,first_name  ")
 
     myresult = cursor.fetchall()
     count = 0
@@ -1471,6 +1492,7 @@ def comp13thMonth():
         shoprateCal = row[6]
         provirateCal = row[7]
         sunproviRateCal  = row[8]
+        firstNameCal = row[9]
 
         comp13th = float(regdayCal + regsunCal + splCal + lgl2Cal
                     + shoprateCal + provirateCal + sunproviRateCal) / 12
@@ -1478,8 +1500,185 @@ def comp13thMonth():
         print(empId, lastName, regdayCal,regsunCal,
          splCal, lgl2Cal, shoprateCal, provirateCal,
          sunproviRateCal, comp13th)
+
+        
+
+        worksheet.write('A' + str(rowIndex),empId)
+        worksheet.write('B' + str(rowIndex),lastName)
+        worksheet.write('C' + str(rowIndex),firstNameCal)
+        worksheet.write('D' + str(rowIndex),regdayCal)
+        worksheet.write('E' + str(rowIndex),regsunCal)
+        worksheet.write('F' + str(rowIndex),splCal)
+        worksheet.write('G' + str(rowIndex),lgl2Cal)
+        worksheet.write('G' + str(rowIndex),shoprateCal)
+        worksheet.write('H' + str(rowIndex),provirateCal)
+        worksheet.write('I' + str(rowIndex),sunproviRateCal)
+        worksheet.write('J' + str(rowIndex),comp13th)
+
+        
+
+        rowIndex += 1
+
+    workbook.close()
+    print('JRS', 'Data has been exported')    
+
+    # from os import startfile
+    startfile("payroll.xlsx")
         
     print(count)
+
+
+def computation_cosolidated():
+    """This function is for computating cosolidation"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter Date: ')
+    # date2 = input('Enter Date to: ')
+    
+    date2 = str((date.fromisoformat(date1)) - timedelta(15))
+    print(date2)
+    # date2 = payCal_conso_date.get()
+    empID_conso = input('Enter Employee ID: ')
+
+   
+    
+    gross_pay_conso = 0
+    uniform_conso = 0
+    rice_conso = 0
+    laundry_conso = 0
+    medical1_conso = 0
+    medical2_conso = 0
+    totaldem_conso = 0
+    otherforms_conso = 0
+    taxable_conso = 0
+    try:
+        cursor.execute("Select * from payroll_computation \
+                        where cut_off_date BETWEEN '" + date2 + "' and '" + date1 + "'\
+                    AND employee_id = '" + empID_conso + "'")
+        row = cursor.fetchone()
+        if row == None:
+            print("Error", "No record found during last payroll")
+            gross_pay_conso = 0
+            uniform_conso = 0
+            rice_conso = 0
+            laundry_conso = 0
+            medical1_conso = 0
+            medical2_conso = 0
+            totaldem_conso = 0
+            otherforms_conso = 0
+            taxable_conso = 0
+            
+        else:
+            cursor.execute("Select grosspay_save, uniform_save,rice_save,laundry_save,medical1_save, \
+                medical2_save,totalDem_save,otherforms_save,taxable_amount\
+                from payroll_computation \
+                where cut_off_date BETWEEN '" + date2 + "' and '" + date1 + "'\
+                AND employee_id = '" + empID_conso + "'")
+
+            # grosspay_save, uniform_save,rice_save,laundry_save,medical1_save,medical2_save,totalDem_save,otherforms_save,cut_off_date\
+            myresult = cursor.fetchall()
+
+            for row in myresult:
+                gross_pay_conso = row[0]
+                uniform_conso = row[1]
+                rice_conso = row[2]
+                laundry_conso = row[3]
+                medical1_conso = row[4]
+                medical2_conso = row[5]
+                totaldem_conso = row[6]
+                otherforms_conso = row[7]
+                taxable_conso = row[8]
+
+                
+            print(gross_pay_conso)
+            
+    
+                
+                
+#     except Exception as ex:
+#         print("Error", f"Error due to :{str(ex)}") 
+    
+#     # gross_conso_cal = grosspay + float(gross_pay_conso)
+#     # this is for taxabale amount consolidated
+#     taxable_amount_conso_cal = 0 + float(taxable_conso)
+#     # taxable_amount_conso_cal = taxable_amount + taxable_conso
+
+# # THIS PART IS FOR  COMPUTATION OF TAXWITHHELD
+#     taxWithheld = 0
+#     if taxable_amount_conso_cal > 0:
+#         cursor.execute("SELECT * FROM tax_table")
+#         query_result = cursor.fetchall()
+#         for row in query_result:
+
+#             amountFrom_tax = float(row[1]) 
+
+#             amountTo_tax = float(row[2])
+#             baseAmount_tax = float(row[3]) 
+#             percentage_tax = float(row[4])
+#             if taxable_amount_conso_cal >= amountFrom_tax and taxable_amount_conso_cal <= amountTo_tax:
+
+#                 taxbase = baseAmount_tax
+#                 cal = taxable_amount_conso_cal - amountFrom_tax
+#                 if cal <= 0:
+#                     cal = 0
+#                     taxWithheld = baseAmount_tax + (cal * percentage_tax)
+#                 else:
+#                     cal = cal
+#                     taxWithheld = baseAmount_tax + (cal * percentage_tax)
+
+#     else:
+#         taxWithheld = 0
+
+#     taxWithheld2 = '{:,.2f}'.format(taxWithheld)
+    
+#     print(taxWithheld2)
+
+
+    
+#     print(taxable_amount_conso_cal)
+#         # try:
+            
+
+    except Exception as ex:
+       
+        print("Error", f"Error due to :{str(ex)}") 
+    
+def show_hdmf_loandeduction():
+    query ='Select * FROM  HDMF_loanDeduction'
+    cursor.execute(query)
+    myresult = cursor
+    for x in myresult:
+        print(x)
+
+def update_hdmfloan_deduction():
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    show_hdmf_loandeduction()
+    
+    trans_id =input('Enter id: ')
+    employee_id =input('Enter Employee ID: ')
+    loan_deduction = input('Enter Amount Deduction: ')
+    
+
+    cursor.execute(
+        "UPDATE HDMF_loanDeduction SET loan_deduction='" + loan_deduction +"' \
+            WHERE id = '" + trans_id +"' ")
+       
+
+    mydb.commit()
+    mydb.close()
+    cursor.close()
+    
+
+    
+    key = input('would you like to Transact another: ').lower()
+    if key == 'yes':
+        return update_hdmfloan_deduction()
+    else:
+        exit
+
         
 comp13thMonth()
 
@@ -1508,3 +1707,8 @@ comp13thMonth()
 # showtables()
 # cash_advance_data()
 # search_payroll_withUpdate()
+
+# update_hdmfloan_deduction()
+
+
+# computation_cosolidated()
