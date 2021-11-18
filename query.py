@@ -1206,7 +1206,7 @@ def showtables():
     #     print(x)
 
 def showColumns():
-    query ='SHOW COLUMNS FROM ldglobal.tax_table;'
+    query ='SHOW COLUMNS FROM ldglobal.cash_advance;'
     cursor.execute(query)
     myresult = cursor.fetchall()
 
@@ -1447,7 +1447,7 @@ def comp13thMonth():
 
     department = 'Rizal-R&F'
 
-    workbook = xlsxwriter.Workbook("payroll.xlsx")
+    workbook = xlsxwriter.Workbook("site_13month.xlsx")
     worksheet = workbook.add_worksheet('rental')
     worksheet.write('A1', 'EMPLOYEE ID')
     worksheet.write('B1', 'LAST NAME')
@@ -1523,7 +1523,7 @@ def comp13thMonth():
     print('JRS', 'Data has been exported')    
 
     # from os import startfile
-    startfile("payroll.xlsx")
+    startfile("site_13month.xlsx")
         
     print(count)
 
@@ -1679,10 +1679,58 @@ def update_hdmfloan_deduction():
     else:
         exit
 
+def UpdatetaxWithheld():
+    """
+    This function is to update Tax Withheld
+    """
+    search_payroll_withUpdate()
+
+    trans_id =input('Enter id: ')
+    
+    tax_withheld_amount = input('Enter tax amount: ')
+
+
+    cursor.execute(
+        "UPDATE payroll_computation SET taxwitheld_save='" + tax_withheld_amount +"' \
+            WHERE id = '" + trans_id +"' ")
+       
+
+    mydb.commit()
+    mydb.close()
+    cursor.close()
+
+    print('Data has been updated')
+
+def insert_cash_advance_data():
+    """This function is for cash advance list"""
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    empID = input('Enter Emp ID:')
+    lname = input('Last Name: ')
+    fname = input('First Name:')
+    amount_save = input('Enter Deduction Amount:')
+    
+    
+    cursor.execute(
+        "INSERT INTO cash_advance (employee_id,lastname,firstname,ca_deduction)"
+        "VALUES(%s,%s,%s,%s)",
+        (empID,lname,fname,amount_save))
+
+    mydb.commit()
+    mydb.close()
+    cursor.close()
+    print('Data has been saved')
+
+    
+
+
+# insert_cash_advance_data()
+
+# UpdatetaxWithheld()
+
         
-comp13thMonth()
-
-
+# comp13thMonth()
 # updatesalaryRate()
 # search_for_splOT()
 # diesel_edit()
@@ -1705,7 +1753,7 @@ comp13thMonth()
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()
-# cash_advance_data()
+cash_advance_data()
 # search_payroll_withUpdate()
 
 # update_hdmfloan_deduction()
