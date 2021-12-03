@@ -1749,11 +1749,11 @@ def insert_cash_advance_data():
 # equipment_registry()
 # mwe_selection()
 # test_on()
-# selection()
+selection()
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()
-cash_advance_data()
+#cash_advance_data()
 # search_payroll_withUpdate()
 
 # update_hdmfloan_deduction()
