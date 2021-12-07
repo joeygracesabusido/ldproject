@@ -1722,9 +1722,155 @@ def insert_cash_advance_data():
     cursor.close()
     print('Data has been saved')
 
+def cf1604():
+    """
+    This function
+    is for 1604cf
+    """  
     
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    
+    # Date_13thMonth = input('Enter Date for 13th Month:')
+    date1 = input('Enter Date Beginning: ')
+    date2 = input('Enter Date End:')
+    
+    workbook = xlsxwriter.Workbook("1604CF.xlsx")
+    worksheet = workbook.add_worksheet('rental')
+    worksheet.write('A1', 'EMPLOYEE ID')
+    worksheet.write('B1', 'LAST NAME')
+    worksheet.write('C1', 'FIRST NAME')
+    worksheet.write('D1', 'GROSS PAY')
+    worksheet.write('E1', 'TOTAL MANDATORY')
+    worksheet.write('F1', 'OTHER FORMS')
+    worksheet.write('G1', 'TAX WIDTHELD')
+    worksheet.write('H1', 'TOTAL TRANSACTIONS')
+   
+   
 
+    rowIndex = 2
+    
+    cursor.execute(
+            "SELECT employee_id,last_name,first_name,\
+                sum(grosspay_save)  as Totalgross,\
+                sum(total_mandatory)   as TotalMandatory,\
+                sum(otherforms_save)  as TotalOtherforms,\
+                sum(taxwitheld_save)  as TotalTaxwidtheld,\
+                    count(employee_id) as TotalNumber\
+            from payroll_computation \
+            WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"'  \
+            GROUP BY employee_id ,last_name,first_name \
+            ORDER BY employee_id")
 
+    myresult = cursor.fetchall()
+    count = 0
+    for row in myresult:
+        count+=1
+        empId = row[0]
+        lastName = row[1]
+        firstName = row[2]
+        grossPay = row[3]
+        totalMandatory = row[4]
+        otherForms = row[5]
+        taxwidtheld = row[6]
+        totalMonths = row[7]
+    
+        # print(empId, lastName, firstName,grossPay,
+        #       totalMandatory,otherForms,taxwidtheld,totalMonths)
+        
+        
+        worksheet.write('A' + str(rowIndex),empId)
+        worksheet.write('B' + str(rowIndex),lastName)
+        worksheet.write('C' + str(rowIndex),firstName)
+        worksheet.write('D' + str(rowIndex),grossPay)
+        worksheet.write('E' + str(rowIndex),totalMandatory)
+        worksheet.write('F' + str(rowIndex),otherForms)
+        worksheet.write('G' + str(rowIndex),taxwidtheld)
+        worksheet.write('H' + str(rowIndex),totalMonths)
+        
+        
+
+        rowIndex += 1
+
+    workbook.close()
+    print('JRS', 'Data has been exported')    
+
+    # from os import startfile
+    startfile("1604CF.xlsx")
+    
+def employee_salaryQuery():
+    """
+    This function is for searching
+    salary of Employee
+    """  
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    
+    # Date_13thMonth = input('Enter Date for 13th Month:')
+    # empID = input('Enter Employee ID: ')
+    date1 = input('Enter Date Beginning: ')
+    date2 = input('Enter Date End:')
+    
+    workbook = xlsxwriter.Workbook("employeeSalary.xlsx")
+    worksheet = workbook.add_worksheet('rental')
+    worksheet.write('A1', '#')
+    worksheet.write('B1', 'TRANS ID')
+    worksheet.write('C1', 'DATE')
+    worksheet.write('D1', 'EMPLOYEE ID')
+    worksheet.write('E1', 'LAST NAME')
+    worksheet.write('F1', 'FIRST NAME')
+    worksheet.write('G1', 'ON/OFF DETAILS')
+   
+   
+   
+
+    rowIndex = 2
+    
+    
+    cursor.execute(
+            "SELECT id,cut_off_date,employee_id,last_name,first_name,on_off_details\
+            from payroll_computation \
+            WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"' \
+                \
+                ORDER BY cut_off_date")
+
+    myresult = cursor.fetchall()
+    count = 0
+    for row in myresult:
+        count+=1
+        transID = row[0]
+        cut_offDate = row[1]
+        empId = row[2]
+        lastName = row[3]
+        firstName = row[4]
+        trans = row[5]
+        
+    
+        # print(transID, count,cut_offDate,empId, lastName, firstName,trans)
+        
+        worksheet.write('A' + str(rowIndex),count)
+        worksheet.write('B' + str(rowIndex),transID)
+        worksheet.write('C' + str(rowIndex),cut_offDate)
+        worksheet.write('D' + str(rowIndex),empId)
+        worksheet.write('E' + str(rowIndex),lastName)
+        worksheet.write('F' + str(rowIndex),firstName)
+        worksheet.write('G' + str(rowIndex),trans)
+       
+        
+
+        rowIndex += 1
+
+    workbook.close()
+    print('JRS', 'Data has been exported')    
+
+    # from os import startfile
+    startfile("employeeSalary.xlsx")
+    
+    
+# employee_salaryQuery()
+cf1604()
 # insert_cash_advance_data()
 
 # UpdatetaxWithheld()
@@ -1749,7 +1895,7 @@ def insert_cash_advance_data():
 # equipment_registry()
 # mwe_selection()
 # test_on()
-selection()
+# selection()
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()

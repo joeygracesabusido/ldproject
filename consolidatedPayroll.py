@@ -3127,7 +3127,8 @@ def employee_update():
     mydb._open_connection()
     cursor = mydb.cursor()
     user_name = userName_entry.get()
-    update_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    # update_time = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    update_time = datetime.now()
     empid_update = employee_id_entry.get()
     lname_update = lastName_reg_entry.get()
     fname_update = firstName_reg_entry.get()
@@ -3210,6 +3211,7 @@ def search_employee_reg():
                     salaryRate_sch = row[20]
                     tax_code_sch = row[21]
                     salaryDetails_sch = row[22]
+                    on_off_sch = row[23]
                     
 
 
@@ -3279,6 +3281,9 @@ def search_employee_reg():
 
                     salaryDetail_reg_entry.delete(0, END)
                     salaryDetail_reg_entry.insert(0, (salaryDetails_sch))
+                    
+                    on_off_reg_entry.delete(0, END)
+                    on_off_reg_entry.insert(0, (on_off_sch))
 
     except Exception as ex:
         messagebox.showerror("Error", f"Error due to :{str(ex)}")
@@ -3306,11 +3311,11 @@ def employee_registry():
                     "contact_person, emer_cont_person, position, date_hired, " 
                     "department, end_contract, tin, sssNumber, phicNumber, hdmfNumber ,"
                     "employment_status, update_contract, salary_rate, taxCode," 
-                    "Salary_Detail, user, update_date)" 
+                    "Salary_Detail, user, update_date,off_on_details)" 
                                        
                     " VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
                     "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
-                    "%s,%s,%s,%s)",
+                    "%s,%s,%s,%s,%s)",
 
                     (employee_id_entry.get(), lastName_reg_entry.get(), firstName_reg_entry.get(),
                      middleName_reg_entry.get(), gender_description.get(),
@@ -3322,7 +3327,7 @@ def employee_registry():
                      hdmf_reg_entry.get(), emp_status_reg_entry.get(), update_con_reg_entry.get(),
                      salaryRate__reg_entry.get(), taxCode_reg_entry.get(), salaryDetail_reg_entry.get(),
                      user_name,
-                     update_time))
+                     update_time,on_off_reg_entry.get()))
 
                 messagebox.showinfo('JRS', 'Data has been Save')
 
