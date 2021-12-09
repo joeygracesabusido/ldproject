@@ -1445,7 +1445,7 @@ def comp13thMonth():
     date1 = input('Enter Date From : ')
     date2 = input('Enter date to : ')
 
-    department = 'Rizal-R&F'
+    # department = 'Rizal-R&F'
 
     workbook = xlsxwriter.Workbook("site_13month.xlsx")
     worksheet = workbook.add_worksheet('rental')
@@ -1456,10 +1456,11 @@ def comp13thMonth():
     worksheet.write('E1', 'REGSUN CAL')
     worksheet.write('F1', 'SPL CAL')
     worksheet.write('G1', 'LGL2 CAL')
-    worksheet.write('G1', 'SHOP RATE CAL')
-    worksheet.write('H1', 'PROVI RATE CAL')
-    worksheet.write('I1', 'SUNDAY PROVI CAL')
-    worksheet.write('J1', '13TH MONTH FEE CALL')
+    worksheet.write('H1', 'SHOP RATE CAL')
+    worksheet.write('I1', 'PROVI RATE CAL')
+    worksheet.write('J1', 'SUNDAY PROVI CAL')
+    worksheet.write('K1', '13TH MONTH FEE CALL')
+    worksheet.write('L1', 'DEPARTMENT')
    
 
     rowIndex = 2
@@ -1473,12 +1474,12 @@ def comp13thMonth():
                 sum(shoprate_day_cal)  as Totalshoprate,\
                 sum(proviRate_day_cal)  as TotalproviRate,\
                 sum(provisun_day_cal)/1.30  as TotalproviSun,\
-                first_name\
+                first_name, department \
             from payroll_computation \
-            WHERE department = '" + department +"' AND \
-                 cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"'  \
-            GROUP BY employee_id ,last_name,first_name  ")
+            WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"'  \
+            GROUP BY employee_id ,last_name,first_name,department  ")
 
+    # department = '" + department +"' AND \
     myresult = cursor.fetchall()
     count = 0
     for row in myresult:
@@ -1493,14 +1494,19 @@ def comp13thMonth():
         provirateCal = row[7]
         sunproviRateCal  = row[8]
         firstNameCal = row[9]
+        Department = row[10]
 
         comp13th = float(regdayCal + regsunCal + splCal + lgl2Cal
                     + shoprateCal + provirateCal + sunproviRateCal) / 12
 
-        print(empId, lastName, regdayCal,regsunCal,
-         splCal, lgl2Cal, shoprateCal, provirateCal,
-         sunproviRateCal, comp13th)
-
+        comp13th_sample = float(regdayCal + regsunCal + splCal + lgl2Cal
+                    + shoprateCal + provirateCal + sunproviRateCal)
+        # print(empId, lastName, regdayCal,regsunCal,
+        #  splCal, lgl2Cal, shoprateCal, provirateCal,
+        #  sunproviRateCal, comp13th)
+        # print(lastName,regdayCal,regsunCal,splCal,
+        #       lgl2Cal,shoprateCal,provirateCal,
+        #       sunproviRateCal,comp13th_sample)
         
 
         worksheet.write('A' + str(rowIndex),empId)
@@ -1510,10 +1516,11 @@ def comp13thMonth():
         worksheet.write('E' + str(rowIndex),regsunCal)
         worksheet.write('F' + str(rowIndex),splCal)
         worksheet.write('G' + str(rowIndex),lgl2Cal)
-        worksheet.write('G' + str(rowIndex),shoprateCal)
-        worksheet.write('H' + str(rowIndex),provirateCal)
-        worksheet.write('I' + str(rowIndex),sunproviRateCal)
-        worksheet.write('J' + str(rowIndex),comp13th)
+        worksheet.write('H' + str(rowIndex),shoprateCal)
+        worksheet.write('I' + str(rowIndex),provirateCal)
+        worksheet.write('J' + str(rowIndex),sunproviRateCal)
+        worksheet.write('K' + str(rowIndex),comp13th)
+        worksheet.write('L' + str(rowIndex),Department)
 
         
 
@@ -1809,7 +1816,7 @@ def employee_salaryQuery():
     
     
     # Date_13thMonth = input('Enter Date for 13th Month:')
-    # empID = input('Enter Employee ID: ')
+    empID = input('Enter Employee ID: ')
     date1 = input('Enter Date Beginning: ')
     date2 = input('Enter Date End:')
     
@@ -1825,6 +1832,7 @@ def employee_salaryQuery():
    
    
    
+   
 
     rowIndex = 2
     
@@ -1833,7 +1841,7 @@ def employee_salaryQuery():
             "SELECT id,cut_off_date,employee_id,last_name,first_name,on_off_details\
             from payroll_computation \
             WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"' \
-                \
+                AND employee_id='" + empID +"'\
                 ORDER BY cut_off_date")
 
     myresult = cursor.fetchall()
@@ -1857,6 +1865,7 @@ def employee_salaryQuery():
         worksheet.write('E' + str(rowIndex),lastName)
         worksheet.write('F' + str(rowIndex),firstName)
         worksheet.write('G' + str(rowIndex),trans)
+        
        
         
 
@@ -1870,13 +1879,13 @@ def employee_salaryQuery():
     
     
 # employee_salaryQuery()
-cf1604()
+# cf1604()
 # insert_cash_advance_data()
 
 # UpdatetaxWithheld()
 
         
-# comp13thMonth()
+comp13thMonth()
 # updatesalaryRate()
 # search_for_splOT()
 # diesel_edit()
