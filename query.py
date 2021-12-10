@@ -1446,6 +1446,7 @@ def comp13thMonth():
     date2 = input('Enter date to : ')
 
     # department = 'Rizal-R&F'
+    department = 'Pampanga'
 
     workbook = xlsxwriter.Workbook("site_13month.xlsx")
     worksheet = workbook.add_worksheet('rental')
@@ -1476,7 +1477,7 @@ def comp13thMonth():
                 sum(provisun_day_cal)/1.30  as TotalproviSun,\
                 first_name, department \
             from payroll_computation \
-            WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"'  \
+            WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"' AND department = '" + department +"' \
             GROUP BY employee_id ,last_name,first_name,department  ")
 
     # department = '" + department +"' AND \
