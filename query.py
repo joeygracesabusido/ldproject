@@ -322,7 +322,7 @@ def search_payroll():
     date1 = input('Enter date from: ')
     date2 = input('Enter date to: ')
 
-    cursor.execute("SELECT id,employee_id,last_name, SUM(grosspay_save) as totalGross,department,on_off_details,\
+    cursor.execute("SELECT id,employee_id,last_name, SUM(grosspay_save) as totalGross,department,on_off_details,sum(taxwitheld_save) as TotalTaxW,\
                         sum(totalDem_save) as TotalDem, \
                         sum(otherforms_save) as Total_otherForms, sum(taxable_amount) as TotalAmount,taxable_mwe_detail,\
                             sum(cashadvance_save) as CashAdvance, cut_off_date \
@@ -332,7 +332,7 @@ def search_payroll():
     myresult = cursor.fetchall()
 
     print(tabulate(myresult, headers =['ID','EMPLOYEE ID',
-                                    'LAST NAME','GROSS PAY','DEPARTMENT','On & Off Status','Total Deminimis','OTHERFORMS',
+                                    'LAST NAME','GROSS PAY','DEPARTMENT','On & Off Status','Tax Widthheld','Total Deminimis','OTHERFORMS',
                                     'Tax Amount','Tax/MWE','Cash Advance','Cut off'], tablefmt='psql'))
     
 def delete_payroll():
