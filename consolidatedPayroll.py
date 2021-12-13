@@ -1135,7 +1135,7 @@ def save_payroll():
              nightdiff_save,nightdiffCal_save, adjustments_save, adjustmentCal_save, grosspay_save, salaryDetails_save,
              sss_save, phic_save, hdmf_save, provshare_save, totalMadatory_save, uniform_save, rice_save, laundry_save,
              medical1_save,
-             medical2_save, totalDem_save,otherForms_save, taxable_amount_save, taxWithheld_save, ca_deduct_save2,
+             medical2_save, totalDem_save,otherForms_save, taxable_amount_save, taxWitheld_entry.get(), ca_deduct_save2,
              sss_loandeduct_save, hdmfdeduct_save, netPay_save,
              user_reg,
              date_time_update,on_off_saving,tax_mwe_entry.get()))
@@ -1741,10 +1741,16 @@ def computation_cosolidated():
     mydb._open_connection()
     cursor = mydb.cursor()
 
+    # date1 = datetime.now()
     date1 = payCal_date.get() 
-    
-    date2 = str((date.fromisoformat(date1)) - timedelta(15))
+    dated2 =  timedelta(16)
+    # date2 = date1 - dated2
 
+    
+    # date2 = str((date.fromisoformat(date1)) - dated2 )
+
+    date2 = payCal_conso_date.get()
+    
     # date2 = payCal_conso_date.get()
     empID_conso = empID_entry.get()
 
@@ -1864,8 +1870,8 @@ def computation_cosolidated():
         taxWitheld_entry.insert(0, (taxWithheld2))
 
 
-        print(gross_conso_cal)
-        print(taxable_amount_conso_cal)
+        # print(gross_conso_cal)
+        # print(taxable_amount_conso_cal)
         # try:
             
 

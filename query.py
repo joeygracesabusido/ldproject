@@ -1883,10 +1883,10 @@ def employee_salaryQuery():
 # cf1604()
 # insert_cash_advance_data()
 
-# UpdatetaxWithheld()
+# UpdatetaxWithheld()   
 
         
-comp13thMonth()
+# comp13thMonth()
 # updatesalaryRate()
 # search_for_splOT()
 # diesel_edit()
@@ -1905,7 +1905,7 @@ comp13thMonth()
 # equipment_registry()
 # mwe_selection()
 # test_on()
-# selection()
+selection()
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()
