@@ -344,13 +344,13 @@ def delete_payroll():
     date1 = input('Enter date from: ')
     date2 = input('Enter date to: ')
 
-    cursor.execute("SELECT id,employee_id,last_name, SUM(grosspay_save) as totalGross,department,on_off_details \
+    cursor.execute("SELECT id,cut_off_date,employee_id,last_name, SUM(grosspay_save) as totalGross,department,on_off_details \
                         FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
                       GROUP BY id,employee_id,last_name, department,on_off_details ")
    
     myresult = cursor.fetchall()
 
-    print(tabulate(myresult, headers =['ID','EMPLOYEE ID',
+    print(tabulate(myresult, headers =['ID','DATE','EMPLOYEE ID',
                                     'LAST NAME','GROSS PAY','DEPARTMENT','On & Off Status'], tablefmt='psql'))
 
     transID = input('Enter trans id :  ')

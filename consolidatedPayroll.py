@@ -627,8 +627,8 @@ def update_salary_comp():
                 last_name = '" + lastname + "',\
                 first_name = '" + firstname + "',\
                 salary_rate = '" + salRate_entry + "',\
+                department = '" + department_update + "',\
                 cut_off_date = '" + date_update_edit + "'\
-                department = '" + department_update + "'\
                 WHERE id =%s", (id_searchTrans_entry.get(),)
             )
             mydb.commit()
