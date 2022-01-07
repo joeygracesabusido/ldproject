@@ -1206,7 +1206,7 @@ def showtables():
     #     print(x)
 
 def showColumns():
-    query ='SHOW COLUMNS FROM ldglobal.cash_advance;'
+    query ='SHOW COLUMNS FROM ldglobal.payroll_computation;'
     cursor.execute(query)
     myresult = cursor.fetchall()
 
@@ -1305,7 +1305,7 @@ def search_payroll_withUpdate():
     date2 = input('Enter date to: ')
 
     cursor.execute("SELECT id,employee_id,last_name, SUM(grosspay_save) as totalGross,\
-                        sum(otherforms_save) as Total_otherForms, sum(taxable_amount) as TotalAmount,\
+                        sum(otherforms_save) as Total_otherForms, sum(taxwitheld_save) as TotalAmount,\
                             sum(cashadvance_save) as CashAdvance, cut_off_date,on_off_details,taxable_amount \
                         FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
                       GROUP BY id,employee_id,last_name, cut_off_date,on_off_details,taxable_amount")
@@ -1877,8 +1877,36 @@ def employee_salaryQuery():
 
     # from os import startfile
     startfile("employeeSalary.xlsx")
-    
-    
+
+def deleteCut_offPeriod():
+    """
+    This function is to delete cut-off 
+    Period
+    """  
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    query ='SELECT * FROM ldglobal.cut_off;'
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['ID', 'DATE FROM','DATE TO','PAY DATE'], tablefmt='psql'))
+
+    keyId = input("Enter id to Delete: ")
+
+    cursor.execute("Delete from cut_off where id = '"+ keyId +"' ")
+
+    print('Data has been deleted')
+
+    mydb.commit
+    mydb.close
+
+
+
+
+
+# deleteCut_offPeriod() 
 # employee_salaryQuery()
 # cf1604()
 # insert_cash_advance_data()

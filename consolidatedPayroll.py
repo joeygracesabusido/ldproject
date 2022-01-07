@@ -587,6 +587,7 @@ def update_salary_comp():
     sss_loan_update =sssLoan_entry.get()
     gross_pay_update = gross_pay_entry.get()
     spltOT_update = splOT_entry.get()
+    department_update = department_list.get()
 
     lastname = lastname_entry.get()
     firstname = firstname_entry.get()
@@ -627,6 +628,7 @@ def update_salary_comp():
                 first_name = '" + firstname + "',\
                 salary_rate = '" + salRate_entry + "',\
                 cut_off_date = '" + date_update_edit + "'\
+                department = '" + department_update + "'\
                 WHERE id =%s", (id_searchTrans_entry.get(),)
             )
             mydb.commit()
