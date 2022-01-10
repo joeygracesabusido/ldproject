@@ -1771,7 +1771,9 @@ def cf1604():
     worksheet.write('E1', 'TOTAL MANDATORY')
     worksheet.write('F1', 'OTHER FORMS')
     worksheet.write('G1', 'TAX WIDTHELD')
-    worksheet.write('H1', 'TOTAL TRANSACTIONS')
+    worksheet.write('H1', 'TOTAL DEM')
+    worksheet.write('I1', 'TOTAL TRANSACTIONS')
+    worksheet.write('J1', 'FULL NAME')
    
    
 
@@ -1783,6 +1785,7 @@ def cf1604():
                 sum(total_mandatory)   as TotalMandatory,\
                 sum(otherforms_save)  as TotalOtherforms,\
                 sum(taxwitheld_save)  as TotalTaxwidtheld,\
+                sum(totalDem_save)  as TotalDem,\
                     count(employee_id) as TotalNumber\
             from payroll_computation \
             WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"'  \
@@ -1794,13 +1797,15 @@ def cf1604():
     for row in myresult:
         count+=1
         empId = row[0]
-        lastName = row[1]
-        firstName = row[2]
+        lastName = row[1].upper()
+        firstName = row[2].upper()
         grossPay = row[3]
         totalMandatory = row[4]
         otherForms = row[5]
         taxwidtheld = row[6]
-        totalMonths = row[7]
+        totalDem = row[7]
+        totalMonths = row[8]
+        fullName = lastName + (' , ') + firstName
     
         # print(empId, lastName, firstName,grossPay,
         #       totalMandatory,otherForms,taxwidtheld,totalMonths)
@@ -1813,7 +1818,9 @@ def cf1604():
         worksheet.write('E' + str(rowIndex),totalMandatory)
         worksheet.write('F' + str(rowIndex),otherForms)
         worksheet.write('G' + str(rowIndex),taxwidtheld)
-        worksheet.write('H' + str(rowIndex),totalMonths)
+        worksheet.write('H' + str(rowIndex),totalDem)
+        worksheet.write('I' + str(rowIndex),totalMonths)
+        worksheet.write('J' + str(rowIndex),fullName)
         
         
 
