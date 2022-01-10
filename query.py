@@ -1693,22 +1693,40 @@ def UpdatetaxWithheld():
     """
     search_payroll_withUpdate()
 
-    trans_id =input('Enter id: ')
+    # trans_id =input('Enter id: ')
     
-    tax_withheld_amount = input('Enter tax amount: ')
+    # tax_withheld_amount = input('Enter tax amount: ')
 
 
-    cursor.execute(
-        "UPDATE payroll_computation SET taxwitheld_save='" + tax_withheld_amount +"' \
-            WHERE id = '" + trans_id +"' ")
+    # cursor.execute(
+    #     "UPDATE payroll_computation SET taxwitheld_save='" + tax_withheld_amount +"' \
+    #         WHERE id = '" + trans_id +"' ")
        
 
-    mydb.commit()
-    mydb.close()
-    cursor.close()
+    # mydb.commit()
+
+    key = input("Would you like to update data yes/no?: ").lower()
+
+    while key == 'yes':
+        trans_id =input('Enter id: ')
+    
+        tax_withheld_amount = input('Enter tax amount: ')
+
+
+        cursor.execute(
+            "UPDATE payroll_computation SET taxwitheld_save='" + tax_withheld_amount +"' \
+                WHERE id = '" + trans_id +"' ")
+        
+
+        mydb.commit()
+
+        key = input("Would you like to update data yes/no?: ").lower()
+   
 
     print('Data has been updated')
 
+    
+    
 def insert_cash_advance_data():
     """This function is for cash advance list"""
     mydb._open_connection()
@@ -1902,13 +1920,46 @@ def deleteCut_offPeriod():
     mydb.commit
     mydb.close
 
+def searchPayroll():
+    """
+    This function is for
+    searching individual payroll
+    """
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
 
 
+    date1 = input('Enter Date Beginning: ')
+    date2 = input('Enter Date End:')
+    empID =input('Enter employee ID: ')
+
+    # query = "Select employee_id, last_name,first_name, \
+    #             sum(taxwitheld_save)  as TotalTaxwidtheld\
+    #             from payroll_computation \
+    #             where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "'\
+    #             AND employee_id = '" + empID + "' \
+    #             GROUP BY employee_id ,last_name,first_name "
+
+    query = "Select cut_off_date, employee_id, last_name,first_name, \
+                taxwitheld_save\
+                from payroll_computation \
+                where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "'\
+                AND employee_id = '" + empID + "' \
+                 "
+
+    cursor.execute(query)
+
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['DATE','EMPLOYEE ID', 
+                                        'LAST NAME','FIRST NAME','T-AMOUNT'], tablefmt='psql'))
 
 
+# searchPayroll()
 # deleteCut_offPeriod() 
 # employee_salaryQuery()
-# cf1604()
+cf1604()
 # insert_cash_advance_data()
 
 # UpdatetaxWithheld()   
@@ -1933,11 +1984,13 @@ def deleteCut_offPeriod():
 # equipment_registry()
 # mwe_selection()
 # test_on()
-selection()
+# selection()
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()
 #cash_advance_data()
+
+# search_payroll()
 # search_payroll_withUpdate()
 
 # update_hdmfloan_deduction()
