@@ -1206,7 +1206,7 @@ def showtables():
     #     print(x)
 
 def showColumns():
-    query ='SHOW COLUMNS FROM ldglobal.payroll_computation;'
+    query ='SHOW COLUMNS FROM ldglobal.employee_details;'
     cursor.execute(query)
     myresult = cursor.fetchall()
 
@@ -1963,10 +1963,74 @@ def searchPayroll():
                                         'LAST NAME','FIRST NAME','T-AMOUNT'], tablefmt='psql'))
 
 
+def tin_Query():
+    """
+    This function is for searching
+    salary of Employee
+    """  
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+   
+    
+    workbook = xlsxwriter.Workbook("employeeTIN.xlsx")
+    worksheet = workbook.add_worksheet('rental')
+    worksheet.write('A1', '#')
+    worksheet.write('B1', 'ID')
+    worksheet.write('C1', 'EMPLOYEE ID')
+    worksheet.write('D1', 'LAST NAME')
+    worksheet.write('E1', 'FIRST NAME')
+    worksheet.write('F1', 'TIN')
+    
+   
+    rowIndex = 2
+    
+    
+    cursor.execute(
+            "SELECT id,employee_id,lastname,firstname,tin\
+            from employee_details \
+            ")
+
+    myresult = cursor.fetchall()
+    count = 0
+    for row in myresult:
+        count+=1
+        transID = row[0]
+        empId = row[1]
+        lastName = row[2]
+        firstName = row[3]
+        tin = row[4]
+        
+    
+        # print(transID, count,cut_offDate,empId, lastName, firstName,trans)
+        
+        worksheet.write('A' + str(rowIndex),count)
+        worksheet.write('B' + str(rowIndex),transID)
+        worksheet.write('C' + str(rowIndex),empId)
+        worksheet.write('D' + str(rowIndex),lastName)
+        worksheet.write('E' + str(rowIndex),firstName)
+        worksheet.write('F' + str(rowIndex),tin)
+       
+        
+       
+        
+
+        rowIndex += 1
+
+    workbook.close()
+    print('JRS', 'Data has been exported')    
+
+    # from os import startfile
+    startfile("employeeTIN.xlsx")
+
+
+
+
+tin_Query()
 # searchPayroll()
 # deleteCut_offPeriod() 
 # employee_salaryQuery()
-cf1604()
+# cf1604()
 # insert_cash_advance_data()
 
 # UpdatetaxWithheld()   
