@@ -227,7 +227,7 @@ def print1601c_report():
                                             FROM payroll_computation\
                                             where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
                                              AND  taxable_mwe_detail = 'Taxable'  and on_off_details = 'on'\
-                                              AND taxable_amount < 10417")
+                                              AND taxable_amount < 20833")
         myresult = list(cursor.fetchall())
 
         for row in myresult:
@@ -272,7 +272,7 @@ def print1601c_report():
                                                FROM payroll_computation\
                                                where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
                                                 AND  taxable_mwe_detail = 'Taxable'  and on_off_details = 'on'\
-                                                 AND taxable_amount > 10417")
+                                                 AND taxable_amount > 20833")
         myresult = list(cursor.fetchall())
 
         for row in myresult:
@@ -1473,6 +1473,9 @@ def net_pay():
                     otherForms = afterDem
                 else:
                     otherForms = CalotherForms
+            
+            
+
             elif salRate + float(allowance_search) > 15000 and salRate + float(allowance_search) >= mwe_monthly and on_off_saving =='on'and  basic_taxable > 0:
                 CalotherForms = (90000 -30000) / 24
 
@@ -1482,32 +1485,35 @@ def net_pay():
                     otherForms = CalotherForms
         taxable_amount = taxable_amount - otherForms
 
-        if taxable_amount > 0:
-            cursor.execute("SELECT * FROM tax_table")
-            query_result = cursor.fetchall()
-            for row in query_result:
+        # this portion is edited 1.25.22 for error debugging employee 3001 taxwithheld
+        if checkvar1.get() >= 1: # only this if is added to debug
+            if taxable_amount > 0:
+                cursor.execute("SELECT * FROM tax_table")
+                query_result = cursor.fetchall()
+                for row in query_result:
 
-                amountFrom_tax = float(row[1])
+                    amountFrom_tax = float(row[1])
 
-                amountTo_tax = float(row[2]) 
-                baseAmount_tax = float(row[3])
-                percentage_tax = float(row[4])
-                if taxable_amount >= amountFrom_tax and taxable_amount <= amountTo_tax:
+                    amountTo_tax = float(row[2]) 
+                    baseAmount_tax = float(row[3])
+                    percentage_tax = float(row[4])
+                    if taxable_amount >= amountFrom_tax and taxable_amount <= amountTo_tax:
 
-                    taxbase = baseAmount_tax
-                    cal = taxable_amount - amountFrom_tax
-                    if cal <= 0:
-                        cal = 0
-                        taxWithheld = baseAmount_tax + (cal * percentage_tax)
+                        taxbase = baseAmount_tax
+                        cal = taxable_amount - amountFrom_tax
+                        if cal <= 0:
+                            cal = 0
+                            taxWithheld = baseAmount_tax + (cal * percentage_tax)
 
 
-                    else:
-                        cal = cal
-                        taxWithheld = baseAmount_tax + (cal * percentage_tax)
+                        else:
+                            cal = cal
+                            taxWithheld = baseAmount_tax + (cal * percentage_tax)
 
+            else:
+                taxWithheld = 0
         else:
             taxWithheld = 0
-
     taxWithheld2 = '{:.2f}'.format(taxWithheld)
     taxWitheld_entry.delete(0, END)
     taxWitheld_entry.insert(0, (taxWithheld2))
@@ -1737,6 +1743,8 @@ def govt_mandatory_comp():
         sssLoan_entry.delete(0, END)
         sssLoan_entry.insert(0, (sss_loandeduct2))
 
+    
+
 # this function is for computation of gross consolidation!!!
 def computation_cosolidated():
     """This function is for computating cosolidation"""
@@ -1784,6 +1792,7 @@ def computation_cosolidated():
                 totaldem_conso = 0
                 otherforms_conso = 0
                 taxable_conso = 0
+               
                 
             else:
                 cursor.execute("Select grosspay_save, uniform_save,rice_save,laundry_save,medical1_save, \
