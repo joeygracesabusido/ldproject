@@ -1206,7 +1206,7 @@ def showtables():
     #     print(x)
 
 def showColumns():
-    query ='SHOW COLUMNS FROM ldglobal.payroll_computation;'
+    query ='SHOW COLUMNS FROM ldglobal.employee_details;'
     cursor.execute(query)
     myresult = cursor.fetchall()
 
@@ -1771,7 +1771,9 @@ def cf1604():
     worksheet.write('E1', 'TOTAL MANDATORY')
     worksheet.write('F1', 'OTHER FORMS')
     worksheet.write('G1', 'TAX WIDTHELD')
-    worksheet.write('H1', 'TOTAL TRANSACTIONS')
+    worksheet.write('H1', 'TOTAL DEM')
+    worksheet.write('I1', 'TOTAL TRANSACTIONS')
+    worksheet.write('J1', 'FULL NAME')
    
    
 
@@ -1783,6 +1785,7 @@ def cf1604():
                 sum(total_mandatory)   as TotalMandatory,\
                 sum(otherforms_save)  as TotalOtherforms,\
                 sum(taxwitheld_save)  as TotalTaxwidtheld,\
+                sum(totalDem_save)  as TotalDem,\
                     count(employee_id) as TotalNumber\
             from payroll_computation \
             WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"'  \
@@ -1794,13 +1797,15 @@ def cf1604():
     for row in myresult:
         count+=1
         empId = row[0]
-        lastName = row[1]
-        firstName = row[2]
+        lastName = row[1].upper()
+        firstName = row[2].upper()
         grossPay = row[3]
         totalMandatory = row[4]
         otherForms = row[5]
         taxwidtheld = row[6]
-        totalMonths = row[7]
+        totalDem = row[7]
+        totalMonths = row[8]
+        fullName = lastName + (' , ') + firstName
     
         # print(empId, lastName, firstName,grossPay,
         #       totalMandatory,otherForms,taxwidtheld,totalMonths)
@@ -1813,7 +1818,9 @@ def cf1604():
         worksheet.write('E' + str(rowIndex),totalMandatory)
         worksheet.write('F' + str(rowIndex),otherForms)
         worksheet.write('G' + str(rowIndex),taxwidtheld)
-        worksheet.write('H' + str(rowIndex),totalMonths)
+        worksheet.write('H' + str(rowIndex),totalDem)
+        worksheet.write('I' + str(rowIndex),totalMonths)
+        worksheet.write('J' + str(rowIndex),fullName)
         
         
 
@@ -1956,10 +1963,74 @@ def searchPayroll():
                                         'LAST NAME','FIRST NAME','T-AMOUNT'], tablefmt='psql'))
 
 
+def tin_Query():
+    """
+    This function is for searching
+    salary of Employee
+    """  
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+   
+    
+    workbook = xlsxwriter.Workbook("employeeTIN.xlsx")
+    worksheet = workbook.add_worksheet('rental')
+    worksheet.write('A1', '#')
+    worksheet.write('B1', 'ID')
+    worksheet.write('C1', 'EMPLOYEE ID')
+    worksheet.write('D1', 'LAST NAME')
+    worksheet.write('E1', 'FIRST NAME')
+    worksheet.write('F1', 'TIN')
+    
+   
+    rowIndex = 2
+    
+    
+    cursor.execute(
+            "SELECT id,employee_id,lastname,firstname,tin\
+            from employee_details \
+            ")
+
+    myresult = cursor.fetchall()
+    count = 0
+    for row in myresult:
+        count+=1
+        transID = row[0]
+        empId = row[1]
+        lastName = row[2]
+        firstName = row[3]
+        tin = row[4]
+        
+    
+        # print(transID, count,cut_offDate,empId, lastName, firstName,trans)
+        
+        worksheet.write('A' + str(rowIndex),count)
+        worksheet.write('B' + str(rowIndex),transID)
+        worksheet.write('C' + str(rowIndex),empId)
+        worksheet.write('D' + str(rowIndex),lastName)
+        worksheet.write('E' + str(rowIndex),firstName)
+        worksheet.write('F' + str(rowIndex),tin)
+       
+        
+       
+        
+
+        rowIndex += 1
+
+    workbook.close()
+    print('JRS', 'Data has been exported')    
+
+    # from os import startfile
+    startfile("employeeTIN.xlsx")
+
+
+
+
+tin_Query()
 # searchPayroll()
 # deleteCut_offPeriod() 
 # employee_salaryQuery()
-cf1604()
+# cf1604()
 # insert_cash_advance_data()
 
 # UpdatetaxWithheld()   
