@@ -28,6 +28,24 @@ from tkinter.scrolledtext import ScrolledText
 
 #from payroll import payroll_transactions
 
+import csv
+
+from pymongo import MongoClient
+import pandas as pd
+import re
+
+from bson.objectid import ObjectId
+import dateutil.parser
+import pymongo
+
+import certifi
+ca = certifi.where()
+
+
+cluster = "mongodb+srv://joeysabusido:genesis11@cluster0.bmdqy.mongodb.net/ldglobal?retryWrites=true&w=majority"
+client = MongoClient(cluster)
+
+db = client.ldglobal
 
 mydb = mysql.connector.connect(
             host="192.46.225.247",
@@ -286,18 +304,1251 @@ def clearpayrollFrame():
     # this will clear frame and frame will be empty
     # if you want to hide the empty panel then
     payroll_frame.pack_forget()
-#==============================================Inventory Mdule=========================================================
-def accouning_module():
-    clearFrame()
-    # global logo_icon3
-    # load3 = Image.open("image\partsregistry.png")
-    # load3 = load3.resize((130, 70), Image.ANTIALIAS)
-    # logo_icon3 = ImageTk.PhotoImage(load3)
 
-    btn_customerEntry = Button(MidViewForm9, text='Customer Entry', bd=2, bg='blue', fg='white',
-                        font=('arial', 12), width=15, height=2, command=search)
-    btn_customerEntry.place(x=2, y=70)
-    btn_customerEntry.bind('<Return>', search)
+
+
+
+#=====================================Accounting Frame==============================================================
+def cleartrialbalanceFrame():
+    # destroy all widgets from frame
+    for widget in accounting_frame.winfo_children():
+        widget.destroy()
+
+    # this will clear frame and frame will be empty
+    # if you want to hide the empty panel then
+    accounting_frame.pack_forget()
+
+def clearFrame():
+    # destroy all widgets from frame
+    for widget in MidViewForm9.winfo_children():
+        widget.destroy()
+
+    # this will clear frame and frame will be empty
+    # if you want to hide the empty panel then
+    MidViewForm9.pack_forget()
+    
+
+
+
+
+def delete_journalEntry():
+    """
+    this function is for
+    deleting journal entry
+    """
+    dataSearch = db['journal_entry']
+    query = {'_id': ObjectId(Selected_ID_entry.get())}
+    result = tkMessageBox.askquestion('JRS','Are you sure you want to Update?',icon="warning")
+    if result == 'yes':
+        x = dataSearch.delete_one(query)
+        messagebox.showinfo('JRS', 'Selected Record has been deleted')
+        journalEntryManual_list_treeview()
+
+
+def updated_journalEntry():
+    """
+    This function is for 
+    updating journal entry
+    """
+    dataSearch = db['journal_entry']
+    query = {'_id': ObjectId(Selected_ID_entry.get())}
+
+    result = tkMessageBox.askquestion('JRS','Are you sure you want to Update?',icon="warning")
+    if result == 'yes':
+        dateEntry =  journalEntryInsert_datefrom.get()
+        date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+        try:
+            newValue = { "$set": { "date_entry": date_time_obj,
+                                 "journal": journal_manual.get(), 
+                                 "ref": reference_manual_entry.get(),
+                                 "descriptions": journal_memo_entry.get('1.0', 'end-1c'),
+                                 "acoount_number": account_number_entry.get(),
+                                     "account_disc": chart_of_account_manual.get(),
+                                     "debit_amount": float(debit_manual_entry.get()), 
+                                     "credit_amount": float(credit_manual_entry.get()),}           
+                                    }
+            dataSearch.update_many(query, newValue)
+            messagebox.showinfo('JRS', 'Data has been updated')
+            journalEntryManual_list_treeview()
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+
+def select_record_treeview():
+    """
+    this function is for
+    selecting record from
+    treeview
+    """
+    journalEntryInsert_datefrom.delete(0, END)
+    journal_manual.delete(0, END)
+    reference_manual_entry.delete(0, END)
+    journal_memo_entry.delete('1.0', END)
+    account_number_entry.delete(0, END)
+    chart_of_account_manual.delete(0, END)
+    debit_manual_entry.delete(0, END)
+    credit_manual_entry.delete(0, END)
+    Selected_ID_entry.delete(0, END)
+
+    selected = journalEntryManual_treeview.focus()
+    values = journalEntryManual_treeview.item(selected)
+    selectedItems = values['values']
+    
+
+
+    dataSearch = db['journal_entry']
+    query = {'_id': ObjectId(selectedItems[0])}
+    try:
+       
+        
+        for x in dataSearch.find(query):
+            
+            id_num = x['_id']
+            date_entry = x['date_entry']
+            journal = x['journal']
+            ref = x['ref']
+            descriptions = x['descriptions']
+            account_number = x['acoount_number']
+            account_disc = x['account_disc']
+            debit_amount = x['debit_amount']
+            debit_amount2 = '{:,.2f}'.format(debit_amount)
+            credit_amount = x['credit_amount']
+            credit_amount2 = '{:,.2f}'.format(credit_amount)
+            
+            
+            journalEntryInsert_datefrom.insert(0, date_entry)
+            journal_manual.insert(0, journal)
+            reference_manual_entry.insert(0, ref)
+            journal_memo_entry.insert('1.0', descriptions)
+            account_number_entry.insert(0, account_number)
+            chart_of_account_manual.insert(0, account_disc)
+            debit_manual_entry.insert(0, debit_amount)
+            credit_manual_entry.insert(0, credit_amount)
+            Selected_ID_entry.insert(0, id_num)
+            
+
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+    
+
+
+def journalEntryManual_list_treeview():
+    
+    """
+    this function is for
+    button to display the list
+    of income Statement as per query
+    """
+    
+    journalEntryManual_treeview.delete(*journalEntryManual_treeview.get_children())
+    return journalEntry_manual_list()
+def journalEntry_manual_list():
+    """
+    This function is for manual
+    entry list
+    """
+    dataSearch = db['journal_entry']
+    query = {'ref':reference_manual_entry.get() }
+    try:
+        cnt = 0
+        debit_amount_total = 0
+        credit_amount_total= 0
+        for x in dataSearch.find(query):
+            cnt+=1
+            id_num = x['_id']
+            date_entry = x['date_entry']
+            journal = x['journal']
+            ref = x['ref']
+            descriptions = x['descriptions']
+            account_number = x['acoount_number']
+            account_disc = x['account_disc']
+            debit_amount = x['debit_amount']
+            debit_amount2 = '{:,.2f}'.format(debit_amount)
+            credit_amount = x['credit_amount']
+            credit_amount2 = '{:,.2f}'.format(credit_amount)
+            
+            debit_amount_total+=debit_amount
+            debit_amount_total2 = '{:,.2f}'.format(debit_amount_total)
+
+            credit_amount_total+=credit_amount
+            credit_amount_total2 = '{:,.2f}'.format(credit_amount_total)
+            
+            journalEntryManual_treeview.insert('', 'end', values=(id_num,date_entry,journal,
+                                ref,descriptions, account_number,account_disc,debit_amount2,
+                                credit_amount2 ))
+
+            totalDebit_manual_entry.delete(0, END)
+            totalDebit_manual_entry.insert(0, (debit_amount_total2))
+
+
+            totalCredit_manual_entry.delete(0, END)
+            totalCredit_manual_entry.insert(0, (credit_amount_total2))
+
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")
+def insert_journalEntry_manual():
+    """
+    this function is for inserting
+    record to journal_entry
+    """
+
+    debit_entry = float(debit_manual_entry.get())
+    
+    
+    credit_entry = float(credit_manual_entry.get())
+    
+
+    dateEntry =  journalEntryInsert_datefrom.get()
+    date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+    
+    
+    collection = db['journal_entry'] # this is to create collection and save as table
+    dataInsert = {
+    # 'date_entry': journalEntryInsert_datefrom.get(),
+    'date_entry': date_time_obj,
+    'journal': journal_manual.get(),
+    'ref': reference_manual_entry.get(),
+    'descriptions': journal_memo_entry.get('1.0', 'end-1c'),
+    'acoount_number': account_number_entry.get(),
+    'account_disc': chart_of_account_manual.get(),
+    'debit_amount': debit_entry,
+    'credit_amount': credit_entry,
+    'user': USERNAME.get(),
+    'created':datetime.now()
+    
+    }
+
+    
+    
+    try:
+        collection.insert_one(dataInsert)
+
+        account_number_entry.delete(0, END)
+        chart_of_account_manual.delete(0, END)
+        debit_manual_entry.delete(0, END)
+        credit_manual_entry.delete(0, END)
+        
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+                   
+    messagebox.showinfo('JRS', 'Data has been exported and save')
+    journalEntryManual_list_treeview()
+
+
+def autoIncrement_journal_manual_ref():
+    """
+    This function is for
+    autoincrement Number
+    for reference in
+    journala Entry
+    """
+    dataSearch = db['journal_entry']
+    agg_result = dataSearch.find().sort('ref',-1).limit(1)
+
+    for x in agg_result :
+        a = x['ref']
+        current_year =  datetime.today().year
+        if a is not None:
+            reference_manual = a 
+            res = re.sub(r'[0-9]+$',
+                    lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
+                    reference_manual)
+
+            reference_manual_entry.delete(0, END)
+            reference_manual_entry.insert(0, (res))
+            
+        
+        else:
+            test_str = 'ENTRY-000'
+            res = test_str
+
+            reference_manual_entry.delete(0, END)
+            reference_manual_entry.insert(0, (res))
+def auto_account_num(e):
+    """
+    this function
+    is for auto complete
+    for account number
+    """
+
+    dataSearch = db['chart_of_account'] 
+    agg_result = dataSearch.find({'accountTitle':chart_of_account_manual.get()})
+
+    for x in agg_result:
+        a = x['accountNum']
+        account_number_entry.delete(0, END)
+        account_number_entry.insert(0, (a))
+
+
+
+
+def chart_of_account_list():
+    """
+    this function is for 
+    the displaying chart of 
+    account to dropdown menu
+    or combo box
+    """  
+    dataSearch = db['chart_of_account'] 
+    # agg_result = dataSearch.find()
+    agg_result = dataSearch.find().sort('accountNum', pymongo.ASCENDING)
+
+    data = []
+    for x in agg_result:
+        data.append(x['accountTitle'])
+    return data
+        
+
+def journal_entry_insert_frame():
+    """
+    This function is for
+    inserting journal entry 
+    """
+    cleartrialbalanceFrame()
+   
+    entry_date_label = Label(accounting_frame, text='Date from:', width=14, height=1, bg='yellow', fg='black',
+                          font=('Arial', 10), anchor='e')
+    entry_date_label.place(x=10, y=35)
+
+    global journalEntryInsert_datefrom
+    journalEntryInsert_datefrom = DateEntry(accounting_frame, width=15, background='darkblue',
+                                  date_pattern='MM/dd/yyyy',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    journalEntryInsert_datefrom.place(x=170, y=35)
+    journalEntryInsert_datefrom.configure(justify='center')
+    
+   
+
+    journal_label = Label(accounting_frame, text='Journal:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    journal_label.place(x=10, y=70)
+
+    global journal_manual
+    
+    journal_manual = ttk.Combobox(accounting_frame, width=14)
+    journal_manual['values'] = ("Payments", "Receipts", "Sales", "Purchases",'General')
+    journal_manual.place(x=170, y=70)
+
+    reference_label = Label(accounting_frame, text='reference:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    reference_label.place(x=10, y=105)
+
+    global reference_manual_entry
+    reference_manual_entry = Entry(accounting_frame, width=12, font=('Arial', 10), justify='right')
+    reference_manual_entry.place(x=170, y=105)
+
+    
+    journal_memo_lbl = Label(accounting_frame, text='Journal Memo:', width=14, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    journal_memo_lbl.place(x=10, y=140)
+
+    global journal_memo_entry
+    journal_memo_entry = scrolledtext.ScrolledText(accounting_frame,
+                                                          wrap=tk.WORD,
+                                                          width=23,
+                                                          height=3,
+                                                          font=("Arial",
+                                                                10))
+    journal_memo_entry.place(x=170, y=140)
+
+
+    account_number_lbl = Label(accounting_frame, text='Acct Number:', width=10, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    account_number_lbl.place(x=10, y=200)
+
+    global account_number_entry
+    account_number_entry = Entry(accounting_frame, width=12, font=('Arial', 10), justify='right')
+    account_number_entry.place(x=10, y=235)
+
+    account_title_lbl = Label(accounting_frame, text='Acct Title:', width=32, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='c')
+    account_title_lbl.place(x=110, y=200)
+
+    global chart_of_account_manual
+    chart_of_account_manual = ttk.Combobox(accounting_frame, width=39)
+    chart_of_account_manual['values'] = chart_of_account_list()
+    chart_of_account_manual.place(x=110, y=235)
+    chart_of_account_manual.bind("<<ComboboxSelected>>", auto_account_num)
+
+
+
+    debitManual_label = Label(accounting_frame, text='Debit:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    debitManual_label.place(x=390, y=200)
+
+    global debit_manual_entry
+    debit_manual_entry = Entry(accounting_frame, width=16, font=('Arial', 10), justify='right')
+    debit_manual_entry.place(x=390, y=235)
+
+    creditManual_label = Label(accounting_frame, text='Credit:', 
+                                            width=14, height=1, bg='yellowgreen', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    creditManual_label.place(x=520, y=200)
+
+    global credit_manual_entry
+    credit_manual_entry = Entry(accounting_frame, width=16, font=('Arial', 10), justify='right')
+    credit_manual_entry.place(x=520, y=235)
+
+
+    selected_label = Label(accounting_frame, text='Transaction ID:', 
+                                            width=14, height=1, bg='yellowgreen', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    selected_label.place(x=700, y=235)
+
+    global Selected_ID_entry
+    Selected_ID_entry = Entry(accounting_frame, width=16, font=('Arial', 10), justify='right')
+    Selected_ID_entry.place(x=820, y=235)
+
+
+    grand_total_label = Label(accounting_frame, text='TOTAL', 
+                                            width=14, height=1, bg='yellowgreen', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    grand_total_label.place(x=650, y=490)
+
+   
+    
+    global totalDebit_manual_entry
+    totalDebit_manual_entry = Entry(accounting_frame, width=16, font=('Arial', 10), justify='right')
+    totalDebit_manual_entry.place(x=880, y=490)
+
+
+   
+    
+    global totalCredit_manual_entry
+    totalCredit_manual_entry = Entry(accounting_frame, width=16, font=('Arial', 10), justify='right')
+    totalCredit_manual_entry.place(x=1000, y=490)
+    
+    
+    
+    btn_batch_entry = Button(accounting_frame, text='Add Batch Entry', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=autoIncrement_journal_manual_ref)
+    btn_batch_entry.place(x=670, y=35)
+
+    btn_JournalManual_entry = Button(accounting_frame, text='Insert Entry', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=insert_journalEntry_manual)
+    btn_JournalManual_entry.place(x=670, y=70)
+
+    btn_selected = Button(accounting_frame, text='Selected', bd=2, bg='khaki', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=select_record_treeview)
+    btn_selected.place(x=670, y=105)
+
+    btn_update_entry = Button(accounting_frame, text='Update', bd=2, bg='gray', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=updated_journalEntry)
+    btn_update_entry.place(x=670, y=140)
+
+    btn_selected_delete = Button(accounting_frame, text='Delete', bd=2, bg='red', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=delete_journalEntry)
+    btn_selected_delete.place(x=670, y=175)
+
+
+    btn_search_ref = Button(accounting_frame, text='Search Ref', bd=2, bg='white', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=journalEntryManual_list_treeview)
+    btn_search_ref.place(x=815, y=35)
+
+
+    # this is for treeview for payroll computation
+    journaEntrymanual_view_Form = Frame(accounting_frame, width=500, height=10)
+    journaEntrymanual_view_Form.place(x=10, y=280)
+
+    style = ttk.Style(accounting_frame)
+    style.theme_use("clam")
+    style.configure("Treeview",
+                    background="black",
+                    foreground="white",
+                    rowheight=15,
+                    fieldbackground="yellow")
+   
+    
+    
+    global journalEntryManual_treeview
+    scrollbarx = Scrollbar(journaEntrymanual_view_Form, orient=HORIZONTAL)
+    scrollbary = Scrollbar(journaEntrymanual_view_Form, orient=VERTICAL)
+    
+    journalEntryManual_treeview = ttk.Treeview(journaEntrymanual_view_Form,
+                                             columns=('ID','DATE', "JOURNAL","REF",
+                                               "DESCRIPTION",
+                                              "ACCOUNT",'ACCOUNTTITLE','DEBIT', 'CREDIT'),
+                                             selectmode="extended", height=8, yscrollcommand=scrollbary.set,
+                                             xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=journalEntryManual_treeview.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=journalEntryManual_treeview.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    journalEntryManual_treeview.heading('ID', text="ID", anchor=CENTER)
+    journalEntryManual_treeview.heading('DATE', text="Date", anchor=CENTER)
+    journalEntryManual_treeview.heading('JOURNAL', text="Journal", anchor=CENTER)
+    journalEntryManual_treeview.heading('REF', text="Ref", anchor=CENTER)
+    journalEntryManual_treeview.heading('DESCRIPTION', text="Description", anchor=CENTER)
+    journalEntryManual_treeview.heading('ACCOUNT', text="Account #", anchor=CENTER)
+    journalEntryManual_treeview.heading('ACCOUNTTITLE', text="Acct Title", anchor=CENTER)
+    journalEntryManual_treeview.heading('DEBIT', text="Debit", anchor=CENTER)
+    journalEntryManual_treeview.heading('CREDIT', text="Credit", anchor=CENTER)
+
+
+    journalEntryManual_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
+    journalEntryManual_treeview.column('#1', stretch=NO, minwidth=0, width=50, anchor='e')
+    journalEntryManual_treeview.column('#2', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_treeview.column('#3', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_treeview.column('#4', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_treeview.column('#5', stretch=NO, minwidth=0, width=220, anchor='e')
+    journalEntryManual_treeview.column('#6', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_treeview.column('#7', stretch=NO, minwidth=0, width=220, anchor='e')
+    journalEntryManual_treeview.column('#8', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_treeview.column('#9', stretch=NO, minwidth=0, width=100, anchor='e')
+   
+   
+
+    journalEntryManual_treeview.pack()
+    
+    
+
+
+
+
+
+def incomeStatement_list_treeview():
+    
+    """
+    this function is for
+    button to display the list
+    of income Statement as per query
+    """
+    
+    incomeStatement_treeview.delete(*incomeStatement_treeview.get_children())
+    return incomeStatement_calculation()
+
+def incomeStatement_calculation():
+    """
+    This function is for calculation
+    of Income Statement
+    """
+    dataSearch = db['journal_entry']
+    # datefrom = incomeStament_datefrom.get()
+    # dateto = incomeStament_dateto.get()
+
+
+    datefrom = incomeStament_datefrom.get()
+    date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
+
+    dateto = incomeStament_dateto.get()
+    date_time_obj_to = datetime.strptime(dateto, '%Y-%m-%d')
+
+    agg_result= dataSearch.aggregate(
+        [
+        {"$match":{'date_entry': {'$gte':date_time_obj_from, '$lte':date_time_obj_to},
+            '$or': [
+            {'acoount_number': {"$regex": "^5"}},
+            {'acoount_number': {"$regex": "^4"}}
+        ] }},
+        # {"$match": { "cut_off_period": date } },
+        # {'$sort' : { '$meta': "textScore" }, '$account_disc': -1 },
+        {"$group" : 
+            {"_id" :  '$acoount_number',
+            "accountName": {'$first':'$account_disc'},
+            "totalDebit" : {"$sum" : '$debit_amount'},
+            "totalCredit" : {"$sum" : '$credit_amount'},
+            
+            }},
+        {'$sort':{'_id': 1}}
+            
+        ])
+
+    total_debit_amount = 0
+    total_credit_amount = 0
+    for x in agg_result: 
+        
+        # # print(x)
+        # account_number = x['_id']
+        # print(account_number)
+        # # TotalDebit = x['totalDebit']
+        
+                
+        account_number = x['accountName']
+        debit_amount = x['totalDebit']
+        debit_amount2 = '{:,.2f}'.format(debit_amount)
+        credit_amount = x['totalCredit']
+        credit_amount2 = '{:,.2f}'.format(credit_amount)
+
+        total_debit_amount+=debit_amount
+        total_debit_amount2 ='{:,.2f}'.format(total_debit_amount)
+
+
+        total_credit_amount+=credit_amount
+        total_credit_amount2 ='{:,.2f}'.format(total_credit_amount)
+
+        
+        netIncome = float(total_credit_amount - total_debit_amount)
+        netIncome2 ='{:,.2f}'.format(netIncome)
+        
+        incomeStatement_treeview.insert('', 'end', values=(account_number,
+                                                        debit_amount2,
+                                                        credit_amount2 ))
+
+        totalIncome_entry.delete(0, END)
+        totalIncome_entry.insert(0, (total_credit_amount2))
+
+        totalExpenses_entry.delete(0, END)
+        totalExpenses_entry.insert(0, (total_debit_amount2))
+
+        netIncome_entry.delete(0, END)
+        netIncome_entry.insert(0, (netIncome2))
+
+
+
+def incomeStatement_frame():
+    """
+    This function is for
+    income statement frame
+    """
+    cleartrialbalanceFrame()
+    global entry_datefrom
+    entry_date_label = Label(accounting_frame, text='Date from:', width=10, height=1, bg='yellow', fg='gray',
+                          font=('Arial', 10), anchor='e')
+    entry_date_label.place(x=10, y=35)
+
+    global incomeStament_datefrom
+    incomeStament_datefrom = DateEntry(accounting_frame, width=15, background='darkblue', date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    incomeStament_datefrom.place(x=120, y=35)
+    incomeStament_datefrom.configure(justify='center')
+    
+    entry_date_label = Label(accounting_frame, text='Date to:', width=10, height=1, bg='yellow', fg='gray',
+                          font=('Arial', 10), anchor='e')
+    entry_date_label.place(x=250, y=35)
+
+    global incomeStament_dateto
+    incomeStament_dateto = DateEntry(accounting_frame, width=15, background='darkblue', date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    incomeStament_dateto.place(x=350, y=35)
+    incomeStament_dateto.configure(justify='center')
+
+    totalIncome_label = Label(accounting_frame, text='Total Income:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    totalIncome_label.place(x=850, y=110)
+
+    global totalIncome_entry
+    totalIncome_entry = Entry(accounting_frame, width=12, font=('Arial', 12), justify='right')
+    totalIncome_entry.place(x=970, y=110)
+
+    totalExpenses_label = Label(accounting_frame, text='Total Expenses:', 
+                                            width=14, height=1, bg='green', fg='white',
+                                             font=('Arial', 10), anchor='e')
+    totalExpenses_label.place(x=850, y=140)
+
+    global totalExpenses_entry
+    totalExpenses_entry = Entry(accounting_frame, width=12, font=('Arial', 12), justify='right')
+    totalExpenses_entry.place(x=970, y=140)
+
+
+    netIncome_label = Label(accounting_frame, text='Net Income:', 
+                                            width=14, height=1, bg='Red', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    netIncome_label.place(x=850, y=170)
+
+    global netIncome_entry
+    netIncome_entry = Entry(accounting_frame, width=12, font=('Arial', 12), justify='right')
+    netIncome_entry.place(x=970, y=170)
+    
+    
+    
+    
+    btn_search_incomeStatment = Button(accounting_frame, text='Search', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=10, height=1, command=incomeStatement_list_treeview)
+    btn_search_incomeStatment.place(x=720, y=35)
+    
+    
+    # this is for treeview for trial Balance
+    incomeStatment_view_Form = Frame(accounting_frame, width=500, height=25)
+    incomeStatment_view_Form.place(x=15, y=110)
+
+    style = ttk.Style(accounting_frame)
+    style.theme_use("clam")
+    style.configure("Treeview",
+                    background="white",
+                    foreground="black",
+                    fieldbackground="yellow")
+    # change selected color
+
+    style.map('Treeview',
+                [('selected','green')])
+    
+    
+    global incomeStatement_treeview
+    scrollbarx = Scrollbar(incomeStatment_view_Form, orient=HORIZONTAL)
+    scrollbary = Scrollbar(incomeStatment_view_Form, orient=VERTICAL)
+    
+    incomeStatement_treeview = ttk.Treeview(incomeStatment_view_Form,
+                                             columns=("ACCOUNTTITLE",'DEBIT', 'CREDIT'),
+                                             selectmode="extended", height=20, yscrollcommand=scrollbary.set,
+                                             xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=incomeStatement_treeview.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=incomeStatement_treeview.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    # trialBalance_treeview.heading('ACCOUNT#', text="Account #", anchor=CENTER)
+    incomeStatement_treeview.heading('ACCOUNTTITLE', text="Account Title", anchor=CENTER)
+    incomeStatement_treeview.heading('DEBIT', text="Debit", anchor=CENTER)
+    incomeStatement_treeview.heading('CREDIT', text="Credit", anchor=CENTER)
+
+
+    incomeStatement_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
+    incomeStatement_treeview.column('#1', stretch=NO, minwidth=0, width=400, anchor='sw')
+    incomeStatement_treeview.column('#2', stretch=NO, minwidth=0, width=200, anchor='e')
+    incomeStatement_treeview.column('#3', stretch=NO, minwidth=0, width=200, anchor='e')
+    
+   
+   
+   
+
+    incomeStatement_treeview.pack()
+
+
+def trialBalance_list_treeview():
+    
+    """
+    this function is for
+    button to display the list
+    of journal entry as per query
+    """
+    
+    trialBalance_treeview.delete(*trialBalance_treeview.get_children())
+    return trialBalance_search()
+
+
+def trialBalance_search():
+    """
+    this function is for searching
+    for per account for
+    trial balance purposes 
+    """
+    dataSearch = db['journal_entry']
+    
+    datefrom = trialBalance_datefrom.get()
+    date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
+
+    dateto = trialBalance_dateto.get()
+    date_time_obj_to = datetime.strptime(dateto, '%Y-%m-%d')
+
+    agg_result= dataSearch.aggregate(
+        [
+        {"$match": {'date_entry': {'$gte':date_time_obj_from, '$lte':date_time_obj_to}} },
+        # {"$match": { "cut_off_period": date } },
+        # {'$sort' : { '$meta': "textScore" }, '$account_disc': -1 },
+        {"$group" : 
+             {"_id" :  '$acoount_number',
+            "accountName": {'$first':'$account_disc'},
+            "totalDebit" : {"$sum" : '$debit_amount'},
+            "totalCredit" : {"$sum" : '$credit_amount'},
+            # "accountNum":'$acoount_number'
+            
+            }},
+        {'$sort':{'_id': 1}}
+            
+        ])
+    
+    totalDebit = 0
+    totalCredit = 0
+    for x in agg_result: 
+        
+                
+        account_number = x['accountName']
+        debit_amount = x['totalDebit']
+        debit_amount2 = '{:,.2f}'.format(debit_amount)
+        credit_amount = x['totalCredit']
+        credit_amount2 = '{:,.2f}'.format(credit_amount)
+
+        balance_amount = float(debit_amount - credit_amount)
+        balance_amount2 = '{:,.2f}'.format(balance_amount)
+
+        totalDebit+=debit_amount
+        totalDebit2 = '{:,.2f}'.format(totalDebit)
+
+        totalCredit+=credit_amount
+        totalCredit2 = '{:,.2f}'.format(totalCredit)
+        
+        trialBalance_treeview.insert('', 'end', values=(account_number,
+                                                        debit_amount2,
+                                                        credit_amount2,
+                                                        balance_amount2 ))
+                
+        totalDebit_trialbalanceTreeview_entry.delete(0, END)
+        totalDebit_trialbalanceTreeview_entry.insert(0, (totalDebit2))
+
+        totalCredit_trialbalanceTreeview_entry.delete(0, END)
+        totalCredit_trialbalanceTreeview_entry.insert(0, (totalCredit2))
+
+
+
+def trialBalance_frame():
+    """
+    This function
+    is for trialbalance frame or button
+    """
+    cleartrialbalanceFrame()
+    global entry_datefrom
+    entry_date_label = Label(accounting_frame, text='Date from:', width=10, height=1, bg='yellow', fg='gray',
+                          font=('Arial', 10), anchor='e')
+    entry_date_label.place(x=10, y=35)
+
+    global trialBalance_datefrom
+    trialBalance_datefrom = DateEntry(accounting_frame, width=15, background='darkblue', date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    trialBalance_datefrom.place(x=120, y=35)
+    trialBalance_datefrom.configure(justify='center')
+    
+    entry_date_label = Label(accounting_frame, text='Date to:', width=10, height=1, bg='yellow', fg='gray',
+                          font=('Arial', 10), anchor='e')
+    entry_date_label.place(x=250, y=35)
+
+    global trialBalance_dateto
+    trialBalance_dateto = DateEntry(accounting_frame, width=15, background='darkblue', date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    trialBalance_dateto.place(x=350, y=35)
+    trialBalance_dateto.configure(justify='center')
+    
+    
+    
+    
+    btn_searchTrialBalance = Button(accounting_frame, text='Search Entry', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=10, height=1, command=trialBalance_list_treeview)
+    btn_searchTrialBalance.place(x=720, y=35)
+    
+    
+    # this is for treeview for trial Balance
+    trialBalance_view_Form = Frame(accounting_frame, width=500, height=25)
+    trialBalance_view_Form.place(x=15, y=110)
+
+    style = ttk.Style(accounting_frame)
+    style.theme_use("clam")
+    style.configure("Treeview",
+                    background="black",
+                    foreground="white",
+                    fieldbackground="yellow")
+    # change selected color
+
+    style.map('Treeview',
+                [('selected','green')])
+    
+    
+    global trialBalance_treeview
+    scrollbarx = Scrollbar(trialBalance_view_Form, orient=HORIZONTAL)
+    scrollbary = Scrollbar(trialBalance_view_Form, orient=VERTICAL)
+    
+    trialBalance_treeview = ttk.Treeview(trialBalance_view_Form,
+                                             columns=("ACCOUNTTITLE",'DEBIT', 'CREDIT','BALANCE'),
+                                             selectmode="extended", height=20, yscrollcommand=scrollbary.set,
+                                             xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=trialBalance_treeview.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=trialBalance_treeview.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    # trialBalance_treeview.heading('ACCOUNT#', text="Account #", anchor=CENTER)
+    trialBalance_treeview.heading('ACCOUNTTITLE', text="Account Title", anchor=CENTER)
+    trialBalance_treeview.heading('DEBIT', text="Debit", anchor=CENTER)
+    trialBalance_treeview.heading('CREDIT', text="Credit", anchor=CENTER)
+    trialBalance_treeview.heading('BALANCE', text="Balance", anchor=CENTER)
+
+
+    trialBalance_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
+    trialBalance_treeview.column('#1', stretch=NO, minwidth=0, width=400, anchor='sw')
+    trialBalance_treeview.column('#2', stretch=NO, minwidth=0, width=200, anchor='e')
+    trialBalance_treeview.column('#3', stretch=NO, minwidth=0, width=200, anchor='e')
+    trialBalance_treeview.column('#4', stretch=NO, minwidth=0, width=200, anchor='e')
+    
+   
+   
+   
+
+    trialBalance_treeview.pack()
+
+
+    netIncome_label = Label(accounting_frame, text='Grand Total', 
+                                            width=14, height=1, bg='Red', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    netIncome_label.place(x=250, y=75)
+
+    global totalDebit_trialbalanceTreeview_entry
+    totalDebit_trialbalanceTreeview_entry = Entry(accounting_frame, width=21,
+                                             font=('Arial', 12), justify='right')
+    totalDebit_trialbalanceTreeview_entry.place(x=415, y=75)
+
+    global totalCredit_trialbalanceTreeview_entry
+    totalCredit_trialbalanceTreeview_entry = Entry(accounting_frame, width=21,
+                                             font=('Arial', 12), justify='right')
+    totalCredit_trialbalanceTreeview_entry.place(x=615, y=75)
+    
+    
+    
+
+
+
+
+def journalEntry_list_treeview():
+    
+    """
+    this function is for
+    button to display the list
+    of journal entry as per query
+    """
+    
+    journalEntry_treeview.delete(*journalEntry_treeview.get_children())
+    return searchJournalEntry_treeview()
+
+def searchJournalEntry_treeview():
+    """
+    This function is for
+    journal Entry List
+    """
+    dataSearch = db['journal_entry']
+    
+    # datefrom = journal_entry_datefrom.get()
+    # dateto = journal_entry_dateto.get()
+
+    datefrom =  journal_entry_datefrom.get()
+    date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
+
+    dateto = journal_entry_dateto.get()
+    date_time_obj_to = datetime.strptime(dateto, '%Y-%m-%d')
+
+    account_search = accountNumber_entry.get()
+    ref_search2 = str(account_search)
+    
+    if  accountNumber_entry.get() == "" and reference_entry.get() =="": 
+        
+        try:
+            cnt = 0
+            agg_result= dataSearch.find({'date_entry': {'$gte':date_time_obj_from, '$lte':date_time_obj_to}})
+           
+            for x in agg_result:
+                cnt+=1
+                date_entry = x['date_entry']
+                journal = x['journal']
+                ref = x['ref']
+                descriptions = x['descriptions']
+                account_number = x['acoount_number']
+                account_disc = x['account_disc']
+                debit_amount = x['debit_amount']
+                debit_amount2 = '{:,.2f}'.format(debit_amount)
+                credit_amount = x['credit_amount']
+                credit_amount2 = '{:,.2f}'.format(credit_amount)
+                
+                
+                journalEntry_treeview.insert('', 'end', values=(date_entry,journal,
+                                    ref,descriptions, account_number,account_disc,debit_amount2,
+                                    credit_amount2 ))
+                
+                
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+    elif reference_entry.get() =="": # this is for date and accountNumber search
+        # query = {'date_entry': {'$gte':datefrom, '$lte':dateto}},{'ref':accountNumber_entry.get()}
+        try:
+            cnt = 0
+            # for x in dataSearch.find({'$and' :[{'date_entry': {'$gte':datefrom, '$lte':dateto}},
+            #                                    {'acoount_number':accountNumber_entry.get()}]}):
+
+            for x in dataSearch.find({'acoount_number':accountNumber_entry.get()}):
+                cnt+=1
+                date_entry = x['date_entry']
+                journal = x['journal']
+                ref = x['ref']
+                descriptions = x['descriptions']
+                account_number = x['acoount_number']
+                account_disc = x['account_disc']
+                debit_amount = x['debit_amount']
+                debit_amount2 = '{:,.2f}'.format(debit_amount)
+                credit_amount = x['credit_amount']
+                credit_amount2 = '{:,.2f}'.format(credit_amount)
+                
+                
+                journalEntry_treeview.insert('', 'end', values=(date_entry,journal,
+                                    ref,descriptions, account_number,account_disc,debit_amount2,
+                                    credit_amount2 ))
+              
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")  
+        
+    elif accountNumber_entry.get() =="": # this is for date and reference Number search
+        # query = {'date_entry': {'$gt':datefrom, '$lt':dateto}},{'ref':accountNumber_entry.get()}
+        try:
+            cnt = 0
+            for x in dataSearch.find({'ref':reference_entry.get()}):
+                cnt+=1
+                date_entry = x['date_entry']
+                journal = x['journal']
+                ref = x['ref']
+                descriptions = x['descriptions']
+                account_number = x['acoount_number']
+                account_disc = x['account_disc']
+                debit_amount = x['debit_amount']
+                debit_amount2 = '{:,.2f}'.format(debit_amount)
+                credit_amount = x['credit_amount']
+                credit_amount2 = '{:,.2f}'.format(credit_amount)
+                
+                
+                journalEntry_treeview.insert('', 'end', values=(date_entry,journal,
+                                    ref,descriptions, account_number,account_disc,debit_amount2,
+                                    credit_amount2 ))
+              
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}") 
+
+
+def importChartofAccount():
+    """
+    This function is for 
+    importing chart of account
+    """    
+    with open("chartofaccount.csv",) as stocks:
+            r_csv = csv.reader(stocks,delimiter=',')
+            for row in r_csv:
+                    accountNum = row[0]
+                    accountTitle = row[1]
+                   
+                    
+                    
+                    
+                    collection = db['chart_of_account'] # this is to create collection and save as table
+                    dataInsert = {
+                    'accountNum': accountNum,
+                    'accountTitle': accountTitle,
+                    'user': USERNAME.get(),
+                    'created':datetime.now()
+                    
+                    }
+                    
+                    try:
+                        collection.insert_one(dataInsert)
+                        
+                    except Exception as ex:
+                        messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+                    
+    messagebox.showinfo('JRS', 'Data has been exported and save')
+   
+        
+
+def import_journal_entry():
+    """
+    This function is for exporting
+    entry from nch entry
+    """
+    # clearFrame()
+    with open("journal_entry.csv",) as stocks:
+            r_csv = csv.reader(stocks,delimiter=',')
+            for row in r_csv:
+                    date_entry = row[0]
+                    journal = row[1]
+                    ref = row[2]
+                    descriptions = row[3]
+                    acoount_number = row[4]
+                    account_disc = row[5]
+                    
+                    debit_amount = float(row[6])
+                    credit_amount = float(row[7])
+                    
+                    date_time_obj_to = datetime.strptime(date_entry, '%m-%d-%Y')
+
+                    collection = db['journal_entry'] # this is to create collection and save as table
+                    dataInsert = {
+                    'date_entry': date_time_obj_to,
+                    'journal': journal,
+                    'ref': ref,
+                    'descriptions': descriptions,
+                    'acoount_number': acoount_number,
+                    'account_disc': account_disc,
+                    'debit_amount': debit_amount,
+                    'credit_amount': credit_amount,
+                    'user': USERNAME.get(),
+                    'created':datetime.now()
+                    
+                    }
+                    
+                    try:
+                        collection.insert_one(dataInsert)
+                        
+                    except Exception as ex:
+                        messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+                    
+    messagebox.showinfo('JRS', 'Data has been exported and save')
+
+
+def importEntry_frame():
+    """
+    This function
+    is for exporting journal
+    entry from csv
+    """
+    cleartrialbalanceFrame()
+    global entry_datefrom
+    entry_date_label = Label(accounting_frame, text='Date from:', width=10, height=1, bg='yellow', fg='gray',
+                          font=('Arial', 10), anchor='e')
+    entry_date_label.place(x=10, y=35)
+
+    global journal_entry_datefrom
+    journal_entry_datefrom = DateEntry(accounting_frame, width=15, background='darkblue', date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    journal_entry_datefrom.place(x=120, y=35)
+    journal_entry_datefrom.configure(justify='center')
+    
+    entry_date_label = Label(accounting_frame, text='Date to:', width=10, height=1, bg='yellow', fg='gray',
+                          font=('Arial', 10), anchor='e')
+    entry_date_label.place(x=250, y=35)
+
+    global journal_entry_dateto
+    journal_entry_dateto = DateEntry(accounting_frame, width=15, background='darkblue', date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    journal_entry_dateto.place(x=350, y=35)
+    journal_entry_dateto.configure(justify='center')
+    
+    
+    
+    accountNumber_label = Label(accounting_frame, text='Account #:', width=10, height=1, bg='yellow', fg='gray',
+                          font=('Arial', 10), anchor='e')
+    accountNumber_label.place(x=470, y=35)
+    
+    global accountNumber_entry
+    accountNumber_entry = Entry(accounting_frame, width=15, font=('Arial', 10), justify='right')
+    accountNumber_entry.place(x=570, y=35)
+
+    reference_label = Label(accounting_frame, text='Reference #:', width=10, height=1, bg='yellow', fg='gray',
+                          font=('Arial', 10), anchor='e')
+    reference_label.place(x=690, y=35)
+    
+    global reference_entry
+    reference_entry = Entry(accounting_frame, width=15, font=('Arial', 10), justify='right')
+    reference_entry.place(x=790, y=35)
+    
+    btn_searchEntry = Button(accounting_frame, text='Search Entry', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=10, height=1, command=journalEntry_list_treeview)
+    btn_searchEntry.place(x=910, y=35)
+    
+    btn_importEntry = Button(accounting_frame, text='Import Entry', bd=2, bg='yellow', fg='black',
+                              font=('arial', 10), width=10, height=1, command=import_journal_entry)
+    btn_importEntry.place(x=10, y=70)
+    
+    
+    # this is for treeview for payroll computation
+    journaEntry_view_Form = Frame(accounting_frame, width=500, height=25)
+    journaEntry_view_Form.place(x=15, y=110)
+
+    style = ttk.Style(accounting_frame)
+    style.theme_use("clam")
+    style.configure("Treeview",
+                    background="black",
+                    foreground="white",
+                    fieldbackground="yellow")
+   
+    
+    
+    global journalEntry_treeview
+    scrollbarx = Scrollbar(journaEntry_view_Form, orient=HORIZONTAL)
+    scrollbary = Scrollbar(journaEntry_view_Form, orient=VERTICAL)
+    
+    journalEntry_treeview = ttk.Treeview(journaEntry_view_Form,
+                                             columns=('DATE', "JOURNAL","REF",
+                                               "DESCRIPTION",
+                                              "ACCOUNT",'ACCOUNTTITLE','DEBIT', 'CREDIT'),
+                                             selectmode="extended", height=20, yscrollcommand=scrollbary.set,
+                                             xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=journalEntry_treeview.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=journalEntry_treeview.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    journalEntry_treeview.heading('DATE', text="Date", anchor=CENTER)
+    journalEntry_treeview.heading('JOURNAL', text="Journal", anchor=CENTER)
+    journalEntry_treeview.heading('REF', text="Ref", anchor=CENTER)
+    journalEntry_treeview.heading('DESCRIPTION', text="Description", anchor=CENTER)
+    journalEntry_treeview.heading('ACCOUNT', text="Account #", anchor=CENTER)
+    journalEntry_treeview.heading('ACCOUNTTITLE', text="Acct Title", anchor=CENTER)
+    journalEntry_treeview.heading('DEBIT', text="Debit", anchor=CENTER)
+    journalEntry_treeview.heading('CREDIT', text="Credit", anchor=CENTER)
+
+
+    journalEntry_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
+    journalEntry_treeview.column('#1', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntry_treeview.column('#2', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntry_treeview.column('#3', stretch=NO, minwidth=0, width=80, anchor='e')
+    journalEntry_treeview.column('#4', stretch=NO, minwidth=0, width=250, anchor='e')
+    journalEntry_treeview.column('#5', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntry_treeview.column('#6', stretch=NO, minwidth=0, width=250, anchor='e')
+    journalEntry_treeview.column('#7', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntry_treeview.column('#8', stretch=NO, minwidth=0, width=100, anchor='e')
+   
+   
+
+    journalEntry_treeview.pack()
+    
+    
+    
+
+
+def accounting_frame():
+    """
+    This function is for accounting
+    frame
+    """
+    
+    clearFrame()
+    global accounting_frame
+
+   
+        
+
+    accounting_frame = Frame(MidViewForm9, width=1120, height=575, bd=2, bg='gray', relief=SOLID)
+    accounting_frame.place(x=160, y=8)
+
+    
+    btn_importEntry = Button(MidViewForm9, text='Journal Entry', bd=2, bg='blue', fg='white',
+                              font=('arial', 12), width=15, height=2, command=importEntry_frame)
+    btn_importEntry.place(x=2, y=100)
+    
+    
+    btn_trialBalance = Button(MidViewForm9, text='Trial Balance', bd=2, bg='blue', fg='white',
+                              font=('arial', 12), width=15, height=2, command=trialBalance_frame)
+    btn_trialBalance.place(x=2, y=160)
+
+    btn_incomeStatement = Button(MidViewForm9, text='Income Statment', bd=2, bg='blue', fg='white',
+                              font=('arial', 12), width=15, height=2, command=incomeStatement_frame)
+    btn_incomeStatement.place(x=2, y=220)
+
+    btn_manualJournalEntry = Button(MidViewForm9, text='Manual Entry', bd=2, bg='blue', fg='white',
+                              font=('arial', 12), width=15, height=2, command=journal_entry_insert_frame)
+    btn_manualJournalEntry.place(x=2, y=280)
+
+    btn_importChartofAccount = Button(MidViewForm9, text='Import CoA', bd=2, bg='blue', fg='white',
+                              font=('arial', 12), width=15, height=2, command=importChartofAccount)
+    btn_importChartofAccount.place(x=2, y=340)
+    
+# this button is for Employee Details
+    # btn_employeeDetails = Button(MidViewForm9, text='Employee Details', bd=2, bg='blue', fg='white',
+    #                         font=('arial', 12), width=15, height=2)
+    # btn_employeeDetails.place(x=2, y=160)
+    
+
+    # btn_1601C = Button(MidViewForm9, text='1601 C Report', bd=2, bg='blue', fg='white',
+    #                              font=('arial', 12), width=15, height=2,command=frame_1601)
+    # btn_1601C.place(x=2, y=220)
+    
+
+    # btn_payroll_export = Button(MidViewForm9, text='Export Excel', bd=2, bg='blue', fg='white',
+    #                              font=('arial', 12), width=15, height=2)
+    # btn_payroll_export.place(x=2, y=280)
+
+    
 #=============================================Equipment Module==========================================================
 def cost_per_equipment_list():
     """This function is for displaying list of cost per Equipment"""
@@ -5664,7 +6915,7 @@ def dashboard():
     filemenu3.add_command(label="Payroll",command=payroll_transactions)
     filemenu3.add_command(label="Clients Registration")
     filemenu3.add_command(label="Daily Transactions")
-    filemenu4.add_command(label="Accounting Module",command=accouning_module)
+    filemenu4.add_command(label="Accounting Module",command=accounting_frame)
     filemenu6.add_command(label="Equipment Module", command = equipment_module)
     filemenu5.add_command(label="Reports Module")
     #filemenu7.add_command(label="New Payroll", command = payroll_transactions)
