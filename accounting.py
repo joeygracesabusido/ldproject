@@ -277,6 +277,7 @@ def insert_journalEntry_manual():
     'descriptions': journal_memo_entry.get('1.0', 'end-1c'),
     'acoount_number': account_number_entry.get(),
     'account_disc': chart_of_account_manual.get(),
+    'bsClass': bs_class_entry.get(),
     'debit_amount': debit_entry,
     'credit_amount': credit_entry,
     'user': USERNAME.get(),
@@ -348,8 +349,12 @@ def auto_account_num(e):
 
     for x in agg_result:
         a = x['accountNum']
+        b = x['bsClass']
         account_number_entry.delete(0, END)
         account_number_entry.insert(0, (a))
+
+        bs_class_entry.delete(0, END)
+        bs_class_entry.insert(0, (b))
 
 
 
@@ -466,6 +471,15 @@ def journal_entry_insert_frame():
     global credit_manual_entry
     credit_manual_entry = Entry(accounting_frame, width=16, font=('Arial', 10), justify='right')
     credit_manual_entry.place(x=520, y=235)
+
+    bs_class_label = Label(accounting_frame, text='BS Class:', 
+                                            width=14, height=1, bg='yellowgreen', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    bs_class_label.place(x=650, y=200)
+
+    global bs_class_entry
+    bs_class_entry = Entry(accounting_frame, width=16, font=('Arial', 10), justify='right')
+    bs_class_entry.place(x=650, y=235)
 
 
     selected_label = Label(accounting_frame, text='Transaction ID:', 
@@ -1084,33 +1098,46 @@ def importChartofAccount():
     This function is for 
     importing chart of account
     """    
-    with open("chartofaccount.csv",) as stocks:
-            r_csv = csv.reader(stocks,delimiter=',')
-            for row in r_csv:
+    dataSearch = db['chart_of_account']
+    agg_result= dataSearch.find()
+
+    a = ""
+    for x in agg_result:
+        a = x['accountNum']
+
+        with open("chartofaccount.csv",) as stocks:
+                r_csv = csv.reader(stocks,delimiter=',')
+                accountNum = ""
+                for row in r_csv:
+
                     accountNum = row[0]
                     accountTitle = row[1]
-                   
+                    bsClass = row[2]
                     
+                
+
+                    if a == accountNum:
+                        messagebox.showinfo('JRS',f'Account Number {accountNum} already taken')
+
+                    else:
                     
-                    
-                    collection = db['chart_of_account'] # this is to create collection and save as table
-                    dataInsert = {
-                    'accountNum': accountNum,
-                    'accountTitle': accountTitle,
-                    'user': USERNAME.get(),
-                    'created':datetime.now()
-                    
-                    }
-                    
-                    try:
-                        collection.insert_one(dataInsert)
+                        collection = db['chart_of_account'] # this is to create collection and save as table
+                        dataInsert = {
+                        'accountNum': accountNum,
+                        'accountTitle': accountTitle,
+                        'bsClass': bsClass,
+                        'user': USERNAME.get(),
+                        'created':datetime.now()
                         
-                    except Exception as ex:
-                        messagebox.showerror("Error", f"Error due to :{str(ex)}")    
-                    
-    messagebox.showinfo('JRS', 'Data has been exported and save')
-   
-        
+                        }
+                        
+                        try:
+                            collection.insert_one(dataInsert)
+                            messagebox.showinfo('JRS', 'Data has been exported and save')
+                            
+                        except Exception as ex:
+                            messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+            
 
 def import_journal_entry():
     """
