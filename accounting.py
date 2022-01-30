@@ -311,25 +311,31 @@ def autoIncrement_journal_manual_ref():
     dataSearch = db['journal_entry']
     agg_result = dataSearch.find().sort('ref',-1).limit(1)
 
+    a = ""
     for x in agg_result :
         a = x['ref']
-        current_year =  datetime.today().year
-        if a is not None:
-            reference_manual = a 
-            res = re.sub(r'[0-9]+$',
-                    lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
-                    reference_manual)
 
-            reference_manual_entry.delete(0, END)
-            reference_manual_entry.insert(0, (res))
-            
+
+        # current_year =  datetime.today().year
+    if a =="":
+        test_str = 'GJ000'
+        res = test_str
+
+        reference_manual_entry.delete(0, END)
+        reference_manual_entry.insert(0, (res))
         
-        else:
-            test_str = 'ENTRY-000'
-            res = test_str
+        
+    
+    else:
+        
 
-            reference_manual_entry.delete(0, END)
-            reference_manual_entry.insert(0, (res))
+        reference_manual = a 
+        res = re.sub(r'[0-9]+$',
+                lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
+                reference_manual)
+
+        reference_manual_entry.delete(0, END)
+        reference_manual_entry.insert(0, (res))
 def auto_account_num(e):
     """
     this function
