@@ -95,7 +95,401 @@ def clearFrame():
     # if you want to hide the empty panel then
     MidViewForm9.pack_forget()
     
+
+
+#======================================Customer Frame==========================================================
+def updated_customer():
+    """
+    This function is for 
+    updating journal entry
+    """
+    dataSearch = db['customer_db']
+    query = {'_id': ObjectId(transID_entry.get())}
+
+    result = tkMessageBox.askquestion('JRS','Are you sure you want to Update?',icon="warning")
+    if result == 'yes':
+      
+        try:
+            newValue = { "$set": { "customerID": customerID_entry.get(),
+                                 "customerName": customerName_entry.get(), 
+                                 "customer_address": customer_address_entry.get('1.0', 'end-1c'),
+                                 "customer_tin": vat_registrationNum_entry.get(),
+                                 "vat_class": tax_class_entry.get(),
+                                 "customer_email": customer_email_entry.get(),
+                                  "contactNumber": customer_contactNum_entry.get(), }           
+                                    }
+            dataSearch.update_many(query, newValue)
+            messagebox.showinfo('JRS', 'Data has been updated')
+            customer_list_treeview()
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")
+            print(ex)
+
+
+def delete_customer():
+    """
+    this function is for
+    deleting journal entry
+    """
+    dataSearch = db['customer_db']
+    query = {'_id': ObjectId(transID_entry.get())}
+    result = tkMessageBox.askquestion('JRS','Are you sure you want to Delete?',icon="warning")
+    if result == 'yes':
+        x = dataSearch.delete_one(query)
+        messagebox.showinfo('JRS', 'Selected Record has been deleted')
+        customer_list_treeview()
+
+def autoIncrement_CustomerID():
+    """
+    This function is for
+    autoincrement Customer ID
+    for reference in
+    journala Entry
+    """
+    dataSearch = db['customer_db']
+    agg_result = dataSearch.find().sort('customerID',-1).limit(1)
+
+    a = ""
+    for x in agg_result :
+        a = x['customerID']
+
+
+        # current_year =  datetime.today().year
+    if a =="":
+        test_str = 'ID-000'
+        res = test_str
+
+        customerID_entry.delete(0, END)
+        customerID_entry.insert(0, (res))
+        
+    else:
+    
+        reference_manual = a 
+        res = re.sub(r'[0-9]+$',
+                lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
+                reference_manual)
+
+        customerID_entry.delete(0, END)
+        customerID_entry.insert(0, (res))
+
+
+def select_record_customerTreeview():
+    """
+    This function is for
+    selection of  treeview
+    """
+    customerName_entry.delete(0, END)
+    customer_address_entry.delete('1.0', END)
+    customer_email_entry.delete(0, END)
+    vat_registrationNum_entry.delete(0, END)
+    tax_class_entry.delete(0, END)
+    transID_entry.delete(0, END)
+    customerID_entry.delete(0, END)
+    customer_contactNum_entry.delete(0, END)
+    
+
+    selected = customer_tree_view.focus()
+    values = customer_tree_view.item(selected)
+    selectedItems = values['values']
+    
+
+
+    dataSearch = db['customer_db']
+    query = {'_id': ObjectId(selectedItems[0])}
+    try:
+       
+        
+        for x in dataSearch.find(query):
+            
+            id_num = x['_id']
+            customerName = x['customerName']
+            customerID = x['customerID']
+            customer_address = x['customer_address']
+            customer_email = x['customer_email']
+            vat_registrationNum = x['customer_tin']
+            tax_class = x['vat_class']
+            customer_contactNum = x['contactNumber']
+            
+            
+            customerID_entry.insert(0, customerID)
+            customerName_entry.insert(0, customerName)
+            customer_address_entry.insert('1.0', customer_address)
+            customer_email_entry.insert(0, customer_email)
+            vat_registrationNum_entry.insert(0, vat_registrationNum)
+            tax_class_entry.insert(0, tax_class)
+            transID_entry.insert(0, id_num)
+            customer_contactNum_entry.insert(0, customer_contactNum)
+           
+
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")
+def customer_list_treeview():
+    
+    """
+    this function is for
+    button to display the list
+    of income Statement as per query
+    """
+    
+    customer_tree_view.delete(*customer_tree_view.get_children())
+    return customerList_Treeview()
+
+def customerList_Treeview():
+    """
+    this function is for 
+    displaying customer List
+    """
+    dataSearch = db['customer_db']
+    # query = {'customerID':customerID_entry.get() }
+    try:
+        
+        for x in dataSearch.find():
+            transID = x['_id']
+            customerID = x['customerID']
+            customerName = x['customerName']
+            customer_address = x['customer_address']
+            customer_email = x['customer_email']
+            vat_registrationNum = x['customer_tin']
+            tax_class = x['vat_class']
+           
+            
+           
+            
+            customer_tree_view.insert('', 'end', values=(transID,customerID,customerName,customer_address,
+                                customer_email,vat_registrationNum, tax_class ))
+
+            
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+def insert_customerFrame():
+    """
+    This function is for
+    inserting customer
+    """
+    collection = db['customer_db'] # this is to create collection and save as table
+    dataInsert = {
+    
+    'customerID': customerID_entry.get(),
+    'customerName': customerName_entry.get(),
+    'customer_address': customer_address_entry.get('1.0', 'end-1c'),
+    'customer_email': customer_email_entry.get(),
+    'contactNumber': customer_contactNum_entry.get(),
+    'customer_tin': vat_registrationNum_entry.get(),
+    'vat_class': tax_class_entry.get(),
+    
+    'user': USERNAME.get(),
+    'created':datetime.now()
+    
+    }
+
+    
+    
+    try:
+        collection.insert_one(dataInsert)
+
+        customerID_entry.delete(0, END)
+        customerName_entry.delete(0, END)
+        customer_address_entry.delete('1.0', END)
+        customer_email_entry.delete(0, END)
+        vat_registrationNum_entry.delete(0, END)
+        tax_class_entry.delete(0, END)
+        messagebox.showinfo('JRS', 'Data has been exported and save')
+        
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+                   
+    
+    customer_list_treeview()
+
+
+
+def insert_customer_frame():
+    """
+    This function si for
+    customer frame
+    """
+
+    clearFrame()
+
+    global insert_customer_frame
+    insert_customer_frame = Frame(MidViewForm9, width=1120, height=575, bd=2, bg='gray', relief=SOLID)
+    insert_customer_frame.place(x=160, y=8)
+
+    customerID_label = Label(insert_customer_frame, text='Customer ID:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    customerID_label.place(x=10, y=10)
+
+    global customerID_entry
+    customerID_entry = Entry(insert_customer_frame, width=20, font=('Arial', 10), justify='right')
+    customerID_entry.place(x=170, y=10)
+
+
+    customerName_label = Label(insert_customer_frame, text='Customer Name:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    customerName_label.place(x=10, y=35)
+
+    global customerName_entry
+    customerName_entry = Entry(insert_customer_frame, width=20, font=('Arial', 10), justify='right')
+    customerName_entry.place(x=170, y=35)
+
+
+    customer_adress_lbl = Label(insert_customer_frame, text='Customer Address:', width=14, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    customer_adress_lbl.place(x=10, y=65)
+
+    global customer_address_entry
+    customer_address_entry = scrolledtext.ScrolledText(insert_customer_frame,
+                                                          wrap=tk.WORD,
+                                                          width=23,
+                                                          height=3,
+                                                          font=("Arial",
+                                                                10))
+    customer_address_entry.place(x=170, y=65)
+
+
+    customer_email_label = Label(insert_customer_frame, text='Customer Email:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    customer_email_label.place(x=10, y=140)
+
+    global customer_email_entry
+    customer_email_entry = Entry(insert_customer_frame, width=20, font=('Arial', 10), justify='right')
+    customer_email_entry.place(x=170, y=140)
+
+    vat_registrationNum_label = Label(insert_customer_frame, text='Customer TIN:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    vat_registrationNum_label.place(x=10, y=170)
+
+    global vat_registrationNum_entry
+    vat_registrationNum_entry = Entry(insert_customer_frame, width=20, font=('Arial', 10), justify='right')
+    vat_registrationNum_entry.place(x=170, y=170)
+
+    customer_contactNum_label = Label(insert_customer_frame, text='Customer Number:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    customer_contactNum_label.place(x=10, y=200)
+
+    global customer_contactNum_entry
+    customer_contactNum_entry = Entry(insert_customer_frame, width=20, font=('Arial', 10), justify='right')
+    customer_contactNum_entry.place(x=170, y=200)
+
+
+    tax_class_label = Label(insert_customer_frame, text='Tax Class:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    tax_class_label.place(x=10, y=230)
+
+    global tax_class_entry
+    
+    tax_class_entry = ttk.Combobox(insert_customer_frame, width=14)
+    tax_class_entry['values'] = ("Vat", "Non-Vat")
+    tax_class_entry.place(x=170, y=230)
+
+    transID_label = Label(insert_customer_frame, text='Trans ID:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    transID_label.place(x=10, y=257)
+
+    global transID_entry
+    
+    transID_entry = Entry(insert_customer_frame, width=20, font=('Arial', 10), justify='right')
+    transID_entry.place(x=170, y=257)
+
+
+    btn_addcustID_entry = Button(insert_customer_frame, text='Customer ID', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=autoIncrement_CustomerID)
+    btn_addcustID_entry.place(x=670, y=35)
+
+    btn_insert_customer_entry = Button(insert_customer_frame, text='Insert Customer', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=insert_customerFrame)
+    btn_insert_customer_entry.place(x=670, y=70)
+
+    btn_selected = Button(insert_customer_frame, text='Selected', bd=2, bg='khaki', fg='black',
+                              font=('arial', 10), width=14, height=1, command=select_record_customerTreeview
+                               )
+    btn_selected.place(x=670, y=105)
+
+    btn_update_entry = Button(insert_customer_frame, text='Update', bd=2, bg='gray', fg='yellow',
+                              font=('arial', 10), width=14, height=1,
+                               command=updated_customer)
+    btn_update_entry.place(x=670, y=140)
+
+    btn_selected_delete = Button(insert_customer_frame, text='Delete', bd=2, bg='red', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=delete_customer)
+    btn_selected_delete.place(x=670, y=175)
+
+
+    btn_search_ref = Button(insert_customer_frame, text='All Customer', bd=2, bg='white', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=customer_list_treeview)
+    btn_search_ref.place(x=815, y=35)
+
+    
+    # this is for treeview for customer frame
+    customer_tree_view_Form = Frame(insert_customer_frame, width=500, height=10)
+    customer_tree_view_Form.place(x=10, y=280)
+
+    style = ttk.Style(insert_customer_frame)
+    style.theme_use("clam")
+    style.configure("Treeview",
+                    background="black",
+                    foreground="white",
+                    rowheight=15,
+                    fieldbackground="yellow")
+   
+    
+
+    
+    
+    global customer_tree_view
+    scrollbarx = Scrollbar(customer_tree_view_Form, orient=HORIZONTAL)
+    scrollbary = Scrollbar(customer_tree_view_Form, orient=VERTICAL)
+    
+    customer_tree_view = ttk.Treeview(customer_tree_view_Form,
+                                             columns=('TRANS-ID','ID','CUSTOMER', "CUST-ADD","CUS-EMAIL",
+                                               "TIN",
+                                              "TAX-CLASS"),
+                                             selectmode="extended", height=12, yscrollcommand=scrollbary.set,
+                                             xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=customer_tree_view.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=customer_tree_view.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    customer_tree_view.heading('TRANS-ID', text="Trans-ID", anchor=CENTER)
+    customer_tree_view.heading('ID', text="ID", anchor=CENTER)
+    customer_tree_view.heading('CUSTOMER', text="NAME", anchor=CENTER)
+    customer_tree_view.heading('CUST-ADD', text="Cus-Address", anchor=CENTER)
+    customer_tree_view.heading('CUS-EMAIL', text="Email", anchor=CENTER)
+    customer_tree_view.heading('TIN', text="Tin", anchor=CENTER)
+    customer_tree_view.heading('TAX-CLASS', text="Tax Class", anchor=CENTER)
+    
+
+
+    customer_tree_view.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
+    customer_tree_view.column('#1', stretch=NO, minwidth=0, width=150, anchor='e')
+    customer_tree_view.column('#2', stretch=NO, minwidth=0, width=150, anchor='e')
+    customer_tree_view.column('#3', stretch=NO, minwidth=0, width=150, anchor='e')
+    customer_tree_view.column('#4', stretch=NO, minwidth=0, width=150, anchor='e')
+    customer_tree_view.column('#5', stretch=NO, minwidth=0, width=150, anchor='e')
+    customer_tree_view.column('#6', stretch=NO, minwidth=0, width=150, anchor='e')
+   
+   
+
+    customer_tree_view.pack()
+
+
+    
+    
 #=====================================Accounting Frame==============================================================
+
 def delete_journalEntry():
     """
     this function is for
@@ -1105,38 +1499,41 @@ def importChartofAccount():
     for x in agg_result:
         a = x['accountNum']
 
-        with open("chartofaccount.csv",) as stocks:
-                r_csv = csv.reader(stocks,delimiter=',')
-                accountNum = ""
-                for row in r_csv:
+    with open("chartofaccount.csv",) as stocks:
+            r_csv = csv.reader(stocks,delimiter=',')
+            accountNum = ""
+            for row in r_csv:
 
-                    accountNum = row[0]
-                    accountTitle = row[1]
-                    bsClass = row[2]
-                    
+                accountNum = row[0]
+                accountTitle = row[1]
+                bsClass = row[2]
                 
+            
 
-                    if a == accountNum:
-                        messagebox.showinfo('JRS',f'Account Number {accountNum} already taken')
+                if a == accountNum:
+                    messagebox.showinfo('JRS',f'Account Number {accountNum} already taken')
 
-                    else:
+                
+                else:
+                
+                    collection = db['chart_of_account'] # this is to create collection and save as table
+                    dataInsert = {
+                    'accountNum': accountNum,
+                    'accountTitle': accountTitle,
+                    'bsClass': bsClass,
+                    'user': USERNAME.get(),
+                    'created':datetime.now()
                     
-                        collection = db['chart_of_account'] # this is to create collection and save as table
-                        dataInsert = {
-                        'accountNum': accountNum,
-                        'accountTitle': accountTitle,
-                        'bsClass': bsClass,
-                        'user': USERNAME.get(),
-                        'created':datetime.now()
-                        
-                        }
-                        
-                        try:
+                    }
+                    
+                    try:
+                        result = tkMessageBox.askquestion('JRS System', 'you want to save data', icon="warning")
+                        if result == 'yes':
                             collection.insert_one(dataInsert)
                             messagebox.showinfo('JRS', 'Data has been exported and save')
-                            
-                        except Exception as ex:
-                            messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+                        
+                    except Exception as ex:
+                        messagebox.showerror("Error", f"Error due to :{str(ex)}")    
             
 
 def import_journal_entry():
@@ -1734,12 +2131,14 @@ def dashboard():
     filemenu3.add_command(label="Payroll",command=payroll_transactions)
    
     filemenu4.add_command(label="Accounting Module", command=accounting_frame)
+    filemenu4.add_command(label="Insert Customer", command=insert_customer_frame)
     filemenu6.add_command(label="Equipment Module")
     filemenu5.add_command(label="Reports Module")
     menubar.add_cascade(label="Account", menu=filemenu)
     menubar.add_cascade(label="Inventory", menu=filemenu2)
     menubar.add_cascade(label="Payroll Transactions", menu=filemenu3)
     menubar.add_cascade(label="Accounting Transaction", menu=filemenu4)
+    
     menubar.add_cascade(label="Equipment", menu=filemenu6)
     menubar.add_cascade(label="Reports", menu=filemenu5)
 
