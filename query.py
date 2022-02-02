@@ -2026,7 +2026,7 @@ def tin_Query():
 
 
 
-tin_Query()
+# tin_Query()
 # searchPayroll()
 # deleteCut_offPeriod() 
 # employee_salaryQuery()
@@ -2055,7 +2055,7 @@ tin_Query()
 # equipment_registry()
 # mwe_selection()
 # test_on()
-# selection()
+selection()
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()

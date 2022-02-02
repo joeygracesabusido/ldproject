@@ -94,7 +94,711 @@ def clearFrame():
     # this will clear frame and frame will be empty
     # if you want to hide the empty panel then
     MidViewForm9.pack_forget()
+#======================================Account Payable Frame===================================================
+def supplier_list():
+    """
+    this function is for 
+    the displaying chart of 
+    account to dropdown menu
+    or combo box
+    """  
+    dataSearch = db['supplier_db'] 
+    # agg_result = dataSearch.find()
+    agg_result = dataSearch.find().sort('supplierName', pymongo.ASCENDING)
+
+    data = []
+    for x in agg_result:
+        data.append(x['supplierName'])
+    return data
+
+
+def autoIncrement_accountsPayable_ref():
+    """
+    This function is for
+    autoincrement Number
+    for reference in
+    Account Payable
+    """
+
+
+    dataSearch = db['journal_entry']
+    agg_result = dataSearch.find({'ref': {"$regex": "^APV"}}).sort('ref',-1).limit(1)
+
+    a = ""
+    for x in agg_result :
+        a = x['ref']
+
+
+        # current_year =  datetime.today().year
+    if a =="":
+        test_str = 'APV-000'
+        res = test_str
+
+        reference_manual_entry.delete(0, END)
+        reference_manual_entry.insert(0, (res))
+        
+        
     
+    else:
+        
+
+        reference_manual = a 
+        res = re.sub(r'[0-9]+$',
+                lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
+                reference_manual)
+
+        reference_manual_entry.delete(0, END)
+        reference_manual_entry.insert(0, (res))
+
+def accountPayble_insert_frame():
+    """
+    This function is
+    for Account Payable Voucher
+    """
+    clearFrame()
+
+    global accountPayable_frame
+    accountPayable_frame = Frame(MidViewForm9, width=1120, height=575, bd=2, bg='gray', relief=SOLID)
+    accountPayable_frame.place(x=160, y=8)
+   
+    entry_date_label = Label(accountPayable_frame, text='Date:', width=14, height=1, bg='yellow', fg='black',
+                          font=('Arial', 10), anchor='e')
+    entry_date_label.place(x=10, y=35)
+
+    global journalEntryInsert_datefrom
+    journalEntryInsert_datefrom = DateEntry(accountPayable_frame, width=15, background='darkblue',
+                                  date_pattern='MM/dd/yyyy',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    journalEntryInsert_datefrom.place(x=170, y=35)
+    journalEntryInsert_datefrom.configure(justify='center')
+
+
+    entry_date_label = Label(accountPayable_frame, text='Due Date:', width=14, height=1, bg='yellow', fg='black',
+                          font=('Arial', 10), anchor='e')
+    entry_date_label.place(x=290, y=35)
+
+    global journalEntryInsert_Duedate
+    journalEntryInsert_Duedate = DateEntry(accountPayable_frame, width=15, background='darkblue',
+                                  date_pattern='MM/dd/yyyy',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    journalEntryInsert_Duedate.place(x=430, y=35)
+    journalEntryInsert_Duedate.configure(justify='center')
+    
+   
+
+    journal_label = Label(accountPayable_frame, text='Journal:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    journal_label.place(x=10, y=70)
+
+    global journal_manual
+    
+    journal_manual = ttk.Combobox(accountPayable_frame, width=14)
+    journal_manual['values'] = ("Payments", "Receipts", "Sales", "Purchases",'General')
+    journal_manual.place(x=170, y=70)
+
+    supplier_label = Label(accountPayable_frame, text='Supplier:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    supplier_label.place(x=290, y=70)
+
+    # global supplier_apv_entry
+    # supplier_apv_entry = Entry(accountPayable_frame, width=25, font=('Arial', 10), justify='right')
+    # supplier_apv_entry.place(x=430, y=70)
+    global supplier_apv_entry
+    supplier_apv_entry = ttk.Combobox(accountPayable_frame, width=35)
+    supplier_apv_entry['values'] = supplier_list()
+    supplier_apv_entry.place(x=430, y=70)
+    # supplier_apv_entry.bind("<<ComboboxSelected>>", auto_account_num)
+
+    reference_label = Label(accountPayable_frame, text='reference:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    reference_label.place(x=10, y=105)
+
+    global reference_manual_entry
+    reference_manual_entry = Entry(accountPayable_frame, width=12, font=('Arial', 10), justify='right')
+    reference_manual_entry.place(x=170, y=105)
+
+    
+    journal_memo_lbl = Label(accountPayable_frame, text='Journal Memo:', width=14, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    journal_memo_lbl.place(x=10, y=140)
+
+    global journal_memo_entry
+    journal_memo_entry = scrolledtext.ScrolledText(accountPayable_frame,
+                                                          wrap=tk.WORD,
+                                                          width=23,
+                                                          height=3,
+                                                          font=("Arial",
+                                                                10))
+    journal_memo_entry.place(x=170, y=140)
+
+
+    account_number_lbl = Label(accountPayable_frame, text='Acct Number:', width=10, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    account_number_lbl.place(x=10, y=200)
+
+    global account_number_entry
+    account_number_entry = Entry(accountPayable_frame, width=12, font=('Arial', 10), justify='right')
+    account_number_entry.place(x=10, y=235)
+
+    account_title_lbl = Label(accountPayable_frame, text='Acct Title:', width=32, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='c')
+    account_title_lbl.place(x=110, y=200)
+
+    global chart_of_account_manual
+    chart_of_account_manual = ttk.Combobox(accountPayable_frame, width=39)
+    chart_of_account_manual['values'] = chart_of_account_list()
+    chart_of_account_manual.place(x=110, y=235)
+    chart_of_account_manual.bind("<<ComboboxSelected>>", auto_account_num)
+
+
+
+    debitManual_label = Label(accountPayable_frame, text='Debit:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    debitManual_label.place(x=390, y=200)
+
+    global debit_manual_entry
+    debit_manual_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    debit_manual_entry.place(x=390, y=235)
+
+    creditManual_label = Label(accountPayable_frame, text='Credit:', 
+                                            width=14, height=1, bg='yellowgreen', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    creditManual_label.place(x=520, y=200)
+
+    global credit_manual_entry
+    credit_manual_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    credit_manual_entry.place(x=520, y=235)
+
+    bs_class_label = Label(accountPayable_frame, text='BS Class:', 
+                                            width=14, height=1, bg='yellowgreen', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    bs_class_label.place(x=650, y=200)
+
+    global bs_class_entry
+    bs_class_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    bs_class_entry.place(x=650, y=235)
+
+
+    selected_label = Label(accountPayable_frame, text='Transaction ID:', 
+                                            width=14, height=1, bg='yellowgreen', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    selected_label.place(x=800, y=235)
+
+    global Selected_ID_entry
+    Selected_ID_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    Selected_ID_entry.place(x=920, y=235)
+
+
+    grand_total_label = Label(accountPayable_frame, text='TOTAL', 
+                                            width=14, height=1, bg='yellowgreen', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    grand_total_label.place(x=650, y=490)
+
+   
+    
+    global totalDebit_manual_entry
+    totalDebit_manual_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    totalDebit_manual_entry.place(x=880, y=490)
+
+
+   
+    
+    global totalCredit_manual_entry
+    totalCredit_manual_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    totalCredit_manual_entry.place(x=1000, y=490)
+    
+    
+    
+    btn_batch_entry = Button(accountPayable_frame, text='Add Batch Entry', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=autoIncrement_accountsPayable_ref)
+    btn_batch_entry.place(x=670, y=35)
+
+    btn_JournalManual_entry = Button(accountPayable_frame, text='Insert Entry', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=insert_journalEntry_manual)
+    btn_JournalManual_entry.place(x=670, y=70)
+
+    btn_selected = Button(accountPayable_frame, text='Selected', bd=2, bg='khaki', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=select_record_treeview)
+    btn_selected.place(x=670, y=105)
+
+    btn_update_entry = Button(accountPayable_frame, text='Update', bd=2, bg='gray', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=updated_journalEntry)
+    btn_update_entry.place(x=670, y=140)
+
+    btn_selected_delete = Button(accountPayable_frame, text='Delete', bd=2, bg='red', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=delete_journalEntry)
+    btn_selected_delete.place(x=670, y=175)
+
+
+    btn_search_ref = Button(accountPayable_frame, text='Search Ref', bd=2, bg='white', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=journalEntryManual_list_treeview)
+    btn_search_ref.place(x=815, y=35)
+
+
+    # this is for treeview for payroll computation
+    journaEntrymanual_view_Form = Frame(accountPayable_frame, width=500, height=10)
+    journaEntrymanual_view_Form.place(x=10, y=280)
+
+    style = ttk.Style(accountPayable_frame)
+    style.theme_use("clam")
+    style.configure("Treeview",
+                    background="black",
+                    foreground="white",
+                    rowheight=15,
+                    fieldbackground="yellow")
+   
+    
+    
+    global journalEntryManual_treeview
+    scrollbarx = Scrollbar(journaEntrymanual_view_Form, orient=HORIZONTAL)
+    scrollbary = Scrollbar(journaEntrymanual_view_Form, orient=VERTICAL)
+    
+    journalEntryManual_treeview = ttk.Treeview(journaEntrymanual_view_Form,
+                                             columns=('ID','DATE', "JOURNAL","REF",
+                                               "DESCRIPTION",
+                                              "ACCOUNT",'ACCOUNTTITLE','DEBIT', 'CREDIT'),
+                                             selectmode="extended", height=8, yscrollcommand=scrollbary.set,
+                                             xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=journalEntryManual_treeview.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=journalEntryManual_treeview.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    journalEntryManual_treeview.heading('ID', text="ID", anchor=CENTER)
+    journalEntryManual_treeview.heading('DATE', text="Date", anchor=CENTER)
+    journalEntryManual_treeview.heading('JOURNAL', text="Journal", anchor=CENTER)
+    journalEntryManual_treeview.heading('REF', text="Ref", anchor=CENTER)
+    journalEntryManual_treeview.heading('DESCRIPTION', text="Description", anchor=CENTER)
+    journalEntryManual_treeview.heading('ACCOUNT', text="Account #", anchor=CENTER)
+    journalEntryManual_treeview.heading('ACCOUNTTITLE', text="Acct Title", anchor=CENTER)
+    journalEntryManual_treeview.heading('DEBIT', text="Debit", anchor=CENTER)
+    journalEntryManual_treeview.heading('CREDIT', text="Credit", anchor=CENTER)
+
+
+    journalEntryManual_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
+    journalEntryManual_treeview.column('#1', stretch=NO, minwidth=0, width=50, anchor='e')
+    journalEntryManual_treeview.column('#2', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_treeview.column('#3', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_treeview.column('#4', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_treeview.column('#5', stretch=NO, minwidth=0, width=220, anchor='e')
+    journalEntryManual_treeview.column('#6', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_treeview.column('#7', stretch=NO, minwidth=0, width=220, anchor='e')
+    journalEntryManual_treeview.column('#8', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_treeview.column('#9', stretch=NO, minwidth=0, width=100, anchor='e')
+   
+   
+
+    journalEntryManual_treeview.pack()
+    
+
+
+#======================================Supplier Frame==========================================================
+def updated_supplier():
+    """
+    This function is for 
+    updating journal entry
+    """
+    dataSearch = db['supplier_db']
+    query = {'_id': ObjectId(supplier_transID_entry.get())}
+
+    result = tkMessageBox.askquestion('JRS','Are you sure you want to Update?',icon="warning")
+    if result == 'yes':
+      
+        try:
+
+            newValue = { "$set": { "supplierID": supplierID_entry.get(),
+                                 "supplierName": supplierName_entry.get(), 
+                                 "supplier_address": supplier_address_entry.get('1.0', 'end-1c'),
+                                 "supplier_tin": supplier_vat_registrationNum_entry.get(),
+                                 "supplier_email": supplier_email_entry.get(),
+                                 "supplier_vat_class": supplier_tax_class_entry.get(),
+                                  "contactNumber": supplier_contactNum_entry.get(), }           
+                                    }
+            dataSearch.update_many(query, newValue)
+            messagebox.showinfo('JRS', 'Data has been updated')
+            supplier_list_treeview()
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")
+            print(ex)
+
+
+def delete_supplier():
+    """
+    this function is for
+    deleting journal entry
+    """
+    dataSearch = db['supplier_db']
+    query = {'_id': ObjectId(supplier_transID_entry.get())}
+    result = tkMessageBox.askquestion('JRS','Are you sure you want to Delete?',icon="warning")
+    if result == 'yes':
+        x = dataSearch.delete_one(query)
+        messagebox.showinfo('JRS', 'Selected Record has been deleted')
+        supplier_list_treeview()
+
+def autoIncrement_supplierID():
+    """
+    This function is for
+    autoincrement Customer ID
+    for reference in
+    journala Entry
+    """
+    dataSearch = db['supplier_db']
+    agg_result = dataSearch.find().sort('supplierID',-1).limit(1)
+
+    a = ""
+    for x in agg_result :
+        a = x['supplierID']
+
+
+        # current_year =  datetime.today().year
+    if a =="":
+        test_str = 'ID-000'
+        res = test_str
+
+        supplierID_entry.delete(0, END)
+        supplierID_entry.insert(0, (res))
+        
+    else:
+    
+        reference_manual = a 
+        res = re.sub(r'[0-9]+$',
+                lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
+                reference_manual)
+
+        supplierID_entry.delete(0, END)
+        supplierID_entry.insert(0, (res))
+
+
+def select_record_supplierTreeview():
+    """
+    This function is for
+    selection of  treeview
+    """
+
+    
+
+    supplierID_entry.delete(0, END)
+    supplier_address_entry.delete('1.0', END)
+    supplierName_entry.delete(0, END)
+    supplier_email_entry.delete(0, END)
+    supplier_contactNum_entry.delete(0, END)
+    supplier_vat_registrationNum_entry.delete(0, END)
+    supplier_tax_class_entry.delete(0, END)
+    supplier_transID_entry.delete(0, END)
+    
+
+    selected = supplier_tree_view.focus()
+    values = supplier_tree_view.item(selected)
+    selectedItems = values['values']
+    
+
+
+    dataSearch = db['supplier_db']
+    query = {'_id': ObjectId(selectedItems[0])}
+    try:
+       
+        
+        for x in dataSearch.find(query):
+            
+            id_num = x['_id']
+            supplierName = x['supplierName']
+            supplierID = x['supplierID']
+            supplier_address = x['supplier_address']
+            supplier_email = x['supplier_email']
+            supplier_vat_registrationNum = x['supplier_tin']
+            tax_class = x['supplier_vat_class']
+            customer_contactNum = x['contactNumber']
+
+            
+            
+            supplierID_entry.insert(0, supplierID)
+            supplierName_entry.insert(0, supplierName)
+            supplier_address_entry.insert('1.0', supplier_address)
+            supplier_email_entry.insert(0, supplier_email)
+            supplier_tax_class_entry.insert(0, tax_class)
+            supplier_vat_registrationNum_entry.insert(0, supplier_vat_registrationNum)
+            supplier_transID_entry.insert(0, id_num)
+            supplier_contactNum_entry.insert(0, customer_contactNum)
+           
+
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")
+def supplier_list_treeview():
+    
+    """
+    this function is for
+    button to display the list
+    of supplier
+    """
+    
+    supplier_tree_view.delete(*supplier_tree_view.get_children())
+    return supplierList_Treeview()
+
+def supplierList_Treeview():
+    """
+    this function is for 
+    displaying customer List
+    """
+    dataSearch = db['supplier_db']
+    # query = {'customerID':customerID_entry.get() }
+    try:
+        
+        for x in dataSearch.find():
+            transID = x['_id']
+            supplierID = x['supplierID']
+            supplierName = x['supplierName']
+            supplier_address = x['supplier_address']
+            supplier_email = x['supplier_email']
+            vat_registrationNum = x['supplier_tin']
+            supplier_tax_class = x['supplier_vat_class']
+           
+            
+           
+            
+            supplier_tree_view.insert('', 'end', values=(transID,supplierID,supplierName,supplier_address,
+                                supplier_email,vat_registrationNum, supplier_tax_class ))
+
+            
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+def insert_supplierFrame():
+    """
+    This function is for
+    inserting customer
+    """
+    collection = db['supplier_db'] # this is to create collection and save as table
+    dataInsert = {
+    
+    'supplierID': supplierID_entry.get(),
+    'supplierName': supplierName_entry.get(),
+    'supplier_address': supplier_address_entry.get('1.0', 'end-1c'),
+    'supplier_email': supplier_email_entry.get(),
+    'contactNumber': supplier_contactNum_entry.get(),
+    'supplier_tin': supplier_vat_registrationNum_entry.get(),
+    'supplier_vat_class': supplier_tax_class_entry.get(),
+    
+    'user': USERNAME.get(),
+    'created':datetime.now()
+    
+    }
+
+    
+    
+    try:
+        collection.insert_one(dataInsert)
+
+        supplierID_entry.delete(0, END)
+        supplierName_entry.delete(0, END)
+        supplier_address_entry.delete('1.0', END)
+        supplier_email_entry.delete(0, END)
+        supplier_contactNum_entry.delete(0, END)
+        supplier_vat_registrationNum_entry.delete(0, END)
+        supplier_tax_class_entry.delete(0, END)
+        supplier_transID_entry.delete(0, END)
+        messagebox.showinfo('JRS', 'Data has been exported and save')
+        
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+                   
+    
+    supplier_list_treeview()
+
+
+
+def insert_supplier_frame():
+    """
+    This function si for
+    customer frame
+    """
+
+    clearFrame()
+
+    global insert_supplier_frame
+    insert_supplier_frame = Frame(MidViewForm9, width=1120, height=575, bd=2, bg='gray', relief=SOLID)
+    insert_supplier_frame.place(x=160, y=8)
+
+    supplierID_label = Label(insert_supplier_frame, text='Supplier ID:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    supplierID_label.place(x=10, y=10)
+
+    global supplierID_entry
+    supplierID_entry = Entry(insert_supplier_frame, width=20, font=('Arial', 10), justify='right')
+    supplierID_entry.place(x=170, y=10)
+
+
+    supplierName_label = Label(insert_supplier_frame, text='Supplier Name:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    supplierName_label.place(x=10, y=35)
+
+    global supplierName_entry
+    supplierName_entry = Entry(insert_supplier_frame, width=20, font=('Arial', 10), justify='right')
+    supplierName_entry.place(x=170, y=35)
+
+
+    supplier_adress_lbl = Label(insert_supplier_frame, text='Supplier Address:', width=14, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    supplier_adress_lbl.place(x=10, y=65)
+
+    global supplier_address_entry
+    supplier_address_entry = scrolledtext.ScrolledText(insert_supplier_frame,
+                                                          wrap=tk.WORD,
+                                                          width=23,
+                                                          height=3,
+                                                          font=("Arial",
+                                                                10))
+    supplier_address_entry.place(x=170, y=65)
+
+
+    supplier_email_label = Label(insert_supplier_frame, text='Supplier Email:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    supplier_email_label.place(x=10, y=140)
+
+    global supplier_email_entry
+    supplier_email_entry = Entry(insert_supplier_frame, width=20, font=('Arial', 10), justify='right')
+    supplier_email_entry.place(x=170, y=140)
+
+    supplier_vat_registrationNum_label = Label(insert_supplier_frame, text='Supplier TIN:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    supplier_vat_registrationNum_label.place(x=10, y=170)
+
+    global supplier_vat_registrationNum_entry
+    supplier_vat_registrationNum_entry = Entry(insert_supplier_frame, width=20, font=('Arial', 10), justify='right')
+    supplier_vat_registrationNum_entry.place(x=170, y=170)
+
+    supplier_contactNum_label = Label(insert_supplier_frame, text='Supplier Number:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    supplier_contactNum_label.place(x=10, y=200)
+
+    global supplier_contactNum_entry
+    supplier_contactNum_entry = Entry(insert_supplier_frame, width=20, font=('Arial', 10), justify='right')
+    supplier_contactNum_entry.place(x=170, y=200)
+
+
+    tax_class_label = Label(insert_supplier_frame, text='Tax Class:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    tax_class_label.place(x=10, y=230)
+
+    global supplier_tax_class_entry
+    
+    supplier_tax_class_entry = ttk.Combobox(insert_supplier_frame, width=14)
+    supplier_tax_class_entry['values'] = ("Vat", "Non-Vat")
+    supplier_tax_class_entry.place(x=170, y=230)
+
+    transID_label = Label(insert_supplier_frame, text='Trans ID:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    transID_label.place(x=10, y=257)
+
+    global supplier_transID_entry
+    
+    supplier_transID_entry = Entry(insert_supplier_frame, width=20, font=('Arial', 10), justify='right')
+    supplier_transID_entry.place(x=170, y=257)
+
+
+    btn_addsuppID_entry = Button(insert_supplier_frame, text='Supplier ID', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=autoIncrement_supplierID)
+    btn_addsuppID_entry.place(x=670, y=35)
+
+    btn_insert_supplier_entry = Button(insert_supplier_frame, text='Insert Supplier', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=insert_supplierFrame)
+    btn_insert_supplier_entry.place(x=670, y=70)
+
+    btn_selected = Button(insert_supplier_frame, text='Selected', bd=2, bg='khaki', fg='black',
+                              font=('arial', 10), width=14, height=1, command=select_record_supplierTreeview
+                               )
+    btn_selected.place(x=670, y=105)
+
+    btn_update_entry = Button(insert_supplier_frame, text='Update', bd=2, bg='gray', fg='yellow',
+                              font=('arial', 10), width=14, height=1,
+                               command=updated_supplier)
+    btn_update_entry.place(x=670, y=140)
+
+    btn_selected_delete = Button(insert_supplier_frame, text='Delete', bd=2, bg='red', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=delete_supplier)
+    btn_selected_delete.place(x=670, y=175)
+
+
+    btn_search_ref = Button(insert_supplier_frame, text='All Supplier', bd=2, bg='white', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=supplier_list_treeview)
+    btn_search_ref.place(x=815, y=35)
+
+    
+    # this is for treeview for supplier frame
+    supplier_tree_view_Form = Frame(insert_supplier_frame, width=500, height=10)
+    supplier_tree_view_Form.place(x=10, y=280)
+
+    style = ttk.Style(insert_supplier_frame)
+    style.theme_use("clam")
+    style.configure("Treeview",
+                    background="black",
+                    foreground="white",
+                    rowheight=15,
+                    fieldbackground="yellow")
+   
+    
+
+    
+    
+    global supplier_tree_view
+    scrollbarx = Scrollbar(supplier_tree_view_Form, orient=HORIZONTAL)
+    scrollbary = Scrollbar(supplier_tree_view_Form, orient=VERTICAL)
+    
+    supplier_tree_view = ttk.Treeview(supplier_tree_view_Form,
+                                             columns=('TRANS-ID','ID','CUSTOMER', "CUST-ADD","CUS-EMAIL",
+                                               "TIN",
+                                              "TAX-CLASS"),
+                                             selectmode="extended", height=12, yscrollcommand=scrollbary.set,
+                                             xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=supplier_tree_view.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=supplier_tree_view.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    supplier_tree_view.heading('TRANS-ID', text="Trans-ID", anchor=CENTER)
+    supplier_tree_view.heading('ID', text="ID", anchor=CENTER)
+    supplier_tree_view.heading('CUSTOMER', text="NAME", anchor=CENTER)
+    supplier_tree_view.heading('CUST-ADD', text="Supp-Address", anchor=CENTER)
+    supplier_tree_view.heading('CUS-EMAIL', text="Email", anchor=CENTER)
+    supplier_tree_view.heading('TIN', text="Tin", anchor=CENTER)
+    supplier_tree_view.heading('TAX-CLASS', text="Tax Class", anchor=CENTER)
+    
+
+
+    supplier_tree_view.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
+    supplier_tree_view.column('#1', stretch=NO, minwidth=0, width=150, anchor='e')
+    supplier_tree_view.column('#2', stretch=NO, minwidth=0, width=150, anchor='e')
+    supplier_tree_view.column('#3', stretch=NO, minwidth=0, width=150, anchor='e')
+    supplier_tree_view.column('#4', stretch=NO, minwidth=0, width=150, anchor='e')
+    supplier_tree_view.column('#5', stretch=NO, minwidth=0, width=150, anchor='e')
+    supplier_tree_view.column('#6', stretch=NO, minwidth=0, width=150, anchor='e')
+   
+   
+
+    supplier_tree_view.pack()
+
 
 
 #======================================Customer Frame==========================================================
@@ -294,6 +998,9 @@ def insert_customerFrame():
         customer_email_entry.delete(0, END)
         vat_registrationNum_entry.delete(0, END)
         tax_class_entry.delete(0, END)
+        customer_contactNum_entry.delete(0, END)
+        transID_entry.delete(0, END)
+
         messagebox.showinfo('JRS', 'Data has been exported and save')
         
     except Exception as ex:
@@ -609,11 +1316,22 @@ def journalEntry_manual_list():
     """
     dataSearch = db['journal_entry']
     query = {'ref':reference_manual_entry.get() }
+
+    # query ==""
+    # if query == "":
+    #     messagebox.showinfo("Error","No Record found" )
+    # else:
     try:
         cnt = 0
         debit_amount_total = 0
         credit_amount_total= 0
+        a = ""
         for x in dataSearch.find(query):
+            a = x['ref']
+            
+        if a == "":
+                messagebox.showinfo("Error","No Record found" )
+        else:
             cnt+=1
             id_num = x['_id']
             date_entry = x['date_entry']
@@ -879,11 +1597,11 @@ def journal_entry_insert_frame():
     selected_label = Label(accounting_frame, text='Transaction ID:', 
                                             width=14, height=1, bg='yellowgreen', fg='black',
                                              font=('Arial', 10), anchor='c')
-    selected_label.place(x=700, y=235)
+    selected_label.place(x=800, y=235)
 
     global Selected_ID_entry
     Selected_ID_entry = Entry(accounting_frame, width=16, font=('Arial', 10), justify='right')
-    Selected_ID_entry.place(x=820, y=235)
+    Selected_ID_entry.place(x=920, y=235)
 
 
     grand_total_label = Label(accounting_frame, text='TOTAL', 
@@ -2132,6 +2850,8 @@ def dashboard():
    
     filemenu4.add_command(label="Accounting Module", command=accounting_frame)
     filemenu4.add_command(label="Insert Customer", command=insert_customer_frame)
+    filemenu4.add_command(label="Insert Supplier", command=insert_supplier_frame)
+    filemenu4.add_command(label="Account Payable", command=accountPayble_insert_frame)
     filemenu6.add_command(label="Equipment Module")
     filemenu5.add_command(label="Reports Module")
     menubar.add_cascade(label="Account", menu=filemenu)
