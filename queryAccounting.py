@@ -91,4 +91,83 @@ def test_lookup():
     # # test = df.head()
     # print(df)
 
-test_lookup()
+def testing_dictionary():
+    """
+    this function is for
+    testing dictionaries
+    """
+    collection = db['journal_entry']
+
+
+    answer = 'yes'
+    date_time_obj = ""
+
+    journal = ""
+    ref = ""
+    journalMemo =""
+    acountNumber = ""
+    accountTitle = ""
+    bsClass = ""
+    debit_amount = 0
+    credit_amount = 0
+    user = ''
+    data ={}
+    cnt =0 
+    while answer == 'yes':
+        cnt+=1
+        dateEntry =  input('Enter Date: ')
+        date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+
+        journal = input('Enter Journal Entry: ')
+        ref = input('Enter Ref: ')
+        journalMemo = input('Enter Journal Memo :')
+        acountNumber = input('Enter Account Number :')
+        accountTitle = input('Enter Account title: ')
+        bsClass = input('Enter BS Class: ')
+        debit_amount = float(input('Enter Debit Amount: '))
+        credit_amount = float(input('Enter Credit Amount: '))
+        user = 'joeysabusido'
+        answer = input("Would you like to add data yes/no?: ").lower()
+
+        data.update({len(data)+1:{
+            'date_entry': dateEntry,
+            'journal': journal,
+            'ref': ref,
+            'descriptions': journalMemo,
+            'acoount_number': acountNumber,
+            'account_disc': accountTitle,
+            'bsClass':bsClass,
+            'debit_amount': debit_amount,
+            'credit_amount': credit_amount,
+            'user': user,
+            'created':datetime.now()
+        }})
+    # print(data)
+   
+    for i in data:
+        print(i,data[i]['account_disc'])
+       
+        # dataInsert = {
+        # 'date_entry': data[i]['date_entry'],
+        # 'journal': data[i]['journal'],
+        # 'ref': data[i]['ref'],
+        # 'descriptions': data[i]['descriptions'],
+        # 'acoount_number':data[i]['acoount_number'],
+        # 'account_disc': data[i]['account_disc'],
+        # 'bsClass':data[i]['bsClass'],
+        # 'debit_amount': data[i]['debit_amount'],
+        # 'credit_amount': data[i]['credit_amount'],
+        # 'user': data[i]['user'],
+        # 'created':data[i]['created']
+        # }
+
+        # try:
+        #     collection.insert_one(dataInsert)
+
+            
+        
+        # except Exception as ex:
+        #     print("Error", f"Error due to :{str(ex)}") 
+
+testing_dictionary() 
+# test_lookup()

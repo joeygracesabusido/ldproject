@@ -95,6 +95,386 @@ def clearFrame():
     # if you want to hide the empty panel then
     MidViewForm9.pack_forget()
 #======================================Account Payable Frame===================================================
+def testing_dictionary2():
+    """
+    """
+    for i in data:
+        
+        print(i,data[i]['date_entry'])
+    
+
+def testing_dictionary():
+    """
+    this function is for
+    testing dictionaries
+    """
+    global data
+    collection = db['journal_entry']
+
+
+    answer = 'yes'
+    date_time_obj = ""
+
+    journal = ""
+    ref = ""
+    journalMemo =""
+    acountNumber = ""
+    accountTitle = ""
+    bsClass = ""
+    debit_amount = 0
+    credit_amount = 0
+    user = ''
+    data ={}
+    cnt =0 
+    # while answer == 'yes':
+
+    # collection = db['journal_entry'] # this is to create collection and save as table
+    # dateEntry =  journalEntryInsert_datefrom.get()
+    # date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+
+    # journal = journal_manual.get(),
+    # ref = reference_manual_entry.get(),
+    # journalMemo = journal_memo_entry.get('1.0', 'end-1c'),
+    # acountNumber = account_number_entry.get(),
+    # accountTitle = chart_of_account_manual.get(),
+    # bsClass = bs_class_entry.get(),
+    # debit_amount = float(debit_manual_entry.get())
+    # credit_amount = float(credit_manual_entry.get())
+    # user = USERNAME.get(),
+    # answer = tkMessageBox.askquestion('JRS','Are you sure you want to add?',icon="warning")
+
+    # while answer =='yes':
+    dateEntry =  journalEntryInsert_datefrom.get()
+    date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+
+    journal = journal_manual.get(),
+    ref = reference_manual_entry.get(),
+    journalMemo = journal_memo_entry.get('1.0', 'end-1c'),
+    acountNumber = account_number_entry.get(),
+    accountTitle = chart_of_account_manual.get(),
+    bsClass = bs_class_entry.get(),
+    debit_amount = float(debit_manual_entry.get())
+    credit_amount = float(credit_manual_entry.get())
+    user = USERNAME.get(),
+
+    answer = tkMessageBox.askquestion('JRS','Are you sure you want to add?',icon="warning")
+    
+    if answer =='yes':
+        add_entryFields1()
+        # dateEntry =  journalEntryInsert_datefrom.get()
+        # date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+
+        # journal = journal_manual.get(),
+        # ref = reference_manual_entry.get(),
+        # journalMemo = journal_memo_entry.get('1.0', 'end-1c'),
+        # acountNumber = account_number_entry.get(),
+        # accountTitle = chart_of_account_manual.get(),
+        # bsClass = bs_class_entry.get(),
+        # debit_amount = float(debit_manual_entry.get())
+        # credit_amount = float(credit_manual_entry.get())
+        # user = USERNAME.get(),
+    
+    else:
+        data.update({len(data)+1:{
+            'date_entry': date_time_obj,
+            'journal': journal,
+            'ref': ref,
+            'descriptions': journalMemo,
+            'acoount_number': acountNumber,
+            'account_disc': accountTitle,
+            'bsClass':bsClass,
+            'debit_amount': debit_amount,
+            'credit_amount': credit_amount,
+            'user': user,
+            'created':datetime.now()
+        }})
+
+
+    for i in data:
+    
+        print(i,data[i]['account_disc'])
+
+        # dataInsert = {
+        # 'date_entry': data[i]['date_entry'],
+        # 'journal': data[i]['journal'],
+        # 'ref': data[i]['ref'],
+        # 'descriptions': data[i]['descriptions'],
+        # 'acoount_number':data[i]['acoount_number'],
+        # 'account_disc': data[i]['account_disc'],``````````````````````````````````````````
+        # 'bsClass':data[i]['bsClass'],
+        # 'debit_amount': data[i]['debit_amount'],
+        # 'credit_amount': data[i]['credit_amount'],
+        # 'user': data[i]['user'],
+        # 'created':data[i]['created']
+        # }
+
+        # try:
+        #     collection.insert_one(dataInsert)
+
+            
+        
+        # except Exception as ex:
+        #     print("Error", f"Error due to :{str(ex)}") 
+
+def delete_journalEntry_apv():
+    """
+    this function is for
+    deleting journal entry
+    """
+    dataSearch = db['journal_entry']
+    query = {'_id': ObjectId(Selected_ID_entry.get())}
+    result = tkMessageBox.askquestion('JRS','Are you sure you want to Update?',icon="warning")
+    if result == 'yes':
+        x = dataSearch.delete_one(query)
+        messagebox.showinfo('JRS', 'Selected Record has been deleted')
+        journalEntryManual_list_treeview_apv()
+
+
+def updated_journalEntry_apv():
+    """
+    This function is for 
+    updating journal entry
+    """
+    dataSearch = db['journal_entry']
+    query = {'_id': ObjectId(Selected_ID_entry.get())}
+
+    result = tkMessageBox.askquestion('JRS','Are you sure you want to Update?',icon="warning")
+    if result == 'yes':
+        dateEntry =  journalEntryInsert_datefrom.get()
+        date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+        try:
+            newValue = { "$set": { "date_entry": date_time_obj,
+                                 "journal": journal_manual.get(), 
+                                 "ref": reference_manual_entry_apv.get(),
+                                 "descriptions": journal_memo_entry.get('1.0', 'end-1c'),
+                                 "acoount_number": account_number_entry.get(),
+                                     "account_disc": chart_of_account_manual.get(),
+                                     "debit_amount": float(debit_manual_entry.get()), 
+                                     "credit_amount": float(credit_manual_entry.get()),}           
+                                    }
+            dataSearch.update_many(query, newValue)
+            messagebox.showinfo('JRS', 'Data has been updated')
+            journalEntryManual_list_treeview_apv()
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+
+def select_record_treeview_apv():
+    """
+    this function is for
+    selecting record from
+    treeview
+    """
+    journalEntryInsert_datefrom.delete(0, END)
+    journal_manual.delete(0, END)
+    reference_manual_entry_apv.delete(0, END)
+    journal_memo_entry.delete('1.0', END)
+    account_number_entry.delete(0, END)
+    chart_of_account_manual.delete(0, END)
+    debit_manual_entry.delete(0, END)
+    credit_manual_entry.delete(0, END)
+    Selected_ID_entry.delete(0, END)
+
+    selected = journalEntryManual_treeview.focus()
+    values = journalEntryManual_treeview.item(selected)
+    selectedItems = values['values']
+    
+
+
+    dataSearch = db['journal_entry']
+    query = {'_id': ObjectId(selectedItems[0])}
+    try:
+       
+        
+        for x in dataSearch.find(query):
+            
+            id_num = x['_id']
+            date_entry = x['date_entry']
+            journal = x['journal']
+            ref = x['ref']
+            descriptions = x['descriptions']
+            account_number = x['acoount_number']
+            account_disc = x['account_disc']
+            debit_amount = x['debit_amount']
+            debit_amount2 = '{:,.2f}'.format(debit_amount)
+            credit_amount = x['credit_amount']
+            credit_amount2 = '{:,.2f}'.format(credit_amount)
+            
+            
+            journalEntryInsert_datefrom.insert(0, date_entry)
+            journal_manual.insert(0, journal)
+            reference_manual_entry_apv.insert(0, ref)
+            journal_memo_entry.insert('1.0', descriptions)
+            account_number_entry.insert(0, account_number)
+            chart_of_account_manual.insert(0, account_disc)
+            debit_manual_entry.insert(0, debit_amount)
+            credit_manual_entry.insert(0, credit_amount)
+            Selected_ID_entry.insert(0, id_num)
+            
+
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+    
+
+
+def journalEntryManual_list_treeview_apv():
+    
+    """
+    this function is for
+    button to display the list
+    of income Statement as per query
+    """
+    
+    journalEntryManual_apv_treeview.delete(*journalEntryManual_apv_treeview.get_children())
+    return journalEntry_manual_list_apv()
+def journalEntry_manual_list_apv():
+    """
+    This function is for manual
+    entry list
+    """
+    dataSearch = db['journal_entry']
+    query = {'ref':reference_manual_entry_apv.get() }
+
+    # query ==""
+    # if query == "":
+    #     messagebox.showinfo("Error","No Record found" )
+    # else:
+    try:
+        cnt = 0
+        debit_amount_total = 0
+        credit_amount_total= 0
+        a = ""
+        for x in dataSearch.find(query):
+            a = x['ref']
+            
+            if a == "":
+                    messagebox.showinfo("Error","No Record found" )
+            else:
+                cnt+=1
+                id_num = x['_id']
+                date_entry = x['date_entry']
+                journal = x['journal']
+                ref = x['ref']
+                descriptions = x['descriptions']
+                account_number = x['acoount_number']
+                account_disc = x['account_disc']
+                debit_amount = x['debit_amount']
+                debit_amount2 = '{:,.2f}'.format(debit_amount)
+                credit_amount = x['credit_amount']
+                credit_amount2 = '{:,.2f}'.format(credit_amount)
+                
+                debit_amount_total+=debit_amount
+                debit_amount_total2 = '{:,.2f}'.format(debit_amount_total)
+
+                credit_amount_total+=credit_amount
+                credit_amount_total2 = '{:,.2f}'.format(credit_amount_total)
+                
+                journalEntryManual_apv_treeview.insert('', 'end', values=(id_num,date_entry,journal,
+                                    ref,descriptions, account_number,account_disc,debit_amount2,
+                                    credit_amount2 ))
+
+                totalDebit_manual_entry.delete(0, END)
+                totalDebit_manual_entry.insert(0, (debit_amount_total2))
+
+
+                totalCredit_manual_entry.delete(0, END)
+                totalCredit_manual_entry.insert(0, (credit_amount_total2))
+
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+
+def add_entryFields1():
+    """
+    This function is to
+    add Entryfields and delete/edit/
+    """
+   
+    global account_number_entry
+    account_number_entry = Entry(accountPayable_frame, width=12, font=('Arial', 10), justify='right')
+    account_number_entry.place(x=10, y=260)
+
+
+    global chart_of_account_manual
+    chart_of_account_manual = ttk.Combobox(accountPayable_frame, width=39)
+    chart_of_account_manual['values'] = chart_of_account_list()
+    chart_of_account_manual.place(x=110, y=260)
+    chart_of_account_manual.bind("<<ComboboxSelected>>", auto_account_num)
+
+
+    global debit_manual_entry
+    debit_manual_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    debit_manual_entry.place(x=390, y=260)
+
+   
+
+    global credit_manual_entry
+    credit_manual_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    credit_manual_entry.place(x=520, y=260)
+
+    global bs_class_entry
+    bs_class_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    bs_class_entry.place(x=650, y=260)
+
+    btn_add_entry = Button(accountPayable_frame, text='Add', bd=2, bg='blue', fg='white',
+                              font=('arial', 10), width=14, height=1
+                              )
+    btn_add_entry.place(x=815, y=260)
+
+def insert_journalEntry_manual_apv():
+    """
+    this function is for inserting
+    record to journal_entry
+    """
+
+    debit_entry = float(debit_manual_entry.get())
+    
+    
+    credit_entry = float(credit_manual_entry.get())
+    
+
+    dateEntry =  journalEntryInsert_datefrom.get()
+    date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+    
+    
+    collection = db['journal_entry'] # this is to create collection and save as table
+    dataInsert = {
+    # 'date_entry': journalEntryInsert_datefrom.get(),
+    'date_entry': date_time_obj,
+    'journal': journal_manual.get(),
+    'ref': reference_manual_entry_apv.get(),
+    'descriptions': journal_memo_entry.get('1.0', 'end-1c'),
+    'acoount_number': account_number_entry.get(),
+    'account_disc': chart_of_account_manual.get(),
+    'bsClass': bs_class_entry.get(),
+    'debit_amount': debit_entry,
+    'credit_amount': credit_entry,
+    'user': USERNAME.get(),
+    'created':datetime.now()
+    
+    }
+
+    
+    
+    try:
+        collection.insert_one(dataInsert)
+
+        account_number_entry.delete(0, END)
+        chart_of_account_manual.delete(0, END)
+        debit_manual_entry.delete(0, END)
+        credit_manual_entry.delete(0, END)
+        
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+                   
+    messagebox.showinfo('JRS', 'Data has been exported and save')
+    journalEntryManual_list_treeview_apv()
+
+
+
+
+    
 def supplier_list():
     """
     this function is for 
@@ -134,8 +514,8 @@ def autoIncrement_accountsPayable_ref():
         test_str = 'APV-000'
         res = test_str
 
-        reference_manual_entry.delete(0, END)
-        reference_manual_entry.insert(0, (res))
+        reference_manual_entry_apv.delete(0, END)
+        reference_manual_entry_apv.insert(0, (res))
         
         
     
@@ -147,8 +527,8 @@ def autoIncrement_accountsPayable_ref():
                 lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
                 reference_manual)
 
-        reference_manual_entry.delete(0, END)
-        reference_manual_entry.insert(0, (res))
+        reference_manual_entry_apv.delete(0, END)
+        reference_manual_entry_apv.insert(0, (res))
 
 def accountPayble_insert_frame():
     """
@@ -216,9 +596,9 @@ def accountPayble_insert_frame():
                                              font=('Arial', 10), anchor='e')
     reference_label.place(x=10, y=105)
 
-    global reference_manual_entry
-    reference_manual_entry = Entry(accountPayable_frame, width=12, font=('Arial', 10), justify='right')
-    reference_manual_entry.place(x=170, y=105)
+    global reference_manual_entry_apv
+    reference_manual_entry_apv = Entry(accountPayable_frame, width=12, font=('Arial', 10), justify='right')
+    reference_manual_entry_apv.place(x=170, y=105)
 
     
     journal_memo_lbl = Label(accountPayable_frame, text='Journal Memo:', width=14, height=1, bg='yellow', 
@@ -285,15 +665,21 @@ def accountPayble_insert_frame():
     bs_class_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
     bs_class_entry.place(x=650, y=235)
 
+    # btn_add_entry = Button(accountPayable_frame, text='Add', bd=2, bg='blue', fg='white',
+    #                           font=('arial', 10), width=14, height=1,
+    #                            command=testing_dictionary)
+    # btn_add_entry.place(x=815, y=235)
+
+
 
     selected_label = Label(accountPayable_frame, text='Transaction ID:', 
                                             width=14, height=1, bg='yellowgreen', fg='black',
                                              font=('Arial', 10), anchor='c')
-    selected_label.place(x=800, y=235)
+    selected_label.place(x=900, y=235)
 
     global Selected_ID_entry
     Selected_ID_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
-    Selected_ID_entry.place(x=920, y=235)
+    Selected_ID_entry.place(x=1020, y=235)
 
 
     grand_total_label = Label(accountPayable_frame, text='TOTAL', 
@@ -316,41 +702,46 @@ def accountPayble_insert_frame():
     
     
     
-    btn_batch_entry = Button(accountPayable_frame, text='Add Batch Entry', bd=2, bg='green', fg='white',
+    btn_batch_entry_apv = Button(accountPayable_frame, text='Add Batch Entry', bd=2, bg='green', fg='white',
                               font=('arial', 10), width=14, height=1,
                                command=autoIncrement_accountsPayable_ref)
-    btn_batch_entry.place(x=670, y=35)
+    btn_batch_entry_apv.place(x=670, y=35)
 
-    btn_JournalManual_entry = Button(accountPayable_frame, text='Insert Entry', bd=2, bg='green', fg='white',
+    btn_JournalManual_entry_apv = Button(accountPayable_frame, text='Insert Entry', bd=2, bg='green', fg='white',
                               font=('arial', 10), width=14, height=1,
-                               command=insert_journalEntry_manual)
-    btn_JournalManual_entry.place(x=670, y=70)
+                               command=insert_journalEntry_manual_apv)
+    btn_JournalManual_entry_apv.place(x=670, y=70)
 
-    btn_selected = Button(accountPayable_frame, text='Selected', bd=2, bg='khaki', fg='black',
+    btn_selected_apv = Button(accountPayable_frame, text='Selected', bd=2, bg='khaki', fg='black',
                               font=('arial', 10), width=14, height=1,
-                               command=select_record_treeview)
-    btn_selected.place(x=670, y=105)
+                               command=select_record_treeview_apv)
+    btn_selected_apv.place(x=670, y=105)
 
-    btn_update_entry = Button(accountPayable_frame, text='Update', bd=2, bg='gray', fg='black',
+    btn_update_entry_apv = Button(accountPayable_frame, text='Update', bd=2, bg='gray', fg='black',
                               font=('arial', 10), width=14, height=1,
-                               command=updated_journalEntry)
-    btn_update_entry.place(x=670, y=140)
+                               command=updated_journalEntry_apv)
+    btn_update_entry_apv.place(x=670, y=140)
 
-    btn_selected_delete = Button(accountPayable_frame, text='Delete', bd=2, bg='red', fg='white',
+    btn_selected_delete_apv = Button(accountPayable_frame, text='Delete', bd=2, bg='red', fg='white',
                               font=('arial', 10), width=14, height=1,
-                               command=delete_journalEntry)
-    btn_selected_delete.place(x=670, y=175)
+                               command=delete_journalEntry_apv)
+    btn_selected_delete_apv.place(x=670, y=175)
 
 
-    btn_search_ref = Button(accountPayable_frame, text='Search Ref', bd=2, bg='white', fg='black',
+    btn_search_ref_apv = Button(accountPayable_frame, text='Search Ref', bd=2, bg='white', fg='black',
                               font=('arial', 10), width=14, height=1,
-                               command=journalEntryManual_list_treeview)
-    btn_search_ref.place(x=815, y=35)
+                               command=journalEntryManual_list_treeview_apv)
+    btn_search_ref_apv.place(x=815, y=35)
+
+    btn_save_entry = Button(accountPayable_frame, text='Save', bd=2, bg='white', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=testing_dictionary)
+    btn_save_entry.place(x=815, y=70)
 
 
     # this is for treeview for payroll computation
-    journaEntrymanual_view_Form = Frame(accountPayable_frame, width=500, height=10)
-    journaEntrymanual_view_Form.place(x=10, y=280)
+    journaEntrymanual_view_apv_Form = Frame(accountPayable_frame, width=500, height=10)
+    journaEntrymanual_view_apv_Form.place(x=10, y=280)
 
     style = ttk.Style(accountPayable_frame)
     style.theme_use("clam")
@@ -362,45 +753,45 @@ def accountPayble_insert_frame():
    
     
     
-    global journalEntryManual_treeview
-    scrollbarx = Scrollbar(journaEntrymanual_view_Form, orient=HORIZONTAL)
-    scrollbary = Scrollbar(journaEntrymanual_view_Form, orient=VERTICAL)
+    global journalEntryManual_apv_treeview
+    scrollbarx = Scrollbar(journaEntrymanual_view_apv_Form, orient=HORIZONTAL)
+    scrollbary = Scrollbar(journaEntrymanual_view_apv_Form, orient=VERTICAL)
     
-    journalEntryManual_treeview = ttk.Treeview(journaEntrymanual_view_Form,
+    journalEntryManual_apv_treeview = ttk.Treeview(journaEntrymanual_view_apv_Form,
                                              columns=('ID','DATE', "JOURNAL","REF",
                                                "DESCRIPTION",
                                               "ACCOUNT",'ACCOUNTTITLE','DEBIT', 'CREDIT'),
                                              selectmode="extended", height=8, yscrollcommand=scrollbary.set,
                                              xscrollcommand=scrollbarx.set)
-    scrollbary.config(command=journalEntryManual_treeview.yview)
+    scrollbary.config(command=journalEntryManual_apv_treeview.yview)
     scrollbary.pack(side=RIGHT, fill=Y)
-    scrollbarx.config(command=journalEntryManual_treeview.xview)
+    scrollbarx.config(command=journalEntryManual_apv_treeview.xview)
     scrollbarx.pack(side=BOTTOM, fill=X)
-    journalEntryManual_treeview.heading('ID', text="ID", anchor=CENTER)
-    journalEntryManual_treeview.heading('DATE', text="Date", anchor=CENTER)
-    journalEntryManual_treeview.heading('JOURNAL', text="Journal", anchor=CENTER)
-    journalEntryManual_treeview.heading('REF', text="Ref", anchor=CENTER)
-    journalEntryManual_treeview.heading('DESCRIPTION', text="Description", anchor=CENTER)
-    journalEntryManual_treeview.heading('ACCOUNT', text="Account #", anchor=CENTER)
-    journalEntryManual_treeview.heading('ACCOUNTTITLE', text="Acct Title", anchor=CENTER)
-    journalEntryManual_treeview.heading('DEBIT', text="Debit", anchor=CENTER)
-    journalEntryManual_treeview.heading('CREDIT', text="Credit", anchor=CENTER)
+    journalEntryManual_apv_treeview.heading('ID', text="ID", anchor=CENTER)
+    journalEntryManual_apv_treeview.heading('DATE', text="Date", anchor=CENTER)
+    journalEntryManual_apv_treeview.heading('JOURNAL', text="Journal", anchor=CENTER)
+    journalEntryManual_apv_treeview.heading('REF', text="Ref", anchor=CENTER)
+    journalEntryManual_apv_treeview.heading('DESCRIPTION', text="Description", anchor=CENTER)
+    journalEntryManual_apv_treeview.heading('ACCOUNT', text="Account #", anchor=CENTER)
+    journalEntryManual_apv_treeview.heading('ACCOUNTTITLE', text="Acct Title", anchor=CENTER)
+    journalEntryManual_apv_treeview.heading('DEBIT', text="Debit", anchor=CENTER)
+    journalEntryManual_apv_treeview.heading('CREDIT', text="Credit", anchor=CENTER)
 
 
-    journalEntryManual_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
-    journalEntryManual_treeview.column('#1', stretch=NO, minwidth=0, width=50, anchor='e')
-    journalEntryManual_treeview.column('#2', stretch=NO, minwidth=0, width=100, anchor='e')
-    journalEntryManual_treeview.column('#3', stretch=NO, minwidth=0, width=100, anchor='e')
-    journalEntryManual_treeview.column('#4', stretch=NO, minwidth=0, width=100, anchor='e')
-    journalEntryManual_treeview.column('#5', stretch=NO, minwidth=0, width=220, anchor='e')
-    journalEntryManual_treeview.column('#6', stretch=NO, minwidth=0, width=100, anchor='e')
-    journalEntryManual_treeview.column('#7', stretch=NO, minwidth=0, width=220, anchor='e')
-    journalEntryManual_treeview.column('#8', stretch=NO, minwidth=0, width=100, anchor='e')
-    journalEntryManual_treeview.column('#9', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_apv_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
+    journalEntryManual_apv_treeview.column('#1', stretch=NO, minwidth=0, width=50, anchor='e')
+    journalEntryManual_apv_treeview.column('#2', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_apv_treeview.column('#3', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_apv_treeview.column('#4', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_apv_treeview.column('#5', stretch=NO, minwidth=0, width=220, anchor='e')
+    journalEntryManual_apv_treeview.column('#6', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_apv_treeview.column('#7', stretch=NO, minwidth=0, width=220, anchor='e')
+    journalEntryManual_apv_treeview.column('#8', stretch=NO, minwidth=0, width=100, anchor='e')
+    journalEntryManual_apv_treeview.column('#9', stretch=NO, minwidth=0, width=100, anchor='e')
    
    
 
-    journalEntryManual_treeview.pack()
+    journalEntryManual_apv_treeview.pack()
     
 
 
@@ -1329,38 +1720,38 @@ def journalEntry_manual_list():
         for x in dataSearch.find(query):
             a = x['ref']
             
-        if a == "":
-                messagebox.showinfo("Error","No Record found" )
-        else:
-            cnt+=1
-            id_num = x['_id']
-            date_entry = x['date_entry']
-            journal = x['journal']
-            ref = x['ref']
-            descriptions = x['descriptions']
-            account_number = x['acoount_number']
-            account_disc = x['account_disc']
-            debit_amount = x['debit_amount']
-            debit_amount2 = '{:,.2f}'.format(debit_amount)
-            credit_amount = x['credit_amount']
-            credit_amount2 = '{:,.2f}'.format(credit_amount)
-            
-            debit_amount_total+=debit_amount
-            debit_amount_total2 = '{:,.2f}'.format(debit_amount_total)
+            if a == "":
+                    messagebox.showinfo("Error","No Record found" )
+            else:
+                cnt+=1
+                id_num = x['_id']
+                date_entry = x['date_entry']
+                journal = x['journal']
+                ref = x['ref']
+                descriptions = x['descriptions']
+                account_number = x['acoount_number']
+                account_disc = x['account_disc']
+                debit_amount = x['debit_amount']
+                debit_amount2 = '{:,.2f}'.format(debit_amount)
+                credit_amount = x['credit_amount']
+                credit_amount2 = '{:,.2f}'.format(credit_amount)
+                
+                debit_amount_total+=debit_amount
+                debit_amount_total2 = '{:,.2f}'.format(debit_amount_total)
 
-            credit_amount_total+=credit_amount
-            credit_amount_total2 = '{:,.2f}'.format(credit_amount_total)
-            
-            journalEntryManual_treeview.insert('', 'end', values=(id_num,date_entry,journal,
-                                ref,descriptions, account_number,account_disc,debit_amount2,
-                                credit_amount2 ))
+                credit_amount_total+=credit_amount
+                credit_amount_total2 = '{:,.2f}'.format(credit_amount_total)
+                
+                journalEntryManual_treeview.insert('', 'end', values=(id_num,date_entry,journal,
+                                    ref,descriptions, account_number,account_disc,debit_amount2,
+                                    credit_amount2 ))
 
-            totalDebit_manual_entry.delete(0, END)
-            totalDebit_manual_entry.insert(0, (debit_amount_total2))
+                totalDebit_manual_entry.delete(0, END)
+                totalDebit_manual_entry.insert(0, (debit_amount_total2))
 
 
-            totalCredit_manual_entry.delete(0, END)
-            totalCredit_manual_entry.insert(0, (credit_amount_total2))
+                totalCredit_manual_entry.delete(0, END)
+                totalCredit_manual_entry.insert(0, (credit_amount_total2))
 
     except Exception as ex:
         messagebox.showerror("Error", f"Error due to :{str(ex)}")
