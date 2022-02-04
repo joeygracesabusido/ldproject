@@ -2023,9 +2023,81 @@ def tin_Query():
     # from os import startfile
     startfile("employeeTIN.xlsx")
 
+def edit_off_on():
+    """
+    This function is for
+    Editing the on and off
+    columns
+    """
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date to: ')
+
+    cursor.execute("SELECT id,cut_off_date,employee_id,last_name, SUM(grosspay_save) as totalGross,department,on_off_details \
+                        FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
+                      GROUP BY id,employee_id,last_name, department,on_off_details ")
+   
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['ID','DATE','EMPLOYEE ID',
+                                    'LAST NAME','GROSS PAY','DEPARTMENT','On & Off Status'], tablefmt='psql'))
 
 
+    trans_id = input("Enter transaction ID: ")
+    off_on_Details = input("Enter details on/off: ")
 
+    key = input("Would you like to update data yes/no?: ").lower()
+
+    if key == 'yes':
+
+        cursor.execute(
+                    "UPDATE payroll_computation SET on_off_details ='"+ off_on_Details +"'\
+                    WHERE id =%s", (trans_id,)
+                )
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        print("Data has been updated")
+        print('')
+
+        # update_employee_details_on()
+    # else:
+    #     selection()
+
+def edit_cash_advances():
+    """
+    This function is
+    for editing cash advance
+    """
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    cash_advance_data()
+
+    trans_id = input("Enter transaction ID: ")
+    amountDeduction = input("Enter amount Deduction: ")
+
+    key = input("Would you like to update data yes/no?: ").lower()
+
+    if key == 'yes':
+
+        cursor.execute(
+                    "UPDATE cash_advance SET ca_deduction ='"+ amountDeduction +"'\
+                    WHERE id =%s", (trans_id,)
+                )
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        print("Data has been updated")
+        
+        edit_cash_advances()
+
+
+# edit_cash_advances()
+# edit_off_on()
 # tin_Query()
 # searchPayroll()
 # deleteCut_offPeriod() 
@@ -2056,11 +2128,11 @@ def tin_Query():
 # equipment_registry()
 # mwe_selection()
 # test_on()
-selection()
-# update_employee_details_mwe_taxable()
+# selection()
+update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()
-#cash_advance_data()
+# cash_advance_data()
 
 # search_payroll()
 # search_payroll_withUpdate()

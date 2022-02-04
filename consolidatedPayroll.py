@@ -227,7 +227,7 @@ def print1601c_report():
                                             FROM payroll_computation\
                                             where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
                                              AND  taxable_mwe_detail = 'Taxable'  and on_off_details = 'on'\
-                                              AND taxable_amount < 20833")
+                                              AND taxable_amount < 10417")
         myresult = list(cursor.fetchall())
 
         for row in myresult:
@@ -272,7 +272,7 @@ def print1601c_report():
                                                FROM payroll_computation\
                                                where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
                                                 AND  taxable_mwe_detail = 'Taxable'  and on_off_details = 'on'\
-                                                 AND taxable_amount > 20833")
+                                                 AND taxable_amount > 10417")
         myresult = list(cursor.fetchall())
 
         for row in myresult:
@@ -417,22 +417,7 @@ def payroll_export():
     worksheet.write('I1', 'TAXABLE AMOUNT')
     worksheet.write('J1', 'TAX WIDTHEL')
     worksheet.write('K1', 'TAX/MWE')
-    # worksheet.write('L1', 'TOTAL DEMINIMIS')
-    # worksheet.write('M1', 'OTHER FORMS')
-    # worksheet.write('N1', 'TOTAL NON TAXABLE')
-    # worksheet.write('O1', 'TOTAL TAXABLE COMP')
-    # worksheet.write('P1', 'GROSS PAY')
-    # worksheet.write('Q1', 'SSS')
-    # worksheet.write('R1', 'PHIC')
-    # worksheet.write('S1', 'HDMF')
-    # worksheet.write('T1', 'CASH ADVANCE') 
-    # worksheet.write('W1', 'SSS LOAN')
-    # worksheet.write('X1', 'HDMF LOAN')
-    # worksheet.write('Y1', 'W-TAX')
-    # worksheet.write('Z1', 'DEDUCTION')
-    # worksheet.write('AA1', 'ADJUSTMENT')
-    # worksheet.write('AB1', 'NET PAY')
-    # worksheet.write('AC1', 'SITE ASSIGNMENT')
+    
    
    
     rowIndex = 2
@@ -471,19 +456,8 @@ def payroll_export():
         otherforms_xlx = data[18]
         taxableAmount_xlx = data[19]
         tax_WIDTHEL_xlx = data[20]
-        tax_mwe_detail_xlx = data[21]
-        # sss_xlx = data[6]
-        # platenumxlx = data[5]
-        # materialsxlx = data[6]
-        # rbdrxlx = data[7]
-        # tonxlx = data[8]
-        # price_mcxlx = data[9]
-        # amount_mcxlx = data[10]
-        # cubic_hcxlx = data[11]
-        # price_hcxlx = data[12]
-        # amount_hcxlx = data[13]
-        # amount_hcxlx2 = data[14]
-        # amount_hcxlx3 = data[15]
+        tax_mwe_detail_xlx = data[22]
+      
 
        
        
@@ -501,10 +475,7 @@ def payroll_export():
         worksheet.write('I' + str(rowIndex),taxableAmount_xlx)
         worksheet.write('J' + str(rowIndex),tax_WIDTHEL_xlx)
         worksheet.write('K' + str(rowIndex),tax_mwe_detail_xlx)
-        # # worksheet.write('L' + str(rowIndex),cubic_hcxlx)
-        # # worksheet.write('M' + str(rowIndex),price_hcxlx)
-        # # worksheet.write('N' + str(rowIndex),amount_hcxlx)
-        # # worksheet.write('O' + str(rowIndex),amount_hcxlx2)
+       
         
        
         
@@ -1148,6 +1119,7 @@ def save_payroll():
         mydb.commit()
         mydb.close()
         cursor.close()
+        payroll_comp_treeview_display()
 
 def net_pay():
     """This funtion is for computaion of Net Pay"""
