@@ -8,6 +8,7 @@ import PIL.Image
 import tkinter.ttk as ttk
 import tkinter.messagebox as tkMessageBox
 import datetime as dt
+from numpy import True_, true_divide
 from tkcalendar import DateEntry
 from tkcalendar import DateEntry as TkcDateEntry
 import tkinter as tk
@@ -33,6 +34,7 @@ from tkinter.scrolledtext import ScrolledText
 from pymongo import MongoClient
 import pandas as pd
 import re
+# from datetime import timedelta 
 
 from bson.objectid import ObjectId
 import dateutil.parser
@@ -229,6 +231,75 @@ def delete_journalEntry_apv():
         messagebox.showinfo('JRS', 'Selected Record has been deleted')
         journalEntryManual_list_treeview_apv()
 
+# this is for supplier_entry APv data base entry
+def auto_dueDate_computation(e):
+    """
+    this function
+    is for auto complete
+    for account number
+    """
+
+    NumDays = int(dueDate_apv_entry.get())
+    dateEntry_From =  journalEntryInsert_datefrom.get()
+    date_time_obj = datetime.strptime(dateEntry_From, '%m/%d/%Y')
+
+    DueDate =  (date_time_obj + timedelta(days=NumDays))
+
+    
+    journalEntryInsert_Duedate.delete(0, END)
+    journalEntryInsert_Duedate.insert(0, (DueDate))
+    
+
+def suppier_entry_apv():
+    """
+    This function is for saving
+    supplier info of payables
+    """
+
+    debit_entry = float(debit_manual_entry.get())
+    
+    
+    credit_entry = float(credit_manual_entry.get())
+    
+
+    dateEntry =  journalEntryInsert_datefrom.get()
+    date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+    
+    
+    collection = db['journal_entry'] # this is to create collection and save as table
+    dataInsert = {
+    # 'date_entry': journalEntryInsert_datefrom.get(),
+    'date_entry': date_time_obj,
+    'journal': journal_manual.get(),
+    'ref': reference_manual_entry_apv.get(),
+    'descriptions': journal_memo_entry.get('1.0', 'end-1c'),
+    'acoount_number': account_number_entry.get(),
+    'account_disc': chart_of_account_manual.get(),
+    'bsClass': bs_class_entry.get(),
+    'debit_amount': debit_entry,
+    'credit_amount': credit_entry,
+    'due_date_apv': journalEntryInsert_Duedate.get(),
+    'terms_days': dueDate_apv_entry.get(),
+    'supplier/Client': supplier_apv_entry.get(),
+    'user': USERNAME.get(),
+    'created':datetime.now()
+    
+    }
+
+    
+    
+    try:
+        collection.insert_one(dataInsert)
+
+       
+        
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+                   
+   
+
+
+
 
 def updated_journalEntry_apv():
     """
@@ -274,9 +345,14 @@ def select_record_treeview_apv():
     debit_manual_entry.delete(0, END)
     credit_manual_entry.delete(0, END)
     Selected_ID_entry.delete(0, END)
+    bs_class_entry.delete(0, END)
+    journalEntryInsert_Duedate.delete(0, END),
+    dueDate_apv_entry.delete(0, END),
+    supplier_apv_entry.delete(0, END),
 
-    selected = journalEntryManual_treeview.focus()
-    values = journalEntryManual_treeview.item(selected)
+
+    selected = journalEntryManual_apv_treeview.focus()
+    values = journalEntryManual_apv_treeview.item(selected)
     selectedItems = values['values']
     
 
@@ -299,7 +375,10 @@ def select_record_treeview_apv():
             debit_amount2 = '{:,.2f}'.format(debit_amount)
             credit_amount = x['credit_amount']
             credit_amount2 = '{:,.2f}'.format(credit_amount)
-            
+            bs_class = x['bsClass']
+            due_date = x['due_date_apv']
+            terms = x['terms_days']
+            supplier_client = x['supplier/Client']
             
             journalEntryInsert_datefrom.insert(0, date_entry)
             journal_manual.insert(0, journal)
@@ -310,6 +389,10 @@ def select_record_treeview_apv():
             debit_manual_entry.insert(0, debit_amount)
             credit_manual_entry.insert(0, credit_amount)
             Selected_ID_entry.insert(0, id_num)
+            bs_class_entry.insert(0, bs_class)
+            journalEntryInsert_Duedate.insert(0, due_date),
+            dueDate_apv_entry.insert(0, terms),
+            supplier_apv_entry.insert(0, supplier_client),
             
 
     except Exception as ex:
@@ -344,43 +427,43 @@ def journalEntry_manual_list_apv():
         cnt = 0
         debit_amount_total = 0
         credit_amount_total= 0
-        a = ""
+        
         for x in dataSearch.find(query):
-            a = x['ref']
+            cnt+=1
+            id_num = x['_id']
+            date_entry = x['date_entry']
+            journal = x['journal']
+            ref = x['ref']
+            descriptions = x['descriptions']
+            account_number = x['acoount_number']
+            account_disc = x['account_disc']
+            debit_amount = x['debit_amount']
+            debit_amount2 = '{:,.2f}'.format(debit_amount)
+            credit_amount = x['credit_amount']
+            credit_amount2 = '{:,.2f}'.format(credit_amount)
             
-            if a == "":
-                    messagebox.showinfo("Error","No Record found" )
-            else:
-                cnt+=1
-                id_num = x['_id']
-                date_entry = x['date_entry']
-                journal = x['journal']
-                ref = x['ref']
-                descriptions = x['descriptions']
-                account_number = x['acoount_number']
-                account_disc = x['account_disc']
-                debit_amount = x['debit_amount']
-                debit_amount2 = '{:,.2f}'.format(debit_amount)
-                credit_amount = x['credit_amount']
-                credit_amount2 = '{:,.2f}'.format(credit_amount)
-                
-                debit_amount_total+=debit_amount
-                debit_amount_total2 = '{:,.2f}'.format(debit_amount_total)
+            debit_amount_total+=debit_amount
+            debit_amount_total2 = '{:,.2f}'.format(debit_amount_total)
 
-                credit_amount_total+=credit_amount
-                credit_amount_total2 = '{:,.2f}'.format(credit_amount_total)
-                
-                journalEntryManual_apv_treeview.insert('', 'end', values=(id_num,date_entry,journal,
-                                    ref,descriptions, account_number,account_disc,debit_amount2,
-                                    credit_amount2 ))
+            credit_amount_total+=credit_amount
+            credit_amount_total2 = '{:,.2f}'.format(credit_amount_total)
+            
+            journalEntryManual_apv_treeview.insert('', 'end', values=(id_num,date_entry,journal,
+                                ref,descriptions, account_number,account_disc,debit_amount2,
+                                credit_amount2 ))
 
-                totalDebit_manual_entry.delete(0, END)
-                totalDebit_manual_entry.insert(0, (debit_amount_total2))
+            totalDebit_manual_entry.delete(0, END)
+            totalDebit_manual_entry.insert(0, (debit_amount_total2))
 
 
-                totalCredit_manual_entry.delete(0, END)
-                totalCredit_manual_entry.insert(0, (credit_amount_total2))
+            totalCredit_manual_entry.delete(0, END)
+            totalCredit_manual_entry.insert(0, (credit_amount_total2))
 
+        # for x in dataSearch.find({"ref": {"$exists": True}}):
+        #     print(x)
+            # a = x['ref']
+            # if a =='':
+            #     messagebox.showinfo("Error","No Record found" )
     except Exception as ex:
         messagebox.showerror("Error", f"Error due to :{str(ex)}")
 
@@ -450,8 +533,12 @@ def insert_journalEntry_manual_apv():
     'bsClass': bs_class_entry.get(),
     'debit_amount': debit_entry,
     'credit_amount': credit_entry,
+    'due_date_apv': journalEntryInsert_Duedate.get(),
+    'terms_days': dueDate_apv_entry.get(),
+    'supplier/Client': supplier_apv_entry.get(),
     'user': USERNAME.get(),
     'created':datetime.now()
+    
     
     }
 
@@ -551,6 +638,7 @@ def accountPayble_insert_frame():
                                   foreground='white', borderwidth=2, padx=10, pady=10)
     journalEntryInsert_datefrom.place(x=170, y=35)
     journalEntryInsert_datefrom.configure(justify='center')
+    journalEntryInsert_datefrom.bind("<<DateEntrySelected>>", auto_dueDate_computation)
 
 
     entry_date_label = Label(accountPayable_frame, text='Due Date:', width=14, height=1, bg='yellow', fg='black',
@@ -563,8 +651,18 @@ def accountPayble_insert_frame():
                                   foreground='white', borderwidth=2, padx=10, pady=10)
     journalEntryInsert_Duedate.place(x=430, y=35)
     journalEntryInsert_Duedate.configure(justify='center')
+
+
+    account_number_lbl = Label(accountPayable_frame, text='Terms in days:', width=14, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    account_number_lbl.place(x=10, y=5)
+
+    global dueDate_apv_entry
+    dueDate_apv_entry = Entry(accountPayable_frame, width=12, font=('Arial', 10), justify='right')
+    dueDate_apv_entry.place(x=170, y=5)
     
-   
+
 
     journal_label = Label(accountPayable_frame, text='Journal:', 
                                             width=14, height=1, bg='yellow', fg='black',
@@ -1621,6 +1719,7 @@ def updated_journalEntry():
                                  "descriptions": journal_memo_entry.get('1.0', 'end-1c'),
                                  "acoount_number": account_number_entry.get(),
                                      "account_disc": chart_of_account_manual.get(),
+                                     "bsClass": bs_class_entry.get(),
                                      "debit_amount": float(debit_manual_entry.get()), 
                                      "credit_amount": float(credit_manual_entry.get()),}           
                                     }
@@ -1646,6 +1745,7 @@ def select_record_treeview():
     debit_manual_entry.delete(0, END)
     credit_manual_entry.delete(0, END)
     Selected_ID_entry.delete(0, END)
+    bs_class_entry.delete(0, END)
 
     selected = journalEntryManual_treeview.focus()
     values = journalEntryManual_treeview.item(selected)
@@ -1671,7 +1771,7 @@ def select_record_treeview():
             debit_amount2 = '{:,.2f}'.format(debit_amount)
             credit_amount = x['credit_amount']
             credit_amount2 = '{:,.2f}'.format(credit_amount)
-            
+            bs_class = x['bsClass']
             
             journalEntryInsert_datefrom.insert(0, date_entry)
             journal_manual.insert(0, journal)
@@ -1682,7 +1782,7 @@ def select_record_treeview():
             debit_manual_entry.insert(0, debit_amount)
             credit_manual_entry.insert(0, credit_amount)
             Selected_ID_entry.insert(0, id_num)
-            
+            bs_class_entry.insert(0, bs_class)
 
     except Exception as ex:
         messagebox.showerror("Error", f"Error due to :{str(ex)}")
@@ -1783,8 +1883,12 @@ def insert_journalEntry_manual():
     'bsClass': bs_class_entry.get(),
     'debit_amount': debit_entry,
     'credit_amount': credit_entry,
+    'due_date_apv': '',
+    'terms_days': '',
+    'supplier/Client': '',
     'user': USERNAME.get(),
     'created':datetime.now()
+    
     
     }
 
@@ -1819,7 +1923,6 @@ def autoIncrement_journal_manual_ref():
     for x in agg_result :
         a = x['ref']
 
-
         # current_year =  datetime.today().year
     if a =="":
         test_str = 'GJ000'
@@ -1828,8 +1931,6 @@ def autoIncrement_journal_manual_ref():
         reference_manual_entry.delete(0, END)
         reference_manual_entry.insert(0, (res))
         
-        
-    
     else:
         
 
@@ -2676,10 +2777,14 @@ def import_journal_entry():
                     'account_disc': account_disc,
                     'debit_amount': debit_amount,
                     'credit_amount': credit_amount,
+                    'due_date_apv': '',
+                    'terms_days': '',
+                    'supplier/Client': '',
                     'user': USERNAME.get(),
                     'created':datetime.now()
                     
                     }
+
                     
                     try:
                         collection.insert_one(dataInsert)
