@@ -1,4 +1,5 @@
 from distutils import command
+from email.mime import text
 from importlib.resources import contents
 from tkinter import *
 import csv
@@ -145,38 +146,27 @@ def testing_dictionary():
     # user = USERNAME.get(),
     # answer = tkMessageBox.askquestion('JRS','Are you sure you want to add?',icon="warning")
 
-    # while answer =='yes':
-    dateEntry =  journalEntryInsert_datefrom.get()
-    date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+    while answer =='yes':
+        debit_manual_entry.delete(0,END)
+        credit_manual_entry.delete(0,END)
+        dateEntry =  journalEntryInsert_datefrom.get()
+        date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
 
-    journal = journal_manual.get(),
-    ref = reference_manual_entry.get(),
-    journalMemo = journal_memo_entry.get('1.0', 'end-1c'),
-    acountNumber = account_number_entry.get(),
-    accountTitle = chart_of_account_manual.get(),
-    bsClass = bs_class_entry.get(),
-    debit_amount = float(debit_manual_entry.get())
-    credit_amount = float(credit_manual_entry.get())
-    user = USERNAME.get(),
+        journal = journal_manual.get(),
+        ref = reference_manual_entry_apv.get(),
+        journalMemo = journal_memo_entry.get('1.0', 'end-1c'),
+        acountNumber = account_number_entry.get(),
+        accountTitle = chart_of_account_manual.get(),
+        bsClass = bs_class_entry.get(),
+        debit_amount = float(debit_manual_entry.get())
+        credit_amount = float(credit_manual_entry.get())
+        user = USERNAME.get(),
 
-    answer = tkMessageBox.askquestion('JRS','Are you sure you want to add?',icon="warning")
-    
-    if answer =='yes':
-        add_entryFields1()
-        # dateEntry =  journalEntryInsert_datefrom.get()
-        # date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+        answer = tkMessageBox.askquestion('JRS','Are you sure you want to add?',icon="warning")
 
-        # journal = journal_manual.get(),
-        # ref = reference_manual_entry.get(),
-        # journalMemo = journal_memo_entry.get('1.0', 'end-1c'),
-        # acountNumber = account_number_entry.get(),
-        # accountTitle = chart_of_account_manual.get(),
-        # bsClass = bs_class_entry.get(),
-        # debit_amount = float(debit_manual_entry.get())
-        # credit_amount = float(credit_manual_entry.get())
-        # user = USERNAME.get(),
-    
-    else:
+
+        data={}   
+        
         data.update({len(data)+1:{
             'date_entry': date_time_obj,
             'journal': journal,
@@ -192,9 +182,9 @@ def testing_dictionary():
         }})
 
 
-    for i in data:
-    
-        print(i,data[i]['account_disc'])
+        for i in data:
+        
+            print(i,data[i]['account_disc'])
 
         # dataInsert = {
         # 'date_entry': data[i]['date_entry'],
@@ -217,6 +207,174 @@ def testing_dictionary():
         
         # except Exception as ex:
         #     print("Error", f"Error due to :{str(ex)}") 
+def print_apv_():
+    """
+    This function is for
+    printing APV 
+    """
+    dataSearch = db['journal_entry']
+    query = {'ref':reference_manual_entry_apv.get()}
+
+    result = []
+
+    # logo_icon3 = PIL.Image.open("image\logo.jpg")
+    # logo_icon_pic = logo_icon3.resize((125, 50), PIL.Image.ANTIALIAS)
+    # company_logo = ImageTk.PhotoImage(logo_icon_pic)
+
+
+    agg_result = dataSearch.find(query)
+    cnt = 0
+    
+    for i in agg_result:
+        cnt+=1
+        data = {'count': cnt,
+                'date_entry': i['date_entry'],
+                'journal': i['journal'],
+                'ref': i['ref'],
+                'descriptions': i['descriptions'],
+                'acoount_number': i['acoount_number'],
+                'account_disc': i['account_disc'],
+                'bsClass': i['bsClass'],
+                'debit_amount': i['debit_amount'],
+                'debit_amount2': '{:,.2f}'.format(i['debit_amount']),
+                'credit_amount': i['credit_amount'],
+                'credit_amount2': '{:,.2f}'.format(i['credit_amount']),
+                'due_date_apv': i['due_date_apv'],
+                'terms_days': i['terms_days'],
+                'supplier_Client': i['supplier/Client'],
+                'totalCredit': i['credit_amount'],
+                # 'totalDebit': '{:,.2f}'.format(i['debit_amount'] + i['debit_amount']),
+                
+                    }
+                
+
+        result.append(data)
+
+    agg_result= dataSearch.aggregate(
+        [
+        {"$match":{'ref':reference_manual_entry_apv.get() ,
+           
+         }},
+       
+        {"$group" : 
+            {"_id" :  '$ref',
+            
+            "totalDebit" : {"$sum" : '$debit_amount'},
+            "totalCredit" : {"$sum" : '$credit_amount'},
+            
+            }},
+        {'$sort':{'_id': 1}}
+            
+        ])
+
+    total_debit_amount = 0
+    total_credit_amount = 0
+    for x in agg_result: 
+      
+        
+        debit_amount = x['totalDebit']
+        debit_amount2 = '{:,.2f}'.format(debit_amount)
+
+        credit_amount = x['totalCredit']
+        credit_amount2 = '{:,.2f}'.format(credit_amount)
+    
+        
+
+    rpt = Report(result)
+    rpt.detailband = Band([
+
+        Element((65, 15), ("Courier", 10), key='acoount_number', align="right"),
+        Element((220, 15), ("Courier", 10), key='account_disc', align="right"),
+        Element((300, 15), ("Courier", 10), key='bsClass', align="right"),
+        Element((385, 15), ("Courier", 8), key='debit_amount2', align="right"),
+        Element((460, 15), ("Courier", 8), key='credit_amount2', align="right"),
+       
+        #Rule((36, 0), 11.5 * 72, thickness=.2)
+
+
+
+    ])
+
+    rpt.pageheader = Band([
+
+        # Image((150, 0), width = 125, height = 50,
+        #         logo_icon3),
+        
+       
+        Element((150, 24), ("Courier-Bold", 13),
+            text='ACCOUNT PAYABLE VOUCHER'),
+
+        Element((150, 45), ("Courier-Bold", 11),
+                key='supplier_Client'),
+
+        Element((36, 45), ("Courier-Bold", 11),
+                text='PAYEE:'),
+
+        Element((36, 65), ("Courier-Bold", 11),
+                text='ADDRESS:'),
+
+        Element((36, 85), ("Courier-Bold", 11),
+                text='Account #'),
+        Element((135, 85), ("Courier-Bold", 11),
+                text='Account Title'),
+        Element((235, 85), ("Courier-Bold", 11),
+                text='Account Type'),
+        Element((350, 85), ("Courier-Bold", 11),
+                text='Debit'),
+        Element((420, 85), ("Courier-Bold", 11),
+                text="Credit"),
+        
+        Rule((30, 100), 8.5 * 50, thickness=1),
+    ])
+    rpt.reportfooter = Band([
+        Rule((30, 4), 8.5 * 50),
+        Element((36, 4), ("Helvetica-Bold", 12),
+                text="Grand Total"),
+
+        Element((345, 4), ("Helvetica-Bold", 11),
+                text=debit_amount2),
+        Element((425, 4), ("Helvetica-Bold", 11),
+                text=credit_amount2),
+        # Element((325, 4), ("Helvetica-Bold", 10),
+        #             text=gross_payT, align="right"),
+        # SumElement((425, 4), ("Courier-Bold", 11),
+        #             key="credit_amount", align="right"),
+        # SumElement((420, 4), ("Helvetica-Bold", 9),
+        #             key="phic", align="right"),
+        # SumElement((460, 4), ("Helvetica-Bold", 9),
+        #             key="hdmf", align="right"),
+        # SumElement((520, 4), ("Helvetica-Bold", 9),
+        #             key="totaldem", align="right"),
+        # SumElement((590, 4), ("Helvetica-Bold", 9),
+        #             key="taxwidtheld", align="right"),
+        # SumElement((665, 4), ("Helvetica-Bold", 9),
+        #             key="cashadvance", align="right"),
+        # SumElement((730, 4), ("Helvetica-Bold", 9),
+        #             key="sssloan", align="right"),
+        # SumElement((800, 4), ("Helvetica-Bold", 9),
+        #             key="hdmfloan", align="right"),
+        # Element((870, 4), ("Helvetica-Bold", 10),
+        #             text=net_payt, align="right"),
+        # Element((36, 30), ("Helvetica", 10),
+        #         text="Prepared BY:"),
+        # Element((80, 60), ("Helvetica", 10),
+        #         text= user_reg),
+        # Element((300, 30), ("Helvetica", 10),
+        #         text="Check  BY:"),
+        # Element((344, 60), ("Helvetica", 10),
+        #         text='JEROME R. SABUSIDO'),
+
+        ])
+        #canvas = Canvas("payroll.pdf") for short bond paper configuration
+    canvas = Canvas("apv.pdf", (50 * 11, 72 * 8.5))
+    rpt.generate(canvas)
+    canvas.save()
+
+    startfile("apv.pdf")
+
+
+
+
 
 def delete_journalEntry_apv():
     """
@@ -596,9 +754,9 @@ def autoIncrement_accountsPayable_ref():
         a = x['ref']
 
 
-        # current_year =  datetime.today().year
+    current_year =  datetime.today().year
     if a =="":
-        test_str = 'APV-000'
+        test_str = (f'{current_year}-APV-000')
         res = test_str
 
         reference_manual_entry_apv.delete(0, END)
@@ -695,7 +853,7 @@ def accountPayble_insert_frame():
     reference_label.place(x=10, y=105)
 
     global reference_manual_entry_apv
-    reference_manual_entry_apv = Entry(accountPayable_frame, width=12, font=('Arial', 10), justify='right')
+    reference_manual_entry_apv = Entry(accountPayable_frame, width=20, font=('Arial', 10), justify='right')
     reference_manual_entry_apv.place(x=170, y=105)
 
     
@@ -809,6 +967,9 @@ def accountPayble_insert_frame():
                               font=('arial', 10), width=14, height=1,
                                command=insert_journalEntry_manual_apv)
     btn_JournalManual_entry_apv.place(x=670, y=70)
+    #
+    # insert_journalEntry_manual_apv
+    # testing_dictionary
 
     btn_selected_apv = Button(accountPayable_frame, text='Selected', bd=2, bg='khaki', fg='black',
                               font=('arial', 10), width=14, height=1,
@@ -831,10 +992,10 @@ def accountPayble_insert_frame():
                                command=journalEntryManual_list_treeview_apv)
     btn_search_ref_apv.place(x=815, y=35)
 
-    btn_save_entry = Button(accountPayable_frame, text='Save', bd=2, bg='white', fg='black',
+    btn_print_apv = Button(accountPayable_frame, text='Print', bd=2, bg='Red', fg='black',
                               font=('arial', 10), width=14, height=1,
-                               command=testing_dictionary)
-    btn_save_entry.place(x=815, y=70)
+                               command=print_apv_)
+    btn_print_apv.place(x=815, y=70)
 
 
     # this is for treeview for payroll computation

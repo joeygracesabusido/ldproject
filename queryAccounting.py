@@ -169,5 +169,34 @@ def testing_dictionary():
         # except Exception as ex:
         #     print("Error", f"Error due to :{str(ex)}") 
 
-testing_dictionary() 
+def apv():
+
+    apv_num = input('Enter APV number : ')
+    dataSearch = db['journal_entry']
+    query = {'ref':apv_num}
+
+    agg_result = dataSearch.find(query)
+    result = {}
+    cnt = 0
+    for i in agg_result:
+        cnt+=1
+        data = {'count': cnt,
+               
+                'debit_amount': (i['debit_amount']),
+                'credit_amount': (i['credit_amount']),
+                'debit_amount_APV': '{:,.2f}'.format(i['credit_amount'] + i['credit_amount']),
+                # 'credit_amount_TOTAL': i['credit_amount'] ,
+                # 'credit_amount2': float('{:,.2f}'.format('credit_amount')),
+
+                
+                    }
+                
+
+        result.update(data)
+
+        print(result['debit_amount_APV'])
+
+
+apv()
+# testing_dictionary() 
 # test_lookup()
