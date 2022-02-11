@@ -2116,7 +2116,7 @@ def edit_cash_advances():
 # diesel_search()
     
 # edit_tax_table()
-# insert_equipment()
+insert_equipment()
 # insert_sssloan_deduction()
 # taxable_amount()
 # total_notsubject()
@@ -2129,7 +2129,7 @@ def edit_cash_advances():
 # mwe_selection()
 # test_on()
 # selection()
-update_employee_details_mwe_taxable()
+# update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()
 # cash_advance_data()

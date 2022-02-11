@@ -21,6 +21,10 @@ from PollyReports import *
 from os import startfile
 import xlsxwriter
 
+import PyPDF2
+from docx import Document
+from docx.shared import Inches
+
 from datetime import date, timedelta
 from datetime import datetime
 
@@ -180,6 +184,7 @@ def apv():
     cnt = 0
     for i in agg_result:
         cnt+=1
+        
         data = {'count': cnt,
                
                 'debit_amount': (i['debit_amount']),
@@ -196,7 +201,145 @@ def apv():
 
         print(result['debit_amount_APV'])
 
+def demo():
+    """
+    This function is for demosntration of printing Microsoft word
+    """
+    document = Document()
 
-apv()
+    x = document.add_heading('ACCOUNT PAYABLE VOUCHER', 1)
+    x.alignment = 1
+    p = document.add_paragraph('A plain paragraph having some ')
+    p.add_run('bold').bold = True
+    p.add_run(' and some ')
+    p.add_run('italic.').italic = True
+
+    document.add_heading('Heading, level 1', level=1)
+    document.add_paragraph('Intense quote', style='Intense Quote')
+
+    document.add_paragraph(
+        'first item in unordered list', style='List Bullet'
+    )
+    document.add_paragraph(
+        'first item in ordered list', style='List Number'
+    )
+
+    # document.add_picture('D:\LD\ldproject\image\logo.jpg', width=Inches(1.25))
+
+    records = (
+        (3, '101', 'Spam'),
+        (7, '422', 'Eggs'),
+        (4, '631', 'Spam, spam, eggs, and spam')
+    )
+
+    table = document.add_table(rows=1, cols=3)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Qty'
+    hdr_cells[1].text = 'Id'
+    hdr_cells[2].text = 'Desc'
+    for qty, id, desc in records:
+        row_cells = table.add_row().cells
+        row_cells[0].text = str(qty)
+        row_cells[1].text = id
+        row_cells[2].text = desc
+
+    document.add_page_break()
+
+    document.save('demo.docx')
+    startfile("demo.docx")
+
+def testing_docx():
+    """
+    This function is 
+    for printing documents
+    using ms words
+    """
+    dataSearch = db['journal_entry']
+    query = input('Enter APV no. ')
+
+    query2 = {'ref':query}
+    agg_result2 = dataSearch.find(query2)
+    result = {}
+    total_debit_amount = 0
+    total_credit_amount = 0
+    cnt = 0
+    for i in agg_result2: 
+        
+        cnt+=1
+        data = {'count': cnt,
+                'date_entry': i['date_entry'],
+                'journal': i['journal'],
+                'ref': i['ref'],
+                'descriptions': i['descriptions'],
+                'acoount_number': i['acoount_number'],
+                'account_disc': i['account_disc'],
+                'bsClass': i['bsClass'],
+                'debit_amount': i['debit_amount'],
+                'debit_amount2': '{:,.2f}'.format(i['debit_amount']),
+                'credit_amount': i['credit_amount'],
+                'credit_amount2': '{:,.2f}'.format(i['credit_amount']),
+                'due_date_apv': i['due_date_apv'],
+                'terms_days': i['terms_days'],
+                'supplier_Client': i['supplier/Client'],
+                'totalCredit': i['credit_amount'],
+                # 'totalDebit': '{:,.2f}'.format(i['debit_amount'] + i['debit_amount']),
+                
+                    }
+                
+
+        result.update(data)
+
+        test_db = (result['account_disc'])
+
+        records = (
+            (result['account_disc'],result['debit_amount'])
+        )
+        
+        document = Document()
+
+        x = document.add_heading('ACCOUNT PAYABLE VOUCHER', 1)
+        x.alignment = 1
+        
+        table = document.add_table(rows=1, cols=1)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = ''
+        # hdr_cells[1].text = ''
+        # hdr_cells[2].text = ''
+        for qty, dbt in records:
+            row_cells = table.add_row().cells
+            row_cells[0].text = str(qty)
+            row_cells[1].text = dbt
+            # row_cells[2].text = float(credit)
+
+        document.add_page_break()
+
+        document.save('demo.docx')
+        startfile("demo.docx")
+
+
+def pdf_to_word():
+    """
+    This function is for printing
+    document pdf to word
+    """
+
+    FILE_PATH = 'd:\LD\ldproject\\apv.pdf'
+
+    with open(FILE_PATH, mode='rb') as f:
+
+        reader = PyPDF2.PdfFileReader(f)
+
+        page = reader.getPage(0)
+
+        print(page.extractText())
+    
+        # startfile("apv.doc")
+
+pdf_to_word()
+# testing_docx()
+
+
+# demo()
+# apv()
 # testing_dictionary() 
 # test_lookup()

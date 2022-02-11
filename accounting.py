@@ -3,6 +3,8 @@ from email.mime import text
 from importlib.resources import contents
 from tkinter import *
 import csv
+from types import NoneType
+import xdrlib
 # from types import NoneType
 from PIL import Image, ImageTk
 import PIL.Image
@@ -22,6 +24,9 @@ from reportlab.pdfgen.canvas import Canvas
 from PollyReports import *
 from os import startfile
 import xlsxwriter
+
+from docx import Document
+from docx.shared import Inches
 
 from datetime import date, timedelta
 from datetime import datetime
@@ -44,6 +49,7 @@ import pymongo
 import certifi
 ca = certifi.where()
 
+# import registration
 
 client = pymongo.MongoClient(f"mongodb+srv://joeysabusido:genesis11@cluster0.bmdqy.mongodb.net/ldglobal?retryWrites=true&w=majority", tlsCAFile=ca)
 
@@ -207,6 +213,170 @@ def testing_dictionary():
         
         # except Exception as ex:
         #     print("Error", f"Error due to :{str(ex)}") 
+def printing_check_voucher():
+    """
+    This function is for 
+    printing check voucher
+    """
+    dataSearch = db['journal_entry']
+    query = {'ref':reference_manual_entry_apv.get()}
+
+    result = []
+
+    # logo_icon3 = PIL.Image.open("image\logo.jpg")
+    # logo_icon_pic = logo_icon3.resize((125, 50), PIL.Image.ANTIALIAS)
+    # company_logo = ImageTk.PhotoImage(logo_icon_pic)
+
+
+    agg_result = dataSearch.find(query)
+    cnt = 0
+    
+    for i in agg_result:
+        cnt+=1
+        data = {'count': cnt,
+                'date_entry': i['date_entry'],
+                'journal': i['journal'],
+                'ref': i['ref'],
+                'descriptions': i['descriptions'],
+                'acoount_number': i['acoount_number'],
+                'account_disc': i['account_disc'],
+                'bsClass': i['bsClass'],
+                'debit_amount': i['debit_amount'],
+                'debit_amount2': '{:,.2f}'.format(i['debit_amount']),
+                'credit_amount': i['credit_amount'],
+                'credit_amount2': '{:,.2f}'.format(i['credit_amount']),
+                'due_date_apv': i['due_date_apv'],
+                'terms_days': i['terms_days'],
+                'supplier_Client': i['supplier/Client'],
+                'totalCredit': i['credit_amount'],
+                # 'totalDebit': '{:,.2f}'.format(i['debit_amount'] + i['debit_amount']),
+                
+                    }
+                
+
+        result.append(data)
+
+    agg_result= dataSearch.aggregate(
+        [
+        {"$match":{'ref':reference_manual_entry_apv.get() ,
+           
+         }},
+       
+        {"$group" : 
+            {"_id" :  '$ref',
+            "journalMemo" : {"$first" : '$descriptions'},
+            "totalDebit" : {"$sum" : '$debit_amount'},
+            "totalCredit" : {"$sum" : '$credit_amount'},
+            
+            }},
+        {'$sort':{'_id': 1}}
+            
+        ])
+
+    total_debit_amount = 0
+    total_credit_amount = 0
+    jorunalMemo =''
+    for x in agg_result: 
+      
+        jorunalMemo = x['journalMemo']
+        debit_amount = x['totalDebit']
+        debit_amount2 = '{:,.2f}'.format(debit_amount)
+
+        credit_amount = x['totalCredit']
+        credit_amount2 = '{:,.2f}'.format(credit_amount)
+   
+
+    rpt = Report(result)
+    rpt.detailband = Band([
+
+        # Element((65, 0), ("Courier-Bold", 10), key='acoount_number', align="right"),
+        Element((110, 0), ("Courier-Bold", 10), key='account_disc', align="right"),
+        # Element((300, 15), ("Courier-Bold", 10), key='bsClass', align="right"),
+        Element((195, 0), ("Helvetica-Bold", 9), key='debit_amount2', align="right"),
+        Element((260, 0), ("Helvetica-Bold", 9), key='credit_amount2', align="right"),
+       
+        #Rule((36, 0), 11.5 * 72, thickness=.2)
+
+
+
+    ])
+
+    rpt.pageheader = Band([
+
+        # Image((150, 0), width = 125, height = 50,
+        #         logo_icon3),
+        
+    
+        Element((90, 10), ("Courier-Bold", 11),
+                key='supplier_Client'),
+
+        
+        Element((100, 85), ("Courier-Bold", 11),
+                text=jorunalMemo),
+
+         Element((100, 190), ("Courier-Bold", 11),
+                text=''),
+
+        # Element((50, 150), ("Courier-Bold", 11),
+        #         text='Account #'),
+        # Element((50, 200), ("Courier-Bold", 11),
+        #         text='Account Title'),
+        # # Element((235, 85), ("Courier-Bold", 11),
+        # #         text='Account Type'),
+        # Element((100, 200), ("Courier-Bold", 11),
+        #         text='Debit'),
+        # Element((150, 200), ("Courier-Bold", 11),
+        #         text="Credit"),
+        
+        # Rule((30, 100), 8.5 * 50, thickness=1),
+    ])
+    rpt.reportfooter = Band([
+        # Rule((30, 4), 8.5 * 50),
+        # Element((36, 4), ("Helvetica-Bold", 12),
+        #         text="Grand Total"),
+
+        # Element((345, 4), ("Helvetica-Bold", 11),
+        #         text=debit_amount2),
+        # Element((425, 4), ("Helvetica-Bold", 11),
+        #         text=credit_amount2),
+        # Element((325, 4), ("Helvetica-Bold", 10),
+        #             text=gross_payT, align="right"),
+        # SumElement((425, 4), ("Courier-Bold", 11),
+        #             key="credit_amount", align="right"),
+        # SumElement((420, 4), ("Helvetica-Bold", 9),
+        #             key="phic", align="right"),
+        # SumElement((460, 4), ("Helvetica-Bold", 9),
+        #             key="hdmf", align="right"),
+        # SumElement((520, 4), ("Helvetica-Bold", 9),
+        #             key="totaldem", align="right"),
+        # SumElement((590, 4), ("Helvetica-Bold", 9),
+        #             key="taxwidtheld", align="right"),
+        # SumElement((665, 4), ("Helvetica-Bold", 9),
+        #             key="cashadvance", align="right"),
+        # SumElement((730, 4), ("Helvetica-Bold", 9),
+        #             key="sssloan", align="right"),
+        # SumElement((800, 4), ("Helvetica-Bold", 9),
+        #             key="hdmfloan", align="right"),
+        # Element((870, 4), ("Helvetica-Bold", 10),
+        #             text=net_payt, align="right"),
+        # Element((36, 30), ("Helvetica", 10),
+        #         text="Prepared BY:"),
+        # Element((80, 60), ("Helvetica", 10),
+        #         text= user_reg),
+        # Element((300, 30), ("Helvetica", 10),
+        #         text="Check  BY:"),
+        # Element((344, 60), ("Helvetica", 10),
+        #         text='JEROME R. SABUSIDO'),
+
+        ])
+        #canvas = Canvas("payroll.pdf") for short bond paper configuration
+    canvas = Canvas("check.pdf", (50 * 11, 72 * 8.5))
+    rpt.generate(canvas)
+    canvas.save()
+
+    startfile("check.pdf")
+
+
 def print_apv_():
     """
     This function is for
@@ -283,11 +453,11 @@ def print_apv_():
     rpt = Report(result)
     rpt.detailband = Band([
 
-        Element((65, 15), ("Courier", 10), key='acoount_number', align="right"),
-        Element((220, 15), ("Courier", 10), key='account_disc', align="right"),
-        Element((300, 15), ("Courier", 10), key='bsClass', align="right"),
-        Element((385, 15), ("Courier", 8), key='debit_amount2', align="right"),
-        Element((460, 15), ("Courier", 8), key='credit_amount2', align="right"),
+        Element((65, 15), ("Courier-Bold", 10), key='acoount_number', align="right"),
+        Element((220, 15), ("Courier-Bold", 10), key='account_disc', align="right"),
+        Element((300, 15), ("Courier-Bold", 10), key='bsClass', align="right"),
+        Element((385, 15), ("Courier-Bold", 10), key='debit_amount2', align="right"),
+        Element((460, 15), ("Courier-Bold", 10), key='credit_amount2', align="right"),
        
         #Rule((36, 0), 11.5 * 72, thickness=.2)
 
@@ -745,18 +915,22 @@ def autoIncrement_accountsPayable_ref():
     Account Payable
     """
 
-
+    current_year =  datetime.today().year
     dataSearch = db['journal_entry']
-    agg_result = dataSearch.find({'ref': {"$regex": "^APV"}}).sort('ref',-1).limit(1)
+    # agg_result = dataSearch.find({'ref': {"$regex": "^APV"}}).sort('ref',-1).limit(1)
+    agg_result = dataSearch.find({'ref': {"$regex": "APV"}}).sort('ref',-1).limit(1)
+
+    # agg_result = dataSearch.find({'ref': { "$gt": "A" }}).sort('ref',-1).limit(1)
 
     a = ""
     for x in agg_result :
         a = x['ref']
 
 
-    current_year =  datetime.today().year
+    
     if a =="":
         test_str = (f'{current_year}-APV-000')
+        # test_str = 'APV-000'
         res = test_str
 
         reference_manual_entry_apv.delete(0, END)
@@ -994,9 +1168,12 @@ def accountPayble_insert_frame():
 
     btn_print_apv = Button(accountPayable_frame, text='Print', bd=2, bg='Red', fg='black',
                               font=('arial', 10), width=14, height=1,
-                               command=print_apv_)
+                               command=printing_check_voucher)
     btn_print_apv.place(x=815, y=70)
 
+    # this is for ready function for apv printing
+    # print_apv_
+    # printing_check_voucher
 
     # this is for treeview for payroll computation
     journaEntrymanual_view_apv_Form = Frame(accountPayable_frame, width=500, height=10)
@@ -3555,7 +3732,7 @@ PASSWORD = StringVar()
 
 
 # ======================================LOGIN ============================================
-def Login(event=None):
+def Login():
     if user_description.get() =="Admin":
         if USERNAME.get == "" or PASSWORD.get() == "":
                 lbl_result.config(text="Please complete the required field!", fg="red")
@@ -3563,56 +3740,49 @@ def Login(event=None):
             dataSearch = db['login']
 
             # query = dataSearch.find_one({'name': USERNAME.get(), 'password':PASSWORD.get()})
-            # query = {'username': USERNAME.get(), 'password':PASSWORD.get(),'status':'approved'}
-            # search_variable = dataSearch.find_one(query)
-            # search_variable = dataSearch.find_one({'$and' :[{'username': USERNAME.get()} ,
+            query = {'username': USERNAME.get(), 'password':PASSWORD.get(),'status':'approved'}
+            agg_result = dataSearch.find(query)
+            # agg_result = dataSearch.find_one({'$and' :[{'username': USERNAME.get()} ,
             #                                    {'password':PASSWORD.get()},
             #                                    {'status':'approved'}
             #                                    ]})
 
-            agg_result= dataSearch.aggregate( [
-                    {"$match": {'status':'approved',
-                        '$and': [
-                        {'username': USERNAME.get()},
-                        {'password': PASSWORD.get()}           
-                        ]}},
-                    
-                                                        
-                    {"$group" : 
-                        {"_id" : '$username',
-                        "count" : {"$sum" : 1},
-                        
-                        }},
-                    
-                    ])
 
+            a = ''
+            for x in agg_result:
+                a = x['username']
+                if a == NoneType:
+                    lbl_result.config(text="Invalid username or password", fg="red")
+                    USERNAME.set("")
+                    PASSWORD.set("")
 
-            # listCusor = list(agg_result)
-
-            # df = pd.DataFrame(listCusor)
-            # # test = df.head()
-            # print(df)
-
-            for x in agg_result :
-                
-                a = x['count']
-                try:
-
-                # if a is None:
-                    
-                #     lbl_result.config(text="Invalid username or password", fg="red")
-                #     USERNAME.set("")
-                #     PASSWORD.set("")
-                    
-
-                # elif a >= 0:
-
+                else:
                     PASSWORD.set("")
                     lbl_result.config(text="")
                     root.withdraw()
                     dashboard()
-                except Exception as ex:
-                    messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+            # agg_result= dataSearch.aggregate( [
+            #         {"$match": {'status':'approved',
+            #             '$and': [
+            #             {'username': USERNAME.get()},
+            #             {'password': PASSWORD.get()}           
+            #             ]}},
+                    
+                                                        
+            #         {"$group" : 
+            #             {"_id" : '$username',
+            #             "count" : {"$sum" : 1},
+                        
+            #             }},
+                    
+            #         ])
+
+
+          
+           
+    
+                    
     
 
 
@@ -3660,7 +3830,14 @@ btn_login = Button(root, text="Login", font=('arial', 12), width=39,command=Logi
 btn_login.place(x=200, y=340)
 # btn_login.bind('<Return>', Login),
 
+password_lbl = Label(root,text='Register User',width=14,height=1,bg='yellow',fg='gray',
+                            font=('Arial',11),anchor='c')
+password_lbl.place(x=200,y=390)
 
+btn_registration = Button(root, text="Registration", font=('arial', 12),
+                                 width=17,bg='gray',fg='yellow'
+                                )
+btn_registration.place(x=380, y=390)
 
 # ========================================INITIALIZATION===================================
 if __name__ == '__main__':
