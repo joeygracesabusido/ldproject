@@ -50,6 +50,35 @@ client = pymongo.MongoClient(f"mongodb+srv://joeysabusido:genesis11@cluster0.bmd
 
 db = client.ldglobal
 
+def insert_login():
+    """
+    This function is
+    for inserting data 
+    """
+    
+    
+    
+    userName = input(str('Enter UserName: '))
+    login_passowrd = input('Enter Password: ')
+    login_status = input('Enter Status: ')
+    
+    collection = db['login']
+    
+    dataInsert = {
+        'username': userName,
+        'password': login_passowrd,
+        'status': login_status,
+        'created':datetime.now()
+        
+    }
+    
+    try:
+        collection.insert_one(dataInsert)
+        print('data has been saved')
+    except Exception as ex:
+                print("Error", f"Error due to :{str(ex)}")
+
+
 def test_lookup():
     """
     this function is 
@@ -335,7 +364,109 @@ def pdf_to_word():
     
         # startfile("apv.doc")
 
-pdf_to_word()
+def update_user_admin():
+    """
+    This function is for updating
+    user status
+    """
+
+       
+    dataSearch = db['login']
+    
+    try:
+        search_data = dataSearch.find()
+        listCusor = list(search_data)
+        # print(listCusor)
+
+        df = pd.DataFrame(listCusor)
+        # test = df.head()
+        print(df)
+    
+    
+
+    except Exception as ex:
+        print("Error", f"Error due to :{str(ex)}")   
+        
+    name_search = input('Enter Name: ')
+    
+    query = {'fullname':{"$regex": name_search}}
+    status_update = input('Enter Update : ')
+    
+    try:
+        newValue = { "$set": { "status": status_update } }
+        dataSearch.update_one(query, newValue)
+        print('Data has been updated')
+    except:
+        print('error occured')
+
+def test_query():
+    """
+    This is to test regex query
+    """
+    dataSearch = db['login']
+
+    name_search = input('Enter Name: ')
+    
+    query = {'fullname':{"$regex": name_search}}
+   
+    try:
+        search_data = dataSearch.find(query)
+        listCusor = list(search_data)
+        # print(listCusor)
+
+        df = pd.DataFrame(listCusor)
+        # test = df.head()
+        print(df)
+    
+    
+
+    except Exception as ex:
+        print("Error", f"Error due to :{str(ex)}")   
+
+
+def update_user_employee():
+    """
+    This function is for updating
+    user status
+    """
+
+       
+    dataSearch = db['employee_login']
+    
+    try:
+        search_data = dataSearch.find()
+        listCusor = list(search_data)
+        # print(listCusor)
+
+        df = pd.DataFrame(listCusor)
+        # test = df.head()
+        print(df)
+    
+    
+
+    except Exception as ex:
+        print("Error", f"Error due to :{str(ex)}")   
+        
+    name_search = input('Enter Name: ')
+    
+    query = {'fullname':{"$regex": name_search}}
+    status_update = input('Enter Update : ')
+    
+    try:
+        newValue = { "$set": { "status": status_update } }
+        dataSearch.update_one(query, newValue)
+        print('Data has been updated')
+    except:
+        print('error occured')
+
+
+update_user_employee()
+# test_query()
+
+# update_user_admin()
+
+
+# pdf_to_word()
 # testing_docx()
 
 

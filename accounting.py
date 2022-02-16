@@ -1,3 +1,4 @@
+from ast import Not
 from distutils import command
 from email.mime import text
 from importlib.resources import contents
@@ -448,16 +449,47 @@ def print_apv_():
         credit_amount = x['totalCredit']
         credit_amount2 = '{:,.2f}'.format(credit_amount)
     
+    dataSearch2 = db['supplier_db']
+
+    query2 =  {'supplierName':supplier_apv_entry.get()}
+
+    agg_result2 = dataSearch2.find(query2)
+
+    supp_adress =''
+    for i in agg_result2:
+        supp_adress = i['supplier_address']
+
+   
+   
+    userPrint = ''
+    if user_description.get() =="Admin":
+        dataSearch = db['login']
+        query = {'username':userName_entry.get()}
+        search_user = dataSearch.find(query)
+
+        for j in search_user:
+            userPrint = j['fullname']
         
+    else:
+
+        dataSearch = db['employee_login']
+        query = {'username':userName_entry.get()}
+        search_user = dataSearch.find(query)
+
+        for j in search_user:
+            userPrint = j['fullname']
+    
+
+
 
     rpt = Report(result)
     rpt.detailband = Band([
 
-        Element((65, 15), ("Courier-Bold", 10), key='acoount_number', align="right"),
-        Element((220, 15), ("Courier-Bold", 10), key='account_disc', align="right"),
-        Element((300, 15), ("Courier-Bold", 10), key='bsClass', align="right"),
-        Element((385, 15), ("Courier-Bold", 10), key='debit_amount2', align="right"),
-        Element((460, 15), ("Courier-Bold", 10), key='credit_amount2', align="right"),
+        Element((65, 0), ("Courier-Bold", 10), key='acoount_number', align="right"),
+        Element((220, 0), ("Courier-Bold", 10), key='account_disc', align="right"),
+        # Element((300, 15), ("Courier-Bold", 10), key='bsClass', align="right"),
+        Element((385, 0), ("Courier-Bold", 10), key='debit_amount2', align="right"),
+        Element((460, 0), ("Courier-Bold", 10), key='credit_amount2', align="right"),
        
         #Rule((36, 0), 11.5 * 72, thickness=.2)
 
@@ -474,27 +506,38 @@ def print_apv_():
         Element((150, 24), ("Courier-Bold", 13),
             text='ACCOUNT PAYABLE VOUCHER'),
 
-        Element((150, 45), ("Courier-Bold", 11),
-                key='supplier_Client'),
-
+       
         Element((36, 45), ("Courier-Bold", 11),
                 text='PAYEE:'),
 
+        Element((150, 45), ("Courier-Bold", 11),
+            key='supplier_Client'),
+
+
         Element((36, 65), ("Courier-Bold", 11),
                 text='ADDRESS:'),
+        Element((150, 65), ("Courier-Bold", 11),
+            text=supp_adress ),
 
         Element((36, 85), ("Courier-Bold", 11),
+                text='Date:'),
+
+        Element((150, 85), ("Courier-Bold", 11),
+            key='date_entry'),
+
+
+        Element((36, 120), ("Courier-Bold", 11),
                 text='Account #'),
-        Element((135, 85), ("Courier-Bold", 11),
+        Element((135, 120), ("Courier-Bold", 11),
                 text='Account Title'),
-        Element((235, 85), ("Courier-Bold", 11),
+        Element((235, 120), ("Courier-Bold", 11),
                 text='Account Type'),
-        Element((350, 85), ("Courier-Bold", 11),
+        Element((350, 120), ("Courier-Bold", 11),
                 text='Debit'),
-        Element((420, 85), ("Courier-Bold", 11),
+        Element((420, 120), ("Courier-Bold", 11),
                 text="Credit"),
         
-        Rule((30, 100), 8.5 * 50, thickness=1),
+        Rule((30, 140), 8.5 * 50, thickness=1),
     ])
     rpt.reportfooter = Band([
         Rule((30, 4), 8.5 * 50),
@@ -505,34 +548,24 @@ def print_apv_():
                 text=debit_amount2),
         Element((425, 4), ("Helvetica-Bold", 11),
                 text=credit_amount2),
-        # Element((325, 4), ("Helvetica-Bold", 10),
-        #             text=gross_payT, align="right"),
-        # SumElement((425, 4), ("Courier-Bold", 11),
-        #             key="credit_amount", align="right"),
-        # SumElement((420, 4), ("Helvetica-Bold", 9),
-        #             key="phic", align="right"),
-        # SumElement((460, 4), ("Helvetica-Bold", 9),
-        #             key="hdmf", align="right"),
-        # SumElement((520, 4), ("Helvetica-Bold", 9),
-        #             key="totaldem", align="right"),
-        # SumElement((590, 4), ("Helvetica-Bold", 9),
-        #             key="taxwidtheld", align="right"),
-        # SumElement((665, 4), ("Helvetica-Bold", 9),
-        #             key="cashadvance", align="right"),
-        # SumElement((730, 4), ("Helvetica-Bold", 9),
+
+        
+        Element((36, 150), ("Helvetica", 10),
+            text='Prepared By:'),
+
+        Element((55, 175), ("Helvetica", 10),
+            text=userPrint),
+
+        Element((180, 150), ("Helvetica", 10),
+                text="Check  BY:"),
+        
         #             key="sssloan", align="right"),
         # SumElement((800, 4), ("Helvetica-Bold", 9),
         #             key="hdmfloan", align="right"),
         # Element((870, 4), ("Helvetica-Bold", 10),
         #             text=net_payt, align="right"),
-        # Element((36, 30), ("Helvetica", 10),
-        #         text="Prepared BY:"),
-        # Element((80, 60), ("Helvetica", 10),
-        #         text= user_reg),
-        # Element((300, 30), ("Helvetica", 10),
-        #         text="Check  BY:"),
-        # Element((344, 60), ("Helvetica", 10),
-        #         text='JEROME R. SABUSIDO'),
+       
+       
 
         ])
         #canvas = Canvas("payroll.pdf") for short bond paper configuration
@@ -1168,7 +1201,7 @@ def accountPayble_insert_frame():
 
     btn_print_apv = Button(accountPayable_frame, text='Print', bd=2, bg='Red', fg='black',
                               font=('arial', 10), width=14, height=1,
-                               command=printing_check_voucher)
+                               command=print_apv_)
     btn_print_apv.place(x=815, y=70)
 
     # this is for ready function for apv printing
@@ -3645,9 +3678,205 @@ def Logout():
 
         root.deiconify()
         reportFrame.destroy()
+#=========================================Checker & Approver Frame=====================================
+def insert_checker_approver():
+    """
+    This function is for inserting
+    data for checker and approver
+    """
+    if checker_approver_entry.get() == "Checker":
 
+        collection = db['checker_db']
+
+        dataInsert = {
+            'fullname': full_name_checker_approver.get(),
+            'position': position_checker_approver.get(),
+            'created':datetime.now()
+            
+        }
+        
+        try:
+            collection.insert_one(dataInsert)
+            messagebox.showinfo('JRS','Data has been saved')
+            checker_approver_frame.destroy()
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")
+    elif checker_approver_entry.get() == "Approver": 
+        collection = db['approver_db']
+
+        dataInsert = {
+            'fullname': full_name_checker_approver.get(),
+            'position': position_checker_approver.get(),
+            'created':datetime.now()
+            
+        }
+        
+        try:
+            collection.insert_one(dataInsert)
+            messagebox.showinfo('JRS','Data has been saved')
+            checker_approver_frame.destroy()
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")  
+
+def check_by_frame():
+    """
+    This function si for 
+    checker registration frame
+    """
+    global checker_approver_frame
+    checker_approver_frame = Toplevel()
+    checker_approver_frame.title("Checker and Approver")
+    width = 550
+    height = 450
+    screen_width = checker_approver_frame.winfo_screenwidth()
+    screen_height = checker_approver_frame.winfo_screenheight()
+    x = (screen_width / 2) - (width / 2)
+    y = (screen_height / 2) - (height / 2)
+    checker_approver_frame.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    checker_approver_frame.resizable = True
+    checker_approver_frame.config(bg="gray")
+
+    
+
+    loginlabe = Label(checker_approver_frame,text='Register As',width=17,height=1,bg='yellow',fg='black',
+                            font=('Arial',14),anchor='c')
+    loginlabe.place(x=185,y=70)
+
+    global checker_approver_entry
+    checker_approver_entry = ttk.Combobox(checker_approver_frame, width=19,font=('Arial',13))
+    checker_approver_entry['values'] = ("Checker", "Approver")
+    checker_approver_entry.place(x=185, y=105)
+
+    full_name_label = Label(checker_approver_frame,text='Full Name',width=14,height=1,bg='yellow',fg='black',
+                                font=('Arial',11),anchor='c')
+    full_name_label.place(x=100,y=230)
+
+    global full_name_checker_approver
+    full_name_checker_approver = Entry(checker_approver_frame, width=22, font=('Arial', 12))
+    #userName_entry.insert(0, u'enter username')
+    full_name_checker_approver.place(x=250, y=230)
+
+    full_name_label = Label(checker_approver_frame,text='Position',width=14,height=1,bg='yellow',fg='black',
+                                font=('Arial',11),anchor='c')
+    full_name_label.place(x=100,y=260)
+
+    global position_checker_approver
+    position_checker_approver = Entry(checker_approver_frame, width=22, font=('Arial', 12))
+    #userName_entry.insert(0, u'enter username')
+    position_checker_approver.place(x=250, y=260)
+
+    btn_login = Button(checker_approver_frame, text="Save", font=('arial', 12), width=39,
+                                        command=insert_checker_approver)
+    btn_login.place(x=100, y=290)
+
+
+#============================================Registraion Frame==============================================
+
+def user_approval():
+    """
+    This function is
+    for allowing for user
+    to navigate or to approved user
+    """
+    if user_description_approval =="Admin":
+        dataSearch = db['login']
+        name_search = full_name_approval.get()
+        
+        query = {'fullname':{"$regex": name_search}}
+        status_update = user_status_approval.get()
+        
+        try:
+            newValue = { "$set": { "status": status_update } }
+            dataSearch.update_one(query, newValue)
+            messagebox.showinfo('JRS','Data has been approved')
+            user_approval_frame.destroy()
+        except Exception as ex:
+
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")
+    else:
+        dataSearch = db['employee_login']
+        name_search = full_name_approval.get()
+        
+        query = {'fullname':{"$regex": name_search}}
+        status_update = user_status_approval.get()
+        
+        try:
+            newValue = { "$set": { "status": status_update } }
+            dataSearch.update_one(query, newValue)
+            messagebox.showinfo('JRS','Data has been approved')
+            user_approval_frame.destroy()
+        except Exception as ex:
+
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+def user_approvalFrame():
+    """
+    This function is for 
+    approval for 
+    """
+    global user_approval_frame
+    user_approval_frame = Toplevel()
+    user_approval_frame.title("User Approval")
+    width = 550
+    height = 450
+    screen_width = user_approval_frame.winfo_screenwidth()
+    screen_height = user_approval_frame.winfo_screenheight()
+    x = (screen_width / 2) - (width / 2)
+    y = (screen_height / 2) - (height / 2)
+    user_approval_frame.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    user_approval_frame.resizable = True
+    user_approval_frame.config(bg="gray")
+
+    
+
+    loginlabe = Label(user_approval_frame,text='Register As',width=17,height=1,bg='yellow',fg='black',
+                            font=('Arial',14),anchor='c')
+    loginlabe.place(x=185,y=70)
+
+    global user_description_approval
+    user_description_approval = ttk.Combobox(user_approval_frame, width=19,font=('Arial',13))
+    user_description_approval['values'] = ("Admin", "Employee")
+    user_description_approval.place(x=185, y=105)
+
+    full_name_label = Label(user_approval_frame,text='Full Name',width=14,height=1,bg='yellow',fg='black',
+                                font=('Arial',11),anchor='c')
+    full_name_label.place(x=100,y=230)
+
+    global full_name_approval
+    full_name_approval = Entry(user_approval_frame, width=22, font=('Arial', 12))
+    #userName_entry.insert(0, u'enter username')
+    full_name_approval.place(x=250, y=230)
+
+    username_lbl = Label(user_approval_frame,text='Approval Status',width=14,height=1,bg='yellow',fg='black',
+                                font=('Arial',11),anchor='c')
+    username_lbl.place(x=100,y=260)
+
+    global user_status_approval
+    user_status_approval = ttk.Combobox(user_approval_frame, width=19,font=('Arial',13))
+    user_status_approval['values'] = ("for approval", "approved")
+    user_status_approval.place(x=250, y=260)
+
+    
+    global lbl_result_registration
+    lbl_result_registration = Label(user_approval_frame, text="", bg='gray', font=('arial', 13),anchor='c')
+    lbl_result_registration.place(x=100, y=290)
+
+
+    btn_login = Button(user_approval_frame, text="Register", font=('arial', 12), width=39,command=user_approval)
+    btn_login.place(x=100, y=320)
+
+
+def disable_userApproval():
+    """
+    This function is for
+    disabling file menu user approval
+    """
+    if user_description.get() =="Employee":
+        filemenu2.entryconfig('User Approval',state='disable')
 
 def dashboard():
+
+    
     global MidViewForm9
     global logo_icon2
     global reportFrame
@@ -3667,6 +3896,8 @@ def dashboard():
     TopdashboardForm = Frame(reportFrame, width=1295, height=50, bd=2, relief=SOLID)
     TopdashboardForm.place(x=1,y=8)
 #============================================================= menu Bar=================================================
+    
+    global filemenu2
     menubar = Menu(reportFrame)
     filemenu = Menu(menubar, tearoff=0)
     filemenu2 = Menu(menubar, tearoff=0)
@@ -3677,9 +3908,11 @@ def dashboard():
 
     filemenu.add_command(label="Logout", command = Logout)
     # filemenu.add_command(label="Exit")
-    filemenu2.add_command(label="Product Registration")
-    filemenu2.add_command(label="Add new")
-    filemenu2.add_command(label="View")
+    filemenu2.add_command(label="User Approval",command=user_approvalFrame)
+    filemenu2.add_command(label="Checker & Approver",command=check_by_frame)
+
+   
+   
     filemenu3.add_command(label="Payroll",command=payroll_transactions)
    
     filemenu4.add_command(label="Accounting Module", command=accounting_frame)
@@ -3689,7 +3922,7 @@ def dashboard():
     filemenu6.add_command(label="Equipment Module")
     filemenu5.add_command(label="Reports Module")
     menubar.add_cascade(label="Account", menu=filemenu)
-    menubar.add_cascade(label="Inventory", menu=filemenu2)
+    menubar.add_cascade(label="User Approval", menu=filemenu2)
     menubar.add_cascade(label="Payroll Transactions", menu=filemenu3)
     menubar.add_cascade(label="Accounting Transaction", menu=filemenu4)
     
@@ -3698,7 +3931,11 @@ def dashboard():
 
     reportFrame.config(menu=menubar)
 
+    
+      
+        # filemenu2["state"] = DISABLED
 
+    disable_userApproval()
     MidViewForm9 = Frame(reportFrame, width=1295, height=600,bd=2,relief=SOLID)
     MidViewForm9.place(x=1, y=58)
     MidViewForm9.config(bg="skyblue")
@@ -3724,12 +3961,159 @@ def dashboard():
                            fg="white", bg="black", font=("helvetica", 10))
     DateTime_label.place(x=1100, y=15)
 
+def insert_user_registration():
+    """
+    This function is for inserting
+    user registration
+    """
 
+    if user_description_registraion.get() =="Admin":
+        if userName_entry_registry.get == "" or password_entry_registration.get() == "":
+                lbl_result_registration.config(text="Please complete the required field!", fg="red")
+        elif password_entry_registration.get() != password_register_Reentry.get():
+                lbl_result_registration.config(text="Password did not Mach", fg="red")
+        else:
+            
+
+            collection = db['login']
+    
+            dataInsert = {
+                'fullname': full_name_registry.get(),
+                'username': userName_entry_registry.get(),
+                'password': password_entry_registration.get(),
+                'status': 'for approval',
+                'created':datetime.now()
+                
+            }
+            
+            try:
+                collection.insert_one(dataInsert)
+                messagebox.showinfo('JRS','Data has been saved')
+                registration_frame.destroy()
+            except Exception as ex:
+                messagebox.showerror("Error", f"Error due to :{str(ex)}")
+            
+    elif user_description_registraion.get() =="Employee" :
+       
+        if userName_entry_registry.get == "" or password_entry_registration.get() == "":
+            lbl_result_registration.config(text="Please complete the required field!", fg="red")
+        elif password_entry_registration.get() != password_register_Reentry.get():
+            lbl_result_registration.config(text="Password did not Mach", fg="red")
+        else:
+            
+
+            collection = db['employee_login']
+    
+            dataInsert = {
+                'fullname': full_name_registry.get(),
+                'username': userName_entry_registry.get(),
+                'password': password_entry_registration.get(),
+                'status': 'for approval',
+                'created':datetime.now()
+                
+            }
+            
+            try:
+                collection.insert_one(dataInsert)
+                messagebox.showinfo('JRS','Data has been saved')
+                registration_frame.destroy()
+            except Exception as ex:
+                    messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+
+                    
+    elif user_description_registraion.get() =="":
+        if userName_entry_registry.get == "" or password_entry_registration.get() == "":
+                lbl_result_registration.config(text="Please complete the required field!", fg="red")
+        elif password_entry_registration.get() != password_register_Reentry.get():
+            lbl_result_registration.config(text="Password did not Mach", fg="red")
+
+          
+           
+    
+
+
+# =====================================Registration =============================================
+def user_regsitration_frame():
+    """
+    This function is for
+    user registration 
+    """
+    global registration_frame
+    registration_frame = Toplevel()
+    registration_frame.title("User Regsitration")
+    width = 550
+    height = 550
+    screen_width = registration_frame.winfo_screenwidth()
+    screen_height = registration_frame.winfo_screenheight()
+    x = (screen_width / 2) - (width / 2)
+    y = (screen_height / 2) - (height / 2)
+    registration_frame.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    registration_frame.resizable = True
+    registration_frame.config(bg="skyblue")
+
+   
+
+    loginlabe = Label(registration_frame,text='Register as',width=17,height=1,bg='yellow',fg='gray',
+                            font=('Arial',14),anchor='c')
+    loginlabe.place(x=185,y=70)
+
+    global user_description_registraion
+    user_description_registraion = ttk.Combobox(registration_frame, width=19,font=('Arial',13))
+    user_description_registraion['values'] = ("Admin", "Employee")
+    user_description_registraion.place(x=185, y=105)
+
+    full_name_label = Label(registration_frame,text='Full Name',width=14,height=1,bg='yellow',fg='gray',
+                                font=('Arial',11),anchor='c')
+    full_name_label.place(x=100,y=230)
+
+    global full_name_registry
+    full_name_registry = Entry(registration_frame, width=22, font=('Arial', 12))
+    #userName_entry.insert(0, u'enter username')
+    full_name_registry.place(x=250, y=230)
+
+    username_lbl = Label(registration_frame,text='Username',width=14,height=1,bg='yellow',fg='gray',
+                                font=('Arial',11),anchor='c')
+    username_lbl.place(x=100,y=260)
+
+    global userName_entry_registry
+    userName_entry_registry = Entry(registration_frame, width=22, font=('Arial', 12))
+    #userName_entry.insert(0, u'enter username')
+    userName_entry_registry.place(x=250, y=260)
+
+
+    password_lbl = Label(registration_frame,text='Password',width=14,height=1,bg='yellow',fg='gray',
+                                font=('Arial',11),anchor='c')
+    password_lbl.place(x=100,y=290)
+
+    global password_entry_registration
+    password_entry_registration = Entry(registration_frame, width=22, font=('Arial', 12),show="*")
+    #password_entry.insert(0,u'enter password')
+    password_entry_registration.place(x=250, y=290)
+
+
+    password_lbl_retype = Label(registration_frame,text='Password Retype',width=14,height=1,bg='yellow',fg='gray',
+                                font=('Arial',11),anchor='c')
+    password_lbl_retype.place(x=100,y=320)
+
+    global password_register_Reentry
+    password_register_Reentry = Entry(registration_frame, width=22, font=('Arial', 12),show="*")
+    #password_entry.insert(0,u'enter password')
+    password_register_Reentry.place(x=250, y=320)
+
+    global lbl_result_registration
+    lbl_result_registration = Label(registration_frame, text="", bg='skyblue', font=('arial', 13),anchor='c')
+    lbl_result_registration.place(x=100, y=350)
+
+
+    btn_login = Button(registration_frame, text="Register", font=('arial', 12), width=39,command=insert_user_registration)
+    btn_login.place(x=100, y=370)
+    # btn_login.bind('<Return>', Login),
+
+   
 
 USERNAME =StringVar()
 PASSWORD = StringVar()
-
-
 
 # ======================================LOGIN ============================================
 def Login():
@@ -3747,6 +4131,31 @@ def Login():
             #                                    {'status':'approved'}
             #                                    ]})
 
+
+            a = ''
+            for x in agg_result:
+                a = x['username']
+                if a == NoneType:
+                    lbl_result.config(text="Invalid username or password", fg="red")
+                    USERNAME.set("")
+                    PASSWORD.set("")
+
+                else:
+                    PASSWORD.set("")
+                    lbl_result.config(text="")
+                    root.withdraw()
+                    dashboard()
+
+    elif user_description.get() =="Employee":
+        if USERNAME.get == "" or PASSWORD.get() == "":
+                lbl_result.config(text="Please complete the required field!", fg="red")
+        else:
+            dataSearch = db['employee_login']
+
+            # query = dataSearch.find_one({'name': USERNAME.get(), 'password':PASSWORD.get()})
+            query = {'username': USERNAME.get(), 'password':PASSWORD.get(),'status':'approved'}
+            agg_result = dataSearch.find(query)
+           
 
             a = ''
             for x in agg_result:
@@ -3830,12 +4239,12 @@ btn_login = Button(root, text="Login", font=('arial', 12), width=39,command=Logi
 btn_login.place(x=200, y=340)
 # btn_login.bind('<Return>', Login),
 
-password_lbl = Label(root,text='Register User',width=14,height=1,bg='yellow',fg='gray',
-                            font=('Arial',11),anchor='c')
-password_lbl.place(x=200,y=390)
+password_lbl = Label(root,text='If not Register, click button?',width=25,height=1,
+                            font=('Arial',10),anchor='c')
+password_lbl.place(x=170,y=390)
 
 btn_registration = Button(root, text="Registration", font=('arial', 12),
-                                 width=17,bg='gray',fg='yellow'
+                                 width=17,bg='gray',fg='yellow', command=user_regsitration_frame
                                 )
 btn_registration.place(x=380, y=390)
 
