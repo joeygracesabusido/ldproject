@@ -2,6 +2,7 @@ from ast import Not
 from distutils import command
 from email.mime import text
 from importlib.resources import contents
+from lib2to3.pgen2.token import ENDMARKER
 from tkinter import *
 import csv
 from types import NoneType
@@ -31,6 +32,8 @@ from docx.shared import Inches
 
 from datetime import date, timedelta
 from datetime import datetime
+
+from fpdf import FPDF
 
 #from PIL import ImageTk, Image as PILImage
 #from payroll import selectTransaction
@@ -214,6 +217,302 @@ def testing_dictionary():
         
         # except Exception as ex:
         #     print("Error", f"Error due to :{str(ex)}") 
+#===========================================Request From=============================================
+def print_fund_request():
+    """
+    This function is
+    for printing fund request in PDF form
+    """
+    printFR = FPDF('P','mm','Letter')
+
+    printFR.add_page()
+    printFR.set_font('courier','B',12)
+    printFR.cell(100,10, fundRequest_number_entry.get(),ln=2 )
+    printFR.cell(150,10, name_request_form_entry.get(),ln=2, align=('C'))
+    printFR.cell(150,10, date_request_form.get(),ln=2,align=('C'))
+    printFR.cell(150,10, particular_requestion_form.get('1.0', 'end-1c'),ln=2,align=('C'))
+    printFR.cell(150,10,'',ln=2,align=('C'))
+    printFR.cell(150,10,'',ln=2,align=('C'))
+    printFR.cell(150,10,'',ln=2,align=('C'))
+    printFR.cell(150,10,'',ln=2,align=('C'))
+    printFR.cell(150,10, preparedBy_entry.get(),ln=2,align=('C'))
+    printFR.output('fundrequest.pdf')
+
+    startfile("fundrequest.pdf")
+
+
+def search_fundRequest_number():
+    """
+    This function is for searching
+    fund request number
+    """
+
+    
+
+    dataSearch = db['fund_request']
+    query = {'fr_number': fundRequest_number_entry.get()}
+
+    fr_search = dataSearch.find(query)
+
+    for i in fr_search:
+        name = i['payee']
+        date_entry = i['date_entry']
+        particular = i['particular']
+        amount = i['amount']
+        requeste_by = i['requeste_by']
+        fr_number = i['fr_number']
+
+        
+
+        name_request_form_entry.delete(0,END)
+        particular_requestion_form.delete('1.0', END)
+        amount_requestion_entry.delete(0,END)
+        preparedBy_entry.delete(0,END)
+        fundRequest_number_entry.delete(0,END)
+        date_request_form.delete(0,END)
+
+        name_request_form_entry.insert(0,(name))
+        date_request_form.insert(0,(date_entry))
+        particular_requestion_form.insert('1.0',(particular))
+        amount_requestion_entry.insert(0,(amount))
+        preparedBy_entry.insert(0,(requeste_by))
+        fundRequest_number_entry.insert(0,(fr_number))
+
+
+
+
+def delete_fund_request():
+    """
+    This function is for deleting 
+    fund request
+    """
+    dataSearch = db['fund_request']
+    # query = {'_id': ObjectId(Selected_ID_entry.get())}
+    query = {'fr_number': fundRequest_number_entry.get()}
+    result = tkMessageBox.askquestion('JRS','Are you sure you want to Delete?',icon="warning")
+    if result == 'yes':
+        x = dataSearch.delete_one(query)
+        messagebox.showinfo('JRS', 'Selected Record has been deleted')
+        journalEntryManual_list_treeview_apv()
+
+
+def save_fund_request():
+    """
+    This function is to save 
+    data for fund request
+    """
+    dateEntry =  date_request_form.get()
+    date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+    
+    
+    collection = db['fund_request'] # this is to create collection and save as table
+    dataInsert = {
+    # 'date_entry': journalEntryInsert_datefrom.get(),
+    'payee': name_request_form_entry.get(),
+    'date_entry': date_time_obj,
+    'particular': particular_requestion_form.get('1.0', 'end-1c'),
+    'amount': float(amount_requestion_entry.get()),
+    # 'descriptions': journal_memo_entry.get('1.0', 'end-1c'),
+    'requeste_by': preparedBy_entry.get(),
+    'fr_number': fundRequest_number_entry.get(),
+    'user': USERNAME.get(),
+    'created':datetime.now()
+    
+    }
+
+    
+    
+    try:
+        collection.insert_one(dataInsert)
+        messagebox.showinfo("Error", 'Data has been save')
+       
+        
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+                   
+   
+
+def auto_fund_request_number():
+    """
+    This function is for auto
+    generate number for fund request
+    """
+    current_year =  datetime.today().year
+    dataSearch = db['fund_request']
+    # agg_result = dataSearch.find({'ref': {"$regex": "^APV"}}).sort('ref',-1).limit(1)
+    agg_result = dataSearch.find({'fr_number': {"$regex": "FR"}}).sort('ref',-1).limit(1)
+
+    # agg_result = dataSearch.find({'ref': { "$gt": "A" }}).sort('ref',-1).limit(1)
+
+    a = ""
+    for x in agg_result :
+        a = x['fr_number']
+
+
+    
+    if a =="":
+        test_str = ('FR-00000')
+        # test_str = 'APV-000'
+        res = test_str
+
+        fundRequest_number_entry.delete(0, END)
+        fundRequest_number_entry.insert(0, (res))
+        
+        
+    
+    else:
+        
+
+        reference_manual = a 
+        res = re.sub(r'[0-9]+$',
+                lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
+                reference_manual)
+
+        fundRequest_number_entry.delete(0, END)
+        fundRequest_number_entry.insert(0, (res))
+
+    userPrint = ''
+    if user_description.get() =="Admin":
+        dataSearch = db['login']
+        query = {'username':userName_entry.get()}
+        search_user = dataSearch.find(query)
+
+        for j in search_user:
+            userPrint = j['fullname']
+            preparedBy_entry.delete(0,END)
+            preparedBy_entry.insert(0,(userPrint))
+        
+    else:
+
+        dataSearch = db['employee_login']
+        query = {'username':userName_entry.get()}
+        search_user = dataSearch.find(query)
+
+        for j in search_user:
+            userPrint = j['fullname']
+            preparedBy_entry.delete(0,END)
+            preparedBy_entry.insert(0,(userPrint))
+
+
+def fund_request_form_frame():
+    """
+    This function is for the frame
+    of budget requestion
+    """
+    clearFrame()
+
+    global fundRequest_form_frame
+    fundRequest_form_frame = Frame(MidViewForm9, width=1120, height=575, bd=2, bg='gray', relief=SOLID)
+    fundRequest_form_frame.place(x=160, y=8)
+
+    reference_label = Label(fundRequest_form_frame, text='Name:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    reference_label.place(x=10, y=35)
+
+    global name_request_form_entry
+    name_request_form_entry = Entry(fundRequest_form_frame, width=35, font=('Arial', 10),
+                                 justify='right')
+    name_request_form_entry.place(x=170, y=35)
+   
+    entry_date_label = Label(fundRequest_form_frame, text='Date:', width=14, height=1, bg='yellow', fg='black',
+                          font=('Arial', 10), anchor='e')
+    entry_date_label.place(x=10, y=65)
+
+    global date_request_form
+    date_request_form = DateEntry(fundRequest_form_frame, width=15, background='darkblue',
+                                  date_pattern='MM/dd/yyyy',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    date_request_form.place(x=170, y=65)
+    date_request_form.configure(justify='center')
+    
+
+    journal_memo_lbl = Label(fundRequest_form_frame, text='Particular:', width=14, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    journal_memo_lbl.place(x=10, y=95)
+
+    global particular_requestion_form
+    particular_requestion_form = scrolledtext.ScrolledText(fundRequest_form_frame,
+                                                          wrap=tk.WORD,
+                                                          width=23,
+                                                          height=3,
+                                                          font=("Arial",
+                                                                10))
+    particular_requestion_form.place(x=170, y=95)
+
+    
+    
+
+    account_number_lbl = Label(fundRequest_form_frame, text='Amounts:', width=14, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    account_number_lbl.place(x=10, y=155)
+
+    global amount_requestion_entry
+    amount_requestion_entry = Entry(fundRequest_form_frame, width=12, font=('Arial', 10), justify='right')
+    amount_requestion_entry.place(x=170, y=155)
+
+
+    account_number_lbl = Label(fundRequest_form_frame, text='Prepared By:', width=14, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    account_number_lbl.place(x=10, y=185)
+
+    global preparedBy_entry
+    preparedBy_entry = Entry(fundRequest_form_frame, width=30, font=('Arial', 10), justify='right')
+    preparedBy_entry.place(x=170, y=185)
+
+    account_number_lbl = Label(fundRequest_form_frame, text='FR Number:', width=14, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    account_number_lbl.place(x=10, y=215)
+
+    global fundRequest_number_entry
+    fundRequest_number_entry = Entry(fundRequest_form_frame, width=30, font=('Arial', 10), justify='right')
+    fundRequest_number_entry.place(x=170, y=215)
+    
+
+    btn_add_new_fr = Button(fundRequest_form_frame, text='Add New', bd=2, bg='gray', fg='yellow',
+                              font=('arial', 10), width=14, height=1,
+                               command=auto_fund_request_number)
+    btn_add_new_fr.place(x=10, y=245)
+
+    
+
+    btn_save_fr = Button(fundRequest_form_frame, text='Save', bd=2, bg='yellowgreen', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=save_fund_request)
+    btn_save_fr.place(x=160, y=245)
+
+    btn_delete_fr = Button(fundRequest_form_frame, text='Delete', bd=2, bg='red', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=delete_fund_request)
+    btn_delete_fr.place(x=310, y=245)
+
+    btn_search_fr = Button(fundRequest_form_frame, text='Search', bd=2, bg='white', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=search_fundRequest_number)
+    btn_search_fr.place(x=10, y=275)
+
+    btn_print_fr = Button(fundRequest_form_frame, text='Print', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=print_fund_request)
+    btn_print_fr.place(x=160, y=275)
+
+    
+    
+
+
+    
+
+
+
+
+
+
+
+#============================================Accounts Payable Frame==================================
 def printing_check_voucher():
     """
     This function is for 
@@ -318,18 +617,7 @@ def printing_check_voucher():
          Element((100, 190), ("Courier-Bold", 11),
                 text=''),
 
-        # Element((50, 150), ("Courier-Bold", 11),
-        #         text='Account #'),
-        # Element((50, 200), ("Courier-Bold", 11),
-        #         text='Account Title'),
-        # # Element((235, 85), ("Courier-Bold", 11),
-        # #         text='Account Type'),
-        # Element((100, 200), ("Courier-Bold", 11),
-        #         text='Debit'),
-        # Element((150, 200), ("Courier-Bold", 11),
-        #         text="Credit"),
-        
-        # Rule((30, 100), 8.5 * 50, thickness=1),
+      
     ])
     rpt.reportfooter = Band([
         # Rule((30, 4), 8.5 * 50),
@@ -376,6 +664,228 @@ def printing_check_voucher():
     canvas.save()
 
     startfile("check.pdf")
+def cash_voucher_frame():
+    """
+    This function is for 
+    cash voucher frame
+    """
+    clearFrame()
+
+    global accountPayable_frame
+    accountPayable_frame = Frame(MidViewForm9, width=1120, height=575, bd=2, bg='gray', relief=SOLID)
+    accountPayable_frame.place(x=160, y=8)
+   
+    entry_date_label = Label(accountPayable_frame, text='Date:', width=14, height=1, bg='yellow', fg='black',
+                          font=('Arial', 10), anchor='e')
+    entry_date_label.place(x=10, y=35)
+
+    global journalEntryInsert_datefrom
+    journalEntryInsert_datefrom = DateEntry(accountPayable_frame, width=15, background='darkblue',
+                                  date_pattern='MM/dd/yyyy',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    journalEntryInsert_datefrom.place(x=170, y=35)
+    journalEntryInsert_datefrom.configure(justify='center')
+    journalEntryInsert_datefrom.bind("<<DateEntrySelected>>", auto_dueDate_computation)
+
+
+    entry_date_label = Label(accountPayable_frame, text='Due Date:', width=14, height=1, bg='yellow', fg='black',
+                          font=('Arial', 10), anchor='e')
+    entry_date_label.place(x=290, y=35)
+
+    global journalEntryInsert_Duedate
+    journalEntryInsert_Duedate = DateEntry(accountPayable_frame, width=15, background='darkblue',
+                                  date_pattern='MM/dd/yyyy',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    journalEntryInsert_Duedate.place(x=430, y=35)
+    journalEntryInsert_Duedate.configure(justify='center')
+
+
+    account_number_lbl = Label(accountPayable_frame, text='Terms in days:', width=14, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    account_number_lbl.place(x=10, y=5)
+
+    global dueDate_apv_entry
+    dueDate_apv_entry = Entry(accountPayable_frame, width=12, font=('Arial', 10), justify='right')
+    dueDate_apv_entry.place(x=170, y=5)
+    
+
+
+    journal_label = Label(accountPayable_frame, text='Journal:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    journal_label.place(x=10, y=70)
+
+    global journal_manual
+    
+    journal_manual = ttk.Combobox(accountPayable_frame, width=14)
+    journal_manual['values'] = ("Payments", "Receipts", "Sales", "Purchases",'General')
+    journal_manual.place(x=170, y=70)
+
+    supplier_label = Label(accountPayable_frame, text='Supplier:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    supplier_label.place(x=290, y=70)
+
+    # global supplier_apv_entry
+    # supplier_apv_entry = Entry(accountPayable_frame, width=25, font=('Arial', 10), justify='right')
+    # supplier_apv_entry.place(x=430, y=70)
+    global supplier_apv_entry
+    supplier_apv_entry = ttk.Combobox(accountPayable_frame, width=35)
+    supplier_apv_entry['values'] = supplier_list()
+    supplier_apv_entry.place(x=430, y=70)
+    # supplier_apv_entry.bind("<<ComboboxSelected>>", auto_account_num)
+
+    reference_label = Label(accountPayable_frame, text='reference:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    reference_label.place(x=10, y=105)
+
+    global reference_manual_entry_apv
+    reference_manual_entry_apv = Entry(accountPayable_frame, width=20, font=('Arial', 10), justify='right')
+    reference_manual_entry_apv.place(x=170, y=105)
+
+    
+    journal_memo_lbl = Label(accountPayable_frame, text='Journal Memo:', width=14, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    journal_memo_lbl.place(x=10, y=140)
+
+    global journal_memo_entry
+    journal_memo_entry = scrolledtext.ScrolledText(accountPayable_frame,
+                                                          wrap=tk.WORD,
+                                                          width=23,
+                                                          height=3,
+                                                          font=("Arial",
+                                                                10))
+    journal_memo_entry.place(x=170, y=140)
+
+
+    account_number_lbl = Label(accountPayable_frame, text='Acct Number:', width=10, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='e')
+    account_number_lbl.place(x=10, y=200)
+
+    global account_number_entry
+    account_number_entry = Entry(accountPayable_frame, width=12, font=('Arial', 10), justify='right')
+    account_number_entry.place(x=10, y=235)
+
+    account_title_lbl = Label(accountPayable_frame, text='Acct Title:', width=32, height=1, bg='yellow', 
+                          fg='black',
+                          font=('Arial', 10), anchor='c')
+    account_title_lbl.place(x=110, y=200)
+
+    global chart_of_account_manual
+    chart_of_account_manual = ttk.Combobox(accountPayable_frame, width=39)
+    chart_of_account_manual['values'] = chart_of_account_list()
+    chart_of_account_manual.place(x=110, y=235)
+    chart_of_account_manual.bind("<<ComboboxSelected>>", auto_account_num)
+
+
+
+    debitManual_label = Label(accountPayable_frame, text='Debit:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    debitManual_label.place(x=390, y=200)
+
+    global debit_manual_entry
+    debit_manual_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    debit_manual_entry.place(x=390, y=235)
+
+    creditManual_label = Label(accountPayable_frame, text='Credit:', 
+                                            width=14, height=1, bg='yellowgreen', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    creditManual_label.place(x=520, y=200)
+
+    global credit_manual_entry
+    credit_manual_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    credit_manual_entry.place(x=520, y=235)
+
+    bs_class_label = Label(accountPayable_frame, text='BS Class:', 
+                                            width=14, height=1, bg='yellowgreen', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    bs_class_label.place(x=650, y=200)
+
+    global bs_class_entry
+    bs_class_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    bs_class_entry.place(x=650, y=235)
+
+    # btn_add_entry = Button(accountPayable_frame, text='Add', bd=2, bg='blue', fg='white',
+    #                           font=('arial', 10), width=14, height=1,
+    #                            command=testing_dictionary)
+    # btn_add_entry.place(x=815, y=235)
+
+
+
+    selected_label = Label(accountPayable_frame, text='Transaction ID:', 
+                                            width=14, height=1, bg='yellowgreen', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    selected_label.place(x=900, y=235)
+
+    global Selected_ID_entry
+    Selected_ID_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    Selected_ID_entry.place(x=1020, y=235)
+
+
+    grand_total_label = Label(accountPayable_frame, text='TOTAL', 
+                                            width=14, height=1, bg='yellowgreen', fg='black',
+                                             font=('Arial', 10), anchor='c')
+    grand_total_label.place(x=650, y=490)
+
+   
+    
+    global totalDebit_manual_entry
+    totalDebit_manual_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    totalDebit_manual_entry.place(x=880, y=490)
+
+
+   
+    
+    global totalCredit_manual_entry
+    totalCredit_manual_entry = Entry(accountPayable_frame, width=16, font=('Arial', 10), justify='right')
+    totalCredit_manual_entry.place(x=1000, y=490)
+    
+    
+    
+    btn_batch_entry_apv = Button(accountPayable_frame, text='Add Batch Entry', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=autoIncrement_accountsPayable_ref)
+    btn_batch_entry_apv.place(x=670, y=35)
+
+    btn_JournalManual_entry_apv = Button(accountPayable_frame, text='Insert Entry', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=insert_journalEntry_manual_apv)
+    btn_JournalManual_entry_apv.place(x=670, y=70)
+    #
+    # insert_journalEntry_manual_apv
+    # testing_dictionary
+
+    btn_selected_apv = Button(accountPayable_frame, text='Selected', bd=2, bg='khaki', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=select_record_treeview_apv)
+    btn_selected_apv.place(x=670, y=105)
+
+    btn_update_entry_apv = Button(accountPayable_frame, text='Update', bd=2, bg='gray', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=updated_journalEntry_apv)
+    btn_update_entry_apv.place(x=670, y=140)
+
+    btn_selected_delete_apv = Button(accountPayable_frame, text='Delete', bd=2, bg='red', fg='white',
+                              font=('arial', 10), width=14, height=1,
+                               command=delete_journalEntry_apv)
+    btn_selected_delete_apv.place(x=670, y=175)
+
+
+    btn_search_ref_apv = Button(accountPayable_frame, text='Search Ref', bd=2, bg='white', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=journalEntryManual_list_treeview_apv)
+    btn_search_ref_apv.place(x=815, y=35)
+
+    btn_print_apv = Button(accountPayable_frame, text='Print', bd=2, bg='Red', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=print_apv_)
+    btn_print_apv.place(x=815, y=70)
+
 
 
 def print_apv_():
@@ -479,6 +989,19 @@ def print_apv_():
         for j in search_user:
             userPrint = j['fullname']
     
+    dataSearch_checker = db['checker_db']
+    search_checker = dataSearch_checker.find()
+
+    for i in search_checker:
+        checker_full_name = i['fullname']
+        position_checker = i['position']
+
+    dataSearch_approver = db['approver_db']
+    search_approver = dataSearch_approver.find()
+
+    for i in search_approver:
+        search_fullname_approver = i['fullname']
+        position_approver = i['position']
 
 
 
@@ -525,19 +1048,25 @@ def print_apv_():
         Element((150, 85), ("Courier-Bold", 11),
             key='date_entry'),
 
+        Element((36, 105), ("Courier-Bold", 11),
+            text='Reference: '),
 
-        Element((36, 120), ("Courier-Bold", 11),
+        Element((150, 105), ("Courier-Bold", 11),
+            key='ref'),
+
+
+        Element((36, 140), ("Courier-Bold", 11),
                 text='Account #'),
-        Element((135, 120), ("Courier-Bold", 11),
+        Element((135, 140), ("Courier-Bold", 11),
                 text='Account Title'),
-        Element((235, 120), ("Courier-Bold", 11),
+        Element((235, 140), ("Courier-Bold", 11),
                 text='Account Type'),
-        Element((350, 120), ("Courier-Bold", 11),
+        Element((350, 140), ("Courier-Bold", 11),
                 text='Debit'),
-        Element((420, 120), ("Courier-Bold", 11),
+        Element((420, 140), ("Courier-Bold", 11),
                 text="Credit"),
         
-        Rule((30, 140), 8.5 * 50, thickness=1),
+        Rule((30, 160), 8.5 * 50, thickness=1),
     ])
     rpt.reportfooter = Band([
         Rule((30, 4), 8.5 * 50),
@@ -550,15 +1079,23 @@ def print_apv_():
                 text=credit_amount2),
 
         
-        Element((36, 150), ("Helvetica", 10),
+        Element((36, 300), ("Helvetica", 10),
             text='Prepared By:'),
 
-        Element((55, 175), ("Helvetica", 10),
+        Element((55, 325), ("Helvetica", 10),
             text=userPrint),
 
-        Element((180, 150), ("Helvetica", 10),
-                text="Check  BY:"),
+        Element((180, 300), ("Helvetica", 10),
+                text="Check  By:"),
         
+        Element((205, 325), ("Helvetica", 10),
+            text=checker_full_name),
+
+        Element((310, 300), ("Helvetica", 10),
+            text="Approved  By:"),
+
+        Element((345, 325), ("Helvetica", 10),
+            text=search_fullname_approver),
         #             key="sssloan", align="right"),
         # SumElement((800, 4), ("Helvetica-Bold", 9),
         #             key="hdmfloan", align="right"),
@@ -3919,6 +4456,7 @@ def dashboard():
     filemenu4.add_command(label="Insert Customer", command=insert_customer_frame)
     filemenu4.add_command(label="Insert Supplier", command=insert_supplier_frame)
     filemenu4.add_command(label="Account Payable", command=accountPayble_insert_frame)
+    filemenu4.add_command(label="Fund Request Form", command=fund_request_form_frame)
     filemenu6.add_command(label="Equipment Module")
     filemenu5.add_command(label="Reports Module")
     menubar.add_cascade(label="Account", menu=filemenu)

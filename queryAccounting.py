@@ -459,8 +459,36 @@ def update_user_employee():
     except:
         print('error occured')
 
+def search_fundrequest():
+    """
+    This function is for
+    searching fundrequest
+    """
+    fr_number = input('Enter fr Number : ')
+    dataSearch = db['fund_request']
+    query = {'fr_number': fr_number}
 
-update_user_employee()
+    fr_search = dataSearch.find(query)
+
+
+    try:
+        search_data = dataSearch.find(query)
+        listCusor = list(search_data)
+        # print(listCusor)
+
+        df = pd.DataFrame(listCusor)
+        # test = df.head()
+        print(df)
+    
+    
+
+    except Exception as ex:
+        print("Error", f"Error due to :{str(ex)}")  
+
+search_fundrequest()
+
+
+# update_user_employee()
 # test_query()
 
 # update_user_admin()
