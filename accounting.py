@@ -224,17 +224,25 @@ def print_fund_request():
     for printing fund request in PDF form
     """
     printFR = FPDF('P','mm','Letter')
+    amount_fr =float(amount_requestion_entry.get())
+    amount_fr2 = '{:,.2f}'.format(amount_fr)
 
     printFR.add_page()
-    printFR.set_font('courier','B',12)
+    printFR.set_font('courier','B',13)
     printFR.cell(100,10, fundRequest_number_entry.get(),ln=2 )
-    printFR.cell(150,10, name_request_form_entry.get(),ln=2, align=('C'))
-    printFR.cell(150,10, date_request_form.get(),ln=2,align=('C'))
-    printFR.cell(150,10, particular_requestion_form.get('1.0', 'end-1c'),ln=2,align=('C'))
+    printFR.cell(180,10,'',ln=2,align=('C'))
+    printFR.cell(190,10, name_request_form_entry.get(),ln=2, align=('C'))
+    printFR.cell(190,10, date_request_form.get(),ln=2,align=('C'))
+    printFR.cell(205,10, particular_requestion_form.get('1.0', 'end-1c'),ln=2,align=('C'))
+    printFR.cell(150,10,'',ln=2,align=('C'))
+    printFR.cell(120,5,'',ln=2,align=('C'))
+    printFR.cell(180,10, amount_fr2,ln=2,align=('C'))
     printFR.cell(150,10,'',ln=2,align=('C'))
     printFR.cell(150,10,'',ln=2,align=('C'))
     printFR.cell(150,10,'',ln=2,align=('C'))
-    printFR.cell(150,10,'',ln=2,align=('C'))
+    printFR.cell(150,10,'Prepared by:',ln=2)
+    
+    
     printFR.cell(150,10, preparedBy_entry.get(),ln=2,align=('C'))
     printFR.output('fundrequest.pdf')
 
