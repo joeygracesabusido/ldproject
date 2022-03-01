@@ -229,21 +229,25 @@ def print_fund_request():
 
     printFR.add_page()
     printFR.set_font('courier','B',13)
+    # particualr_w = printFR.get_string_width(particular_requestion_form.get('1.0', 'end-1c') + 6)
+    # printFR.set_x((particualr_w) /2)
+    # printFR.set_line_width(1)
     printFR.cell(100,10, fundRequest_number_entry.get(),ln=2 )
     printFR.cell(180,10,'',ln=2,align=('C'))
     printFR.cell(190,10, name_request_form_entry.get(),ln=2, align=('C'))
-    printFR.cell(190,10, date_request_form.get(),ln=2,align=('C'))
-    printFR.cell(10,20, particular_requestion_form.get('1.0', 'end-1c'),ln=2,align=('C'))
-    printFR.cell(150,10,'',ln=2,align=('C'))
-    printFR.cell(120,5,'',ln=2,align=('C'))
-    printFR.cell(180,10, amount_fr2,ln=2,align=('C'))
-    printFR.cell(150,10,'',ln=2,align=('C'))
-    printFR.cell(150,10,'',ln=2,align=('C'))
-    printFR.cell(150,10,'',ln=2,align=('C'))
-    printFR.cell(150,10,'Prepared by:',ln=2)
+    printFR.cell(205,10, date_request_form.get(),ln=1,align=('C'))
+    printFR.cell(73,10,'',ln=0,align=('C'))
+    printFR.multi_cell(120,5, particular_requestion_form.get('1.0', 'end-1c'),
+                            border=0,align='L',ln=2)
+    
+    printFR.cell(120,10, amount_fr2,ln=1,align=('L'))
+    
+    printFR.cell(100,10,'',ln=1,align=('L'))
+    printFR.cell(100,10,'',ln=1,align=('L'))
+    printFR.cell(150,10,'Prepared by:',ln=2,align=('L'))
     
     
-    printFR.cell(150,10, preparedBy_entry.get(),ln=2,align=('C'))
+    printFR.cell(100,10, preparedBy_entry.get(),ln=2,align=('C'))
     printFR.output('fundrequest.pdf')
 
     startfile("fundrequest.pdf")
