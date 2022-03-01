@@ -5,7 +5,7 @@ from importlib.resources import contents
 from lib2to3.pgen2.token import ENDMARKER
 from tkinter import *
 import csv
-from types import NoneType
+# from types import NoneType
 import xdrlib
 # from types import NoneType
 from PIL import Image, ImageTk
@@ -233,7 +233,7 @@ def print_fund_request():
     printFR.cell(180,10,'',ln=2,align=('C'))
     printFR.cell(190,10, name_request_form_entry.get(),ln=2, align=('C'))
     printFR.cell(190,10, date_request_form.get(),ln=2,align=('C'))
-    printFR.cell(205,10, particular_requestion_form.get('1.0', 'end-1c'),ln=2,align=('C'))
+    printFR.cell(10,20, particular_requestion_form.get('1.0', 'end-1c'),ln=2,align=('C'))
     printFR.cell(150,10,'',ln=2,align=('C'))
     printFR.cell(120,5,'',ln=2,align=('C'))
     printFR.cell(180,10, amount_fr2,ln=2,align=('C'))
@@ -348,7 +348,7 @@ def auto_fund_request_number():
     current_year =  datetime.today().year
     dataSearch = db['fund_request']
     # agg_result = dataSearch.find({'ref': {"$regex": "^APV"}}).sort('ref',-1).limit(1)
-    agg_result = dataSearch.find({'fr_number': {"$regex": "FR"}}).sort('ref',-1).limit(1)
+    agg_result = dataSearch.find({'fr_number': {"$regex": "FR"}}).sort('fr_number',-1).limit(1)
 
     # agg_result = dataSearch.find({'ref': { "$gt": "A" }}).sort('ref',-1).limit(1)
 
@@ -4681,7 +4681,7 @@ def Login():
             a = ''
             for x in agg_result:
                 a = x['username']
-                if a == NoneType:
+                if a == '':
                     lbl_result.config(text="Invalid username or password", fg="red")
                     USERNAME.set("")
                     PASSWORD.set("")
@@ -4706,7 +4706,7 @@ def Login():
             a = ''
             for x in agg_result:
                 a = x['username']
-                if a == NoneType:
+                if a == '':
                     lbl_result.config(text="Invalid username or password", fg="red")
                     USERNAME.set("")
                     PASSWORD.set("")
