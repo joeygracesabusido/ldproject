@@ -237,11 +237,14 @@ def print_fund_request():
     printFR.cell(190,10, name_request_form_entry.get(),ln=2, align=('C'))
     printFR.cell(205,10, date_request_form.get(),ln=1,align=('C'))
     printFR.cell(73,10,'',ln=0,align=('C'))
-    printFR.multi_cell(120,5, particular_requestion_form.get('1.0', 'end-1c'),
+    printFR.multi_cell(120,8, particular_requestion_form.get('1.0', 'end-1c'),
                             border=0,align='L',ln=2)
     
-    printFR.cell(120,10, amount_fr2,ln=1,align=('L'))
     
+    printFR.cell(150,10, amount_fr2,ln=1,align=('L'))
+    
+    printFR.cell(100,10,'',ln=1,align=('L'))
+    printFR.cell(100,10,'',ln=1,align=('L'))
     printFR.cell(100,10,'',ln=1,align=('L'))
     printFR.cell(100,10,'',ln=1,align=('L'))
     printFR.cell(150,10,'Prepared by:',ln=2,align=('L'))
