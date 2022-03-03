@@ -215,7 +215,7 @@ def print1601c_report():
         cursor.execute("SELECT sum(totalDem_save) as totaldem\
                                             FROM payroll_computation\
                                             where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
-                                                         ")
+                                                 and on_off_details = 'on' ")
         myresult = list(cursor.fetchall())
 
         for row in myresult:
@@ -227,18 +227,29 @@ def print1601c_report():
                                             FROM payroll_computation\
                                             where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
                                              AND  taxable_mwe_detail = 'Taxable'  and on_off_details = 'on'\
-                                              AND taxable_amount < 10417")
+                                               GROUP BY employee_id")
         myresult = list(cursor.fetchall())
+
+       
+
+        taxabltaxable_notsubject = 0
+        tax_amount_1601_notsubject = 0
+        for row in myresult:
+            taxabltaxable_notsubject = row[0]
+           
+            if taxabltaxable_notsubject < 20833:
+                tax_amount_1601_notsubject+=taxabltaxable_notsubject
+                taxable_notsubject1 = '{:,.2f}'.format(tax_amount_1601_notsubject)
 
         for row in myresult:
             taxable_notsubject = row[0]
-            taxable_notsubject1 = '{:,.2f}'.format(row[0])
+            # taxable_notsubject1 = '{:,.2f}'.format(row[0])
 
     # this is for Total Otherforms
         cursor.execute("SELECT sum(otherforms_save) as totalOtherForms\
                                                FROM payroll_computation\
                                                where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
-                                                            ")
+                                                and on_off_details = 'on' ")
         myresult = list(cursor.fetchall())
 
         for row in myresult:
@@ -248,8 +259,8 @@ def print1601c_report():
     # this is for Total Mandatory
         cursor.execute("SELECT sum(total_mandatory) as Totalmandatory\
                                                    FROM payroll_computation\
-                                                   where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
-                                                                ")
+                                                   where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "'\
+                                                      and on_off_details = 'on' ")
         myresult = list(cursor.fetchall())
 
         for row in myresult:
@@ -259,8 +270,8 @@ def print1601c_report():
     # this is for Total taxWithheld
         cursor.execute("SELECT sum(taxwitheld_save) as totaltaxwithheld\
                                                    FROM payroll_computation\
-                                                   where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
-                                                                ")
+                                                   where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "'\
+                                                      and on_off_details = 'on' ")
         myresult = list(cursor.fetchall())
 
         for row in myresult:
@@ -268,16 +279,22 @@ def print1601c_report():
             withheld1 = '{:,.2f}'.format(row[0])
 
     # this is for Total Taxable greater than 10417
-        cursor.execute("SELECT sum(taxable_amount) as totaltaxable_amount\
+        cursor.execute("SELECT sum(taxable_amount) as TaxableAmount\
                                                FROM payroll_computation\
                                                where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
                                                 AND  taxable_mwe_detail = 'Taxable'  and on_off_details = 'on'\
-                                                 AND taxable_amount > 10417")
+                                                 GROUP BY employee_id")
+                                                #  AND taxable_amount > 10417"
         myresult = list(cursor.fetchall())
 
+        taxable_subject = 0
+        tax_amount_1601 = 0
         for row in myresult:
             taxable_subject = row[0]
-            taxable_subject1 = '{:,.2f}'.format(row[0])
+           
+            if taxable_subject >= 20833:
+                tax_amount_1601+=taxable_subject
+                taxable_subject1 = '{:,.2f}'.format(tax_amount_1601)
         a1 = date1
         a2 = date2
         rpt = Report(result)
@@ -416,7 +433,8 @@ def payroll_export():
     worksheet.write('H1', 'OTHER FORMS')
     worksheet.write('I1', 'TAXABLE AMOUNT')
     worksheet.write('J1', 'TAX WIDTHEL')
-    worksheet.write('K1', 'TAX/MWE')
+    worksheet.write('K1', 'TOTAL MANDATORY')
+    worksheet.write('L1', 'TAX/MWE')
     
    
    
@@ -434,7 +452,8 @@ def payroll_export():
                         sum(otherforms_save) as TotalOtherforms,\
                         sum(taxable_amount) as TotaltaxAmount,\
                         sum(taxwitheld_save) as TotalWitheld,\
-                        sum(total_mandatory)as totalMandatory,taxable_mwe_detail\
+                        sum(total_mandatory)as totalMandatory,\
+                            taxable_mwe_detail\
                         FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
                             AND on_off_details = 'on' \
                       GROUP BY employee_id,last_name,first_name, position_name,salary_rate,department,\
@@ -456,6 +475,7 @@ def payroll_export():
         otherforms_xlx = data[18]
         taxableAmount_xlx = data[19]
         tax_WIDTHEL_xlx = data[20]
+        total_mandatory_xlx = data[21]
         tax_mwe_detail_xlx = data[22]
       
 
@@ -474,7 +494,8 @@ def payroll_export():
         worksheet.write('H' + str(rowIndex),otherforms_xlx)
         worksheet.write('I' + str(rowIndex),taxableAmount_xlx)
         worksheet.write('J' + str(rowIndex),tax_WIDTHEL_xlx)
-        worksheet.write('K' + str(rowIndex),tax_mwe_detail_xlx)
+        worksheet.write('K' + str(rowIndex),total_mandatory_xlx)
+        worksheet.write('L' + str(rowIndex),tax_mwe_detail_xlx)
        
         
        
@@ -1116,7 +1137,7 @@ def save_payroll():
                 sss_save, phic_save, hdmf_save, provshare_save, totalMadatory_save, uniform_save, rice_save, laundry_save,
                 medical1_save,
                 medical2_save, totalDem_save,otherForms_save, taxable_amount_save, taxWitheld_entry.get(), ca_deduct_save2,
-                sss_loandeduct_save, hdmfdeduct_save, netPayConso,
+                sss_loandeduct_save, hdmfdeduct_save, netPay_save2,
                 user_reg,
                 date_time_update,on_off_saving,tax_mwe_entry.get()))
             # 58
@@ -1160,7 +1181,7 @@ def save_payroll():
                 sss_save, phic_save, hdmf_save, provshare_save, totalMadatory_save, uniform_save, rice_save, laundry_save,
                 medical1_save,
                 medical2_save, totalDem_save,otherForms_save, taxable_amount_save, taxWitheld_entry.get(), ca_deduct_save2,
-                sss_loandeduct_save, hdmfdeduct_save, netPay_save2,
+                sss_loandeduct_save, hdmfdeduct_save, netPayConso,
                 user_reg,
                 date_time_update,on_off_saving,tax_mwe_entry.get()))
             # 58
@@ -1268,6 +1289,7 @@ def net_pay():
             medical1 = 0
             medical2 = 0
             otherForms = 0
+            taxWithheld = 0
             uniform_entry.delete(0, END)
             uniform_entry.insert(0, (uniform))
 
@@ -1792,7 +1814,8 @@ def computation_cosolidated():
 
     check2 = checkvar2.get()
 
-    if check2 == 1:
+
+    if check2 == 1 :
         gross_pay_conso = 0
         uniform_conso = 0
         rice_conso = 0
@@ -1805,9 +1828,9 @@ def computation_cosolidated():
         try:
             cursor.execute("Select * from payroll_computation \
                             where cut_off_date BETWEEN '" + date2 + "' and '" + date1 + "'\
-                        AND employee_id = '" + empID_conso + "'")
+                        AND employee_id = '" + empID_conso + "' and on_off_details ='on'" )
             row = cursor.fetchone()
-            if row == None:
+            if row == None :
                 messagebox.showerror("Error", "No record found during last payroll")
                 gross_pay_conso = 0
                 uniform_conso = 0
@@ -1818,6 +1841,7 @@ def computation_cosolidated():
                 totaldem_conso = 0
                 otherforms_conso = 0
                 taxable_conso = 0
+                taxWithheld = 0
                
                 
             else:
