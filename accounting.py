@@ -243,7 +243,7 @@ def print_fund_request():
     
     printFR.cell(150,10, amount_fr2,ln=1,align=('L'))
     
-    printFR.cell(100,10,'',ln=1,align=('L'))
+   
     printFR.cell(100,10,'',ln=1,align=('L'))
     printFR.cell(100,10,'',ln=1,align=('L'))
     printFR.cell(100,10,'',ln=1,align=('L'))

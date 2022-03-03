@@ -1068,7 +1068,12 @@ def save_payroll():
 
         ca_deduct_save2 = ca_deduct_save
         sss_loandeduct_save = sss_loandeduct
-        netPay_save = netPay
+        # netPay_save = float(netpay_entry.get())
+
+        netPay_save2 = netPay
+
+        netPayConso = netPay_conso
+
 
 
 
@@ -1079,47 +1084,95 @@ def save_payroll():
         # date_time_update = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         date_time_update = datetime.now()
 
-        cursor.execute(
-            "INSERT INTO payroll_computation (department,cut_off_date,employee_id,last_name," 
-            "first_name,position_name,salary_rate,provicaial_rate,regular_day, regularday_cal," 
-            "regularday_ot,regularday_ot_cal,regularsunday, regularsunday_cal,regularsunday_ot,regularsunday_ot_cal, " 
-            "spl,spl_cal,spl_ot,spl_ot_cal, legal_day,legal_day_cal,legal_day_ot,legal_day_ot_cal,"
-            "shoprate_day,shoprate_day_cal,proviRate_day,proviRate_day_cal,proviRate_day_ot," 
-            "proviRate_day_ot_cal,provisun_day,provisun_day_cal,provisun_day_ot,provisun_day_ot_cal," 
-            "nightdiff_day,nightdiff_day_cal,adjustment,adjustment_cal,grosspay_save,salaryDetails_save,"
-            "sss_save,phic_save,hmdf_save,sss_provi_save,total_mandatory,uniform_save,rice_save,laundry_save,"
-            "medical1_save," 
-            "medical2_save,totalDem_save,otherforms_save,taxable_amount,taxwitheld_save,cashadvance_save," 
-            "sssloan_save,hdmfloan_save,netpay_save,"
-            "userlog,time_update,on_off_details,taxable_mwe_detail)" 
-            " VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
-            "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
-            "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
-            "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
-            "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
-            "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+        if checkvar2.get() == 0:
 
-            (department, date1, empID, lastname,
-             firstname, posittion, salRate_entry,  provicialRate, regday_save, regdaycal_save,
-             regdayot_save, regdaycalOT_save, regsun_save, regsuncal_save, regsunOT_save, regsuncalOT_save,
-             spl_save, splCal_save, splOT_entry.get(), splOTcal_save, legal_save, legalCal_save, legalOT_save, legalOTcal_save,
-             shoprate_save, shoprateCal_save, proviRate_save, proviRateCal_save, proviRateOT_save,
-             proviRateOTcal_save, proviRateSun_save, proviRateSunCal_save,proviSunRateOT_save,proviSunRateOTcal_save,
-             nightdiff_save,nightdiffCal_save, adjustments_save, adjustmentCal_save, grosspay_save, salaryDetails_save,
-             sss_save, phic_save, hdmf_save, provshare_save, totalMadatory_save, uniform_save, rice_save, laundry_save,
-             medical1_save,
-             medical2_save, totalDem_save,otherForms_save, taxable_amount_save, taxWitheld_entry.get(), ca_deduct_save2,
-             sss_loandeduct_save, hdmfdeduct_save, netPay_save,
-             user_reg,
-             date_time_update,on_off_saving,tax_mwe_entry.get()))
-        # 58
-        messagebox.showinfo('JRS','Data has been Save')
+            cursor.execute(
+                "INSERT INTO payroll_computation (department,cut_off_date,employee_id,last_name," 
+                "first_name,position_name,salary_rate,provicaial_rate,regular_day, regularday_cal," 
+                "regularday_ot,regularday_ot_cal,regularsunday, regularsunday_cal,regularsunday_ot,regularsunday_ot_cal, " 
+                "spl,spl_cal,spl_ot,spl_ot_cal, legal_day,legal_day_cal,legal_day_ot,legal_day_ot_cal,"
+                "shoprate_day,shoprate_day_cal,proviRate_day,proviRate_day_cal,proviRate_day_ot," 
+                "proviRate_day_ot_cal,provisun_day,provisun_day_cal,provisun_day_ot,provisun_day_ot_cal," 
+                "nightdiff_day,nightdiff_day_cal,adjustment,adjustment_cal,grosspay_save,salaryDetails_save,"
+                "sss_save,phic_save,hmdf_save,sss_provi_save,total_mandatory,uniform_save,rice_save,laundry_save,"
+                "medical1_save," 
+                "medical2_save,totalDem_save,otherforms_save,taxable_amount,taxwitheld_save,cashadvance_save," 
+                "sssloan_save,hdmfloan_save,netpay_save,"
+                "userlog,time_update,on_off_details,taxable_mwe_detail)" 
+                " VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+
+                (department, date1, empID, lastname,
+                firstname, posittion, salRate_entry,  provicialRate, regday_save, regdaycal_save,
+                regdayot_save, regdaycalOT_save, regsun_save, regsuncal_save, regsunOT_save, regsuncalOT_save,
+                spl_save, splCal_save, splOT_entry.get(), splOTcal_save, legal_save, legalCal_save, legalOT_save, legalOTcal_save,
+                shoprate_save, shoprateCal_save, proviRate_save, proviRateCal_save, proviRateOT_save,
+                proviRateOTcal_save, proviRateSun_save, proviRateSunCal_save,proviSunRateOT_save,proviSunRateOTcal_save,
+                nightdiff_save,nightdiffCal_save, adjustments_save, adjustmentCal_save, grosspay_save, salaryDetails_save,
+                sss_save, phic_save, hdmf_save, provshare_save, totalMadatory_save, uniform_save, rice_save, laundry_save,
+                medical1_save,
+                medical2_save, totalDem_save,otherForms_save, taxable_amount_save, taxWitheld_entry.get(), ca_deduct_save2,
+                sss_loandeduct_save, hdmfdeduct_save, netPayConso,
+                user_reg,
+                date_time_update,on_off_saving,tax_mwe_entry.get()))
+            # 58
+            messagebox.showinfo('JRS','Data has been Save')
 
 
-        mydb.commit()
-        mydb.close()
-        cursor.close()
-        payroll_comp_treeview_display()
+            mydb.commit()
+            mydb.close()
+            cursor.close()
+            payroll_comp_treeview_display()
+
+        else:
+
+            cursor.execute(
+                "INSERT INTO payroll_computation (department,cut_off_date,employee_id,last_name," 
+                "first_name,position_name,salary_rate,provicaial_rate,regular_day, regularday_cal," 
+                "regularday_ot,regularday_ot_cal,regularsunday, regularsunday_cal,regularsunday_ot,regularsunday_ot_cal, " 
+                "spl,spl_cal,spl_ot,spl_ot_cal, legal_day,legal_day_cal,legal_day_ot,legal_day_ot_cal,"
+                "shoprate_day,shoprate_day_cal,proviRate_day,proviRate_day_cal,proviRate_day_ot," 
+                "proviRate_day_ot_cal,provisun_day,provisun_day_cal,provisun_day_ot,provisun_day_ot_cal," 
+                "nightdiff_day,nightdiff_day_cal,adjustment,adjustment_cal,grosspay_save,salaryDetails_save,"
+                "sss_save,phic_save,hmdf_save,sss_provi_save,total_mandatory,uniform_save,rice_save,laundry_save,"
+                "medical1_save," 
+                "medical2_save,totalDem_save,otherforms_save,taxable_amount,taxwitheld_save,cashadvance_save," 
+                "sssloan_save,hdmfloan_save,netpay_save,"
+                "userlog,time_update,on_off_details,taxable_mwe_detail)" 
+                " VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+
+                (department, date1, empID, lastname,
+                firstname, posittion, salRate_entry,  provicialRate, regday_save, regdaycal_save,
+                regdayot_save, regdaycalOT_save, regsun_save, regsuncal_save, regsunOT_save, regsuncalOT_save,
+                spl_save, splCal_save, splOT_entry.get(), splOTcal_save, legal_save, legalCal_save, legalOT_save, legalOTcal_save,
+                shoprate_save, shoprateCal_save, proviRate_save, proviRateCal_save, proviRateOT_save,
+                proviRateOTcal_save, proviRateSun_save, proviRateSunCal_save,proviSunRateOT_save,proviSunRateOTcal_save,
+                nightdiff_save,nightdiffCal_save, adjustments_save, adjustmentCal_save, grosspay_save, salaryDetails_save,
+                sss_save, phic_save, hdmf_save, provshare_save, totalMadatory_save, uniform_save, rice_save, laundry_save,
+                medical1_save,
+                medical2_save, totalDem_save,otherForms_save, taxable_amount_save, taxWitheld_entry.get(), ca_deduct_save2,
+                sss_loandeduct_save, hdmfdeduct_save, netPay_save2,
+                user_reg,
+                date_time_update,on_off_saving,tax_mwe_entry.get()))
+            # 58
+            messagebox.showinfo('JRS','Data has been Save')
+
+
+            mydb.commit()
+            mydb.close()
+            cursor.close()
+            payroll_comp_treeview_display()
+
+
 
 def net_pay():
     """This funtion is for computaion of Net Pay"""
@@ -1512,10 +1565,11 @@ def net_pay():
     # print(taxable_amount)
 def net_pay_conso_calculation():
     """This function is for calculation of Net pay with consolidation of Taxwithheld"""
-    netPay = grosspay - float(taxWitheld_entry.get()) - totalMadatory - float(sss_loandeduct) - float(hdmfdeduct) - float(ca_deduct_save)
-    netPay2 = '{:,.2f}'.format(netPay)
+    global netPay_conso
+    netPay_conso = grosspay - float(taxWitheld_entry.get()) - totalMadatory - float(sss_loandeduct) - float(hdmfdeduct) - float(ca_deduct_save)
+    netPay_conso2 = '{:,.2f}'.format(netPay_conso)
     netpay_entry.delete(0, END)
-    netpay_entry.insert(0, (netPay2))
+    netpay_entry.insert(0, (netPay_conso2))
 
 
 
