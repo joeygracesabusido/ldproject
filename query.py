@@ -924,6 +924,41 @@ def rental_export():
         # from os import startfile
     startfile("rental_report.xlsx")
 
+def update_employee_details_employee_resigned():
+    """This function is to update employee for on off details"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    query ='Select employee_id,lastName,firstName,\
+            salary_rate,employment_status,user,update_date,id from employee_details ORDER BY employee_id'
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+    print(tabulate(myresult, headers =['ID','LAST NAME', 'FIRST NAME',
+                                       'SALARY RATE','STATUS',
+                                       'USER','TIME','ID'], tablefmt='psql'))
+
+    employeeID = input("Enter employee ID: ")
+    emp_status = input("Enter details Resigned/Employeed: ")
+
+    key = input("Would you like to update data yes/no?: ").lower()
+
+    if key == 'yes':
+
+        cursor.execute(
+                    "UPDATE employee_details SET employment_status ='"+ emp_status +"'\
+                    WHERE employee_id =%s", (employeeID,)
+                )
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        print("Data has been updated")
+        print('')
+
+        update_employee_details_employee_resigned()
+    # else:
+    #     selection()
+
 
 def update_employee_details_on():
     """This function is to update employee for on off details"""
@@ -2129,7 +2164,7 @@ def edit_cash_advances():
 # equipment_registry()
 # mwe_selection()
 # test_on()
-selection()
+# selection()
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()
@@ -2142,3 +2177,5 @@ selection()
 
 
 # computation_cosolidated()
+
+update_employee_details_employee_resigned()

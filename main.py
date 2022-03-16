@@ -2359,6 +2359,59 @@ def diesel_registry():
 
 
 #===========================================Liters Per Hour=============================================================
+def total_liters_per_equipment():
+    """
+    This function is for
+    selecting total diesel
+    per equipment
+    """
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    liter_per_hour_treeview.delete(*liter_per_hour_treeview.get_children())
+    date1 = ltrHrs_sateSearchFrom.get()
+    date2 = ltrHrs_sateSearchTo.get()
+
+
+    query2 = "Select\
+                equipment_id,\
+                sum(use_liter) as diesel\
+                from diesel_consumption\
+                where transaction_date\
+                BETWEEN '" + date1 + "' and\
+                '" + date2 + "'  \
+                GROUP BY equipment_id \
+            "
+    cursor.execute(query2)
+    myresult = cursor.fetchall()
+
+    for i in myresult:
+        eqp_id = i[0]
+        totalDiesel = i[1]
+
+        totalliters2 = '{:,.2f}'.format(totalDiesel)
+        totalhours2 = 0
+        liters_per_hour2 = 0
+
+        liter_per_hour_treeview.insert('', 'end', values=(
+                    eqp_id, totalliters2, totalhours2,
+                    liters_per_hour2))
+
+    # query = "Select\
+    #             equipment_id,\
+    #             sum(total_rental_hour) as TotalRental\
+    #             from equipment_rental\
+    #             where transaction_date\
+    #             BETWEEN '" + date1 + "' and\
+    #             '" + date2 + "' \
+    #             GROUP BY equipment_id \
+    #             "
+    # cursor.execute(query)
+    # myresult = cursor.fetchall()
+
+    # for j in myresult:
+
+
+
 def liter_per_hour_listview():
     """This function is to appear data for ltrs/hour in treeview """
     mydb._open_connection()
@@ -2418,6 +2471,9 @@ def liter_per_hour_listview():
                      }
             diesel_report.update(data2)
 
+        totalliters = 0
+        totalliters2 = 0
+        totalhours2 = 0
         for k in diesel_report:
 
             if k == j:
@@ -2434,9 +2490,9 @@ def liter_per_hour_listview():
                     k, totalliters2, totalhours2,
                     liters_per_hour2))
 
-            else:
-                pass
+                
 
+           
 
 def liter_per_hour_module():
     """This function is for computation of liter per Hour"""
@@ -2465,6 +2521,10 @@ def liter_per_hour_module():
                                font=('arial', 10), width=10, height=1, command=liter_per_hour_listview)
     btn_perHour_search.place(x=750, y=15)
     btn_perHour_search.bind('<Return>', liter_per_hour_listview)
+
+    btn_totalDiesel = Button(equipmentModule_frame, text='Total Diesel', bd=2, bg='gray', fg='yellow',
+                            font=('arial', 10), width=14, height=1, command=total_liters_per_equipment)
+    btn_totalDiesel.place(x=870, y=15)
 
     # this is for Tree View for Rental Equipment
     MidViewForm21 = Frame(equipmentModule_frame, width=500, height=450)

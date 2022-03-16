@@ -3208,6 +3208,10 @@ def employee_update():
     position_update = position_reg_entry.get()
     on_off = on_off_reg_entry.get()
     sala_details = salaryDetail_reg_entry.get()
+    sss_reg_update = sss_reg_entry.get()
+    tin_reg_update = tin_reg_entry.get()
+    phic_reg_update = phic_reg_entry.get()
+    hdmf_reg_update = hdmf_reg_entry.get()
     try:
         if employee_id_entry.get()== "":
             messagebox.showerror("Error", "Employee ID fields  Must be required")
@@ -3224,7 +3228,11 @@ def employee_update():
                 department='" + department_update + "',\
                 position='" + position_update + "',\
                 Salary_Detail='" + sala_details + "',\
-                off_on_details ='" + on_off + "'\
+                off_on_details ='" + on_off + "',\
+                tin ='" + tin_reg_update + "',\
+                sssNumber ='" + sss_reg_update + "',\
+                phicNumber ='" + phic_reg_update + "',\
+                hdmfNumber ='" + hdmf_reg_update + "'\
                 WHERE employee_id =%s", (employee_id_entry.get(),)
             )
             mydb.commit()
