@@ -2134,7 +2134,7 @@ def edit_cash_advances():
 # edit_cash_advances()
 # edit_off_on()
 # tin_Query()
-# searchPayroll()
+searchPayroll()
 # deleteCut_offPeriod() 
 # employee_salaryQuery()
 # cf1604()
@@ -2178,4 +2178,4 @@ def edit_cash_advances():
 
 # computation_cosolidated()
 
-update_employee_details_employee_resigned()
+# update_employee_details_employee_resigned()

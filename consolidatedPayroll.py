@@ -881,6 +881,8 @@ def print_payroll():
                 defp_fields  = 'PAMPANGA PAYROLL'
             elif department == 'Rizal-R&F':
                 defp_fields  = 'RIZAL  PAYROLL'
+            elif department == 'Surigao':
+                defp_fields  = 'SURIGAO  PAYROLL'
 
             else:
                 defp_fields = 'LD HO PAYROLL'
@@ -2280,6 +2282,9 @@ def searchEmployee_details():
             mwe = float(537)
         elif  department_list.get() == "Pampanga":
             mwe = float(420)
+
+        elif  department_list.get() == "Surigao":
+            mwe = float(320)
         
         # this is for determination of on & off employee!!!
         
@@ -2424,7 +2429,7 @@ def payrollComputation_module():
     department_list_label.place(x=150, y=5)
 
     department_list = ttk.Combobox(payroll_frame, width=20)
-    department_list['values'] = ("Head Office", "Admin-Site", "Pampanga", "Rizal-R&F")
+    department_list['values'] = ("Head Office", "Admin-Site", "Pampanga", "Rizal-R&F", "Surigao")
     department_list.place(x=285, y=5)
 
     payCal_date_label = Label(payroll_frame, text='Date:', width=10, height=1, bg='yellow', fg='gray',
