@@ -2131,10 +2131,117 @@ def edit_cash_advances():
         edit_cash_advances()
 
 
+def cost_analysis_report():
+    """
+    This function is for 
+    cost analysis
+    """
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date To: ')
+
+    # query_equipment = "Select\
+    #             equipment_id\
+    #             from equipment_details "
+                
+    # cursor.execute(query_equipment)
+    # myresult = cursor.fetchall()
+
+    # equipID_equipment =''
+    # equipID = ''
+    # TotalHours2 = 0
+
+    # for i in myresult:
+    #     equipID_equipment = i[0]
+        
+    
+
+    # query_rental = "Select\
+    #             equipment_id,\
+    #             sum(total_rental_hour) as TotalRental,\
+    #             sum(rental_amount) as TotalRental \
+    #             from equipment_rental\
+    #             where transaction_date\
+    #             BETWEEN '" + date1 + "' and\
+    #             '" + date2 + "' \
+    #             GROUP BY equipment_id \
+    #             "
+    # cursor.execute(query_rental)
+    # myresult = cursor.fetchall()
+    
+
+    # for i in myresult:
+    #     equipID = i[0]
+    #     TotalHours = i[1]
+    #     totalAmount = i[2]
+       
+
+    #     if equipID_equipment == equipID:
+    #         TotalHours2= TotalHours
+        
+    #         print(equipID_equipment,TotalHours2)
+
+    query =  "Select\
+                equipment_details.equipment_id,\
+                sum(diesel_consumption.use_liter) as TotalLiters,\
+                sum(diesel_consumption.amount) as Totalamount\
+                from equipment_details\
+                INNER JOIN diesel_consumption \
+                ON equipment_details.equipment_id=diesel_consumption.equipment_id  \
+                where diesel_consumption.transaction_date \
+                 BETWEEN '" + date1 + "' and\
+                 '" + date2 + "' \
+                 GROUP BY equipment_id \
+                 "   
+    cursor.execute(query)
+    myresult = cursor.fetchall()  
+
+    for i in myresult: 
+        equipID = i[0] 
+        totalliters = i[1]
+        total_amount_diesel = i[2]
+
+
+        query_disel =  "Select\
+                equipment_details.equipment_id,\
+                sum(equipment_rental.total_rental_hour) as TotalHours\
+                from equipment_details\
+                INNER JOIN equipment_rental \
+                ON equipment_details.equipment_id=equipment_rental.equipment_id  \
+                where equipment_rental.transaction_date \
+                    BETWEEN '" + date1 + "' and\
+                    '" + date2 + "' \
+                    GROUP BY equipment_id \
+                    "   
+        cursor.execute(query_disel)
+        myresult2 = cursor.fetchall()
+
+        for l in myresult2:
+            equipID_diesel = l[0] 
+            totalHours = l[1]
+
+            
+            if equipID_diesel == equipID:
+                totalHours2 = totalHours
+                liters_consumption_per_hr = totalliters/totalHours
+                cost_per_equipment = total_amount_diesel/totalHours
+                
+                print(equipID_diesel,f'Total Hours: {totalHours2}',f'Total Liters: {totalliters}',
+                                    f'Liter/Hr: {liters_consumption_per_hr}',
+                                    f'Cost per Hr: {cost_per_equipment}')
+        
+
+            
+cost_analysis_report()
+
 # edit_cash_advances()
 # edit_off_on()
 # tin_Query()
-searchPayroll()
+# searchPayroll()
 # deleteCut_offPeriod() 
 # employee_salaryQuery()
 # cf1604()
