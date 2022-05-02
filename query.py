@@ -2228,7 +2228,8 @@ def cost_analysis_report():
             if equipID_diesel == equipID:
                 totalHours2 = totalHours
                 liters_consumption_per_hr = totalliters/totalHours
-                cost_per_equipment = total_amount_diesel/totalHours
+                total_expense = total_amount_diesel
+                cost_per_equipment = total_expense/totalHours
                 
                 print(equipID_diesel,f'Total Hours: {totalHours2}',f'Total Liters: {totalliters}',
                                     f'Liter/Hr: {liters_consumption_per_hr}',
