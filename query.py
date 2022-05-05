@@ -1867,6 +1867,42 @@ def cf1604():
     # from os import startfile
     startfile("1604CF.xlsx")
     
+def salaryQuery_per_employee():
+    """
+    this function is for Salary per employee
+    
+    """
+    
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    empID = input('Enter Employee ID: ')
+    date1 = input('Enter Date Beginning: ')
+    date2 = input('Enter Date End:')
+    
+    
+    cursor.execute(
+            "SELECT id,cut_off_date,employee_id,last_name,first_name,on_off_details\
+            from payroll_computation \
+            WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"' \
+                AND employee_id='" + empID +"'\
+                ORDER BY cut_off_date")
+
+    myresult = cursor.fetchall()
+    count = 0
+    for row in myresult:
+        count+=1
+        transID = row[0]
+        cut_offDate = row[1]
+        empId = row[2]
+        lastName = row[3]
+        firstName = row[4]
+        trans = row[5]
+        
+        print(count,transID,
+              cut_offDate,empId,lastName,firstName,trans)
+    
+    
 def employee_salaryQuery():
     """
     This function is for searching
@@ -2236,8 +2272,384 @@ def cost_analysis_report():
                                     f'Cost per Hr: {cost_per_equipment}')
         
 
+def update_department():
+    """
+    This function is for
+    Editing the on and off
+    columns
+    """
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date to: ')
+
+    cursor.execute("SELECT id,cut_off_date,employee_id,last_name, SUM(grosspay_save) as totalGross,department,on_off_details \
+                        FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
+                      GROUP BY id,employee_id,last_name, department,on_off_details ")
+   
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['ID','DATE','EMPLOYEE ID',
+                                    'LAST NAME','GROSS PAY','DEPARTMENT','On & Off Status'], tablefmt='psql'))
+
+
+    trans_id = input("Enter transaction ID: ")
+    department_update = input("Enter Department: ")
+
+    key = input("Would you like to update data yes/no?: ").lower()
+
+    if key == 'yes':
+
+        cursor.execute(
+                    "UPDATE payroll_computation SET department ='"+ department_update +"'\
+                    WHERE id =%s", (trans_id,)
+                )
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        print("Data has been updated")
+        print('')
+
+        # update_employee_details_on()
+    # else:
+    #     selection()
+
+def payroll_off_export():
+    """This function is for exporting payroll """
+    
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    
+    
+    
+    date1 = input('Enter Date From:   ')
+    date2 = input('Enter Date To:   ')
+
+    workbook = xlsxwriter.Workbook("payroll_off.xlsx")
+    worksheet = workbook.add_worksheet('rental')
+    worksheet.write('A1', 'ID')
+    worksheet.write('B1', 'EMPLOYEE NAME')
+    worksheet.write('C1', 'POSITION')
+    worksheet.write('D1', 'RATE')
+    worksheet.write('E1', 'GROSS PAY')
+    worksheet.write('F1', 'DEPARTMENT')
+    worksheet.write('G1', 'SSS PROVI')
+    worksheet.write('G1', 'TOTALDEM')
+    worksheet.write('H1', 'OTHER FORMS')
+    worksheet.write('I1', 'TAXABLE AMOUNT')
+    worksheet.write('J1', 'TAX WIDTHEL')
+    worksheet.write('K1', 'TOTAL MANDATORY')
+    worksheet.write('L1', 'TAX/MWE')
+    
+   
+   
+    rowIndex = 2
+
+    cursor.execute("SELECT employee_id,last_name,\
+                        first_name,position_name, salary_rate,SUM(grosspay_save) as totalGross,department,\
+                        Sum(sss_save) as TotalSSS,\
+                        sum(phic_save) as totalphic,sum(hmdf_save) as totalhdmf,sum(totalDem_save) as totalDem,\
+                        sum(taxwitheld_save) as TotalWtax,\
+                       sum(cashadvance_save) as totalCA,sum(sssloan_save) as totalsssloan,\
+                        sum(hdmfloan_save) as totalhdmfloan,sum(netpay_save) as totalnetpay, \
+                        sum(sss_provi_save) as TotalProvi,\
+                        sum(totalDem_save) as TotalDemi,\
+                        sum(otherforms_save) as TotalOtherforms,\
+                        sum(taxable_amount) as TotaltaxAmount,\
+                        sum(taxwitheld_save) as TotalWitheld,\
+                        sum(total_mandatory)as totalMandatory,\
+                            taxable_mwe_detail\
+                        FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
+                            AND on_off_details = 'off' \
+                      GROUP BY employee_id,last_name,first_name, position_name,salary_rate,department,\
+                          taxable_mwe_detail ")
+   
+    myresult = cursor.fetchall()
+
+    for data in myresult:
+        empIDxlx = data[0]
+        lastnamexlx = data[1]
+        fnamexls = data[2]
+        full_name_xlx = lastnamexlx + ',' + fnamexls
+        position_xlx = data[3]
+        salaryRate_xlx = data[4]
+        grosspay_xlx = data[5]
+        department_xlx = data[6]
+        sss_provi_xlx = data[16]
+        totalDem_xlx = data[17]
+        otherforms_xlx = data[18]
+        taxableAmount_xlx = data[19]
+        tax_WIDTHEL_xlx = data[20]
+        total_mandatory_xlx = data[21]
+        tax_mwe_detail_xlx = data[22]
+      
+
+       
+       
+       
+
+        worksheet.write('A' + str(rowIndex),empIDxlx)
+        worksheet.write('B' + str(rowIndex),full_name_xlx)
+        worksheet.write('C' + str(rowIndex),position_xlx)
+        worksheet.write('D' + str(rowIndex),salaryRate_xlx)
+        worksheet.write('E' + str(rowIndex),grosspay_xlx)
+        worksheet.write('F' + str(rowIndex),department_xlx)
+        worksheet.write('G' + str(rowIndex),sss_provi_xlx)
+        worksheet.write('G' + str(rowIndex),totalDem_xlx)
+        worksheet.write('H' + str(rowIndex),otherforms_xlx)
+        worksheet.write('I' + str(rowIndex),taxableAmount_xlx)
+        worksheet.write('J' + str(rowIndex),tax_WIDTHEL_xlx)
+        worksheet.write('K' + str(rowIndex),total_mandatory_xlx)
+        worksheet.write('L' + str(rowIndex),tax_mwe_detail_xlx)
+       
+        
+       
+        
+        rowIndex += 1
+
+    workbook.close()
+       
+
+    # from os import startfile
+    startfile("payroll_off.xlsx")
+
+
+def payroll_perDepartment_export():
+    """This function is for exporting payroll """
+    
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    
+    
+    
+    date1 = input('Enter Date From:   ')
+    date2 = input('Enter Date To:   ')
+    department_query =  input("Enter Department: ")
+
+    workbook = xlsxwriter.Workbook("payroll_off_on.xlsx")
+    worksheet = workbook.add_worksheet('rental')
+    worksheet.write('A1', 'ID')
+    worksheet.write('B1', 'EMPLOYEE NAME')
+    worksheet.write('C1', 'POSITION')
+    worksheet.write('D1', 'RATE')
+    worksheet.write('E1', 'GROSS PAY')
+    worksheet.write('F1', 'DEPARTMENT')
+    worksheet.write('G1', 'SSS PROVI')
+    worksheet.write('G1', 'TOTALDEM')
+    worksheet.write('H1', 'OTHER FORMS')
+    worksheet.write('I1', 'TAXABLE AMOUNT')
+    worksheet.write('J1', 'TAX WIDTHEL')
+    worksheet.write('K1', 'TOTAL MANDATORY')
+    worksheet.write('L1', 'TAX/MWE')
+    
+   
+   
+    rowIndex = 2
+
+    cursor.execute("SELECT employee_id,last_name,\
+                        first_name,position_name, salary_rate,SUM(grosspay_save) as totalGross,department,\
+                        Sum(sss_save) as TotalSSS,\
+                        sum(phic_save) as totalphic,sum(hmdf_save) as totalhdmf,sum(totalDem_save) as totalDem,\
+                        sum(taxwitheld_save) as TotalWtax,\
+                       sum(cashadvance_save) as totalCA,sum(sssloan_save) as totalsssloan,\
+                        sum(hdmfloan_save) as totalhdmfloan,sum(netpay_save) as totalnetpay, \
+                        sum(sss_provi_save) as TotalProvi,\
+                        sum(totalDem_save) as TotalDemi,\
+                        sum(otherforms_save) as TotalOtherforms,\
+                        sum(taxable_amount) as TotaltaxAmount,\
+                        sum(taxwitheld_save) as TotalWitheld,\
+                        sum(total_mandatory)as totalMandatory,\
+                            taxable_mwe_detail\
+                        FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
+                             and department = '"+ department_query +"' \
+                      GROUP BY employee_id,last_name,first_name, position_name,salary_rate,department,\
+                          taxable_mwe_detail ")
+   
+    myresult = cursor.fetchall()
+
+    for data in myresult:
+        empIDxlx = data[0]
+        lastnamexlx = data[1]
+        fnamexls = data[2]
+        full_name_xlx = lastnamexlx + ',' + fnamexls
+        position_xlx = data[3]
+        salaryRate_xlx = data[4]
+        grosspay_xlx = data[5]
+        department_xlx = data[6]
+        sss_provi_xlx = data[16]
+        totalDem_xlx = data[17]
+        otherforms_xlx = data[18]
+        taxableAmount_xlx = data[19]
+        tax_WIDTHEL_xlx = data[20]
+        total_mandatory_xlx = data[21]
+        tax_mwe_detail_xlx = data[22]
+      
+
+       
+       
+       
+
+        worksheet.write('A' + str(rowIndex),empIDxlx)
+        worksheet.write('B' + str(rowIndex),full_name_xlx)
+        worksheet.write('C' + str(rowIndex),position_xlx)
+        worksheet.write('D' + str(rowIndex),salaryRate_xlx)
+        worksheet.write('E' + str(rowIndex),grosspay_xlx)
+        worksheet.write('F' + str(rowIndex),department_xlx)
+        worksheet.write('G' + str(rowIndex),sss_provi_xlx)
+        worksheet.write('G' + str(rowIndex),totalDem_xlx)
+        worksheet.write('H' + str(rowIndex),otherforms_xlx)
+        worksheet.write('I' + str(rowIndex),taxableAmount_xlx)
+        worksheet.write('J' + str(rowIndex),tax_WIDTHEL_xlx)
+        worksheet.write('K' + str(rowIndex),total_mandatory_xlx)
+        worksheet.write('L' + str(rowIndex),tax_mwe_detail_xlx)
+       
+        
+       
+        
+        rowIndex += 1
+
+    workbook.close()
+       
+
+    # from os import startfile
+    startfile("payroll_off_on.xlsx")
+
+def update_deminimis():
+    """
+    This function is for
+    searching for deminimis
+    columns
+    """
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date to: ')
+
+    cursor.execute("SELECT id,cut_off_date,employee_id,last_name, uniform_save,rice_save,laundry_save,  \
+                        medical1_save,medical2_save,totalDem_save\
+                            FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
+                      ")
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['ID','DATE','EMPLOYEE ID',
+                                    'LAST NAME','GROSS PAY','DEPARTMENT','On & Off Status','Total Deminimis'],
+                                        tablefmt='psql'))
+    
+    trans_id = input("Enter transaction ID: ")
+    uniform_update = input('Enter uniform: ')
+    rice_update = input('Enter rice: ')
+    laundry_update = input('Enter laundry: ')
+    medical1_update = input('Enter medical1: ')
+    medical2_update = input('Enter medical2: ')
+    total_dem_update = input('Enter total Deminimis: ')
+    
+    key = input("Would you like to update data yes/no?: ").lower()
+
+    if key == 'yes':
+
+        cursor.execute(
+                    "UPDATE payroll_computation SET uniform_save ='"+ uniform_update +"',\
+                   rice_save ='"+ rice_update +"',\
+                    laundry_save ='"+ laundry_update +"',medical1_save ='"+ medical1_update +"',  \
+                     medical2_save ='"+ medical2_update +"',totalDem_save ='"+ total_dem_update +"'   \
+                            WHERE id =%s", (trans_id,)
+                )
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        print("Data has been updated")
+        print('')
+    
+def update_otherforms():
+    """
+    This function is for
+    searching for deminimis
+    columns
+    """
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date to: ')
+
+    cursor.execute("SELECT id,cut_off_date,employee_id,last_name, otherforms_save\
+                        \
+                            FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
+                      ")
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['ID','DATE','EMPLOYEE ID',
+                                    'LAST NAME','Other Forms'],
+                                        tablefmt='psql'))
+    
+    trans_id = input("Enter transaction ID: ")
+    other_forms_update = input("Enter Other Forms: ")
+   
+    
+    key = input("Would you like to update data yes/no?: ").lower()
+
+    if key == 'yes':
+
+        cursor.execute(
+                    "UPDATE payroll_computation SET otherforms_save ='"+ other_forms_update +"'\
+                            WHERE id =%s", (trans_id,)
+                )
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        print("Data has been updated")
+        
+def not_subject():
+    """
+    This function is for querying
+    Payroll for not subject to tax
+    """   
+    
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date to: ') 
+    
+    cursor.execute("SELECT employee_id,last_name, sum(taxable_amount) as TaxableAmount\
+                                               FROM payroll_computation\
+                                               where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
+                                                and on_off_details = 'on'\
+                                                 GROUP BY employee_id,last_name \
+                                                 ORDER BY last_name")
+    
+    myresult = cursor.fetchall()
+    total = 0
+    count = 1
+    for i in myresult:
+        emp = i[0]
+        lastName = i[1]
+        taxAmount = i[2]
+        
+    
+        if taxAmount <= 20833:
+            taxAmount2 = taxAmount
+            total+=taxAmount2
+            count+=1
             
-cost_analysis_report()
+            print(count,emp,lastName,taxAmount2)
+        
+    print(total)    
+        
+        
+        
+           
+    
+    
+    
+    
+    
+            
+# cost_analysis_report()
 
 # edit_cash_advances()
 # edit_off_on()
@@ -2287,3 +2699,25 @@ cost_analysis_report()
 # computation_cosolidated()
 
 # update_employee_details_employee_resigned()
+
+# searchPayroll()
+
+# salaryQuery_per_employee()
+
+# update_department()
+
+
+# payroll_off_export()
+
+
+# payroll_perDepartment_export()
+
+
+# update_deminimis()
+
+
+# update_otherforms()
+
+not_subject()
+
+
