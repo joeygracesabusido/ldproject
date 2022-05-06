@@ -1241,7 +1241,7 @@ def showtables():
     #     print(x)
 
 def showColumns():
-    query ='SHOW COLUMNS FROM ldglobal.employee_details;'
+    query ='SHOW COLUMNS FROM ldglobal.diesel_consumption;'
     cursor.execute(query)
     myresult = cursor.fetchall()
 
@@ -2718,6 +2718,6 @@ def not_subject():
 
 # update_otherforms()
 
-not_subject()
+# not_subject()
 
 

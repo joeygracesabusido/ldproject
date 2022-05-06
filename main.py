@@ -2001,7 +2001,58 @@ def diesel_registry_search_with_equipID():
         equipment_diesel_treeview.insert('', 'end', values=(
             cnt, trans_id, date1, equip_id, useLiter, price, amount2, balance2,
             userName_rental, dateUpdate))
+def update_diesel_registry():
+    """
+    This function is for 
+    updating diesel registry
+    """
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    
+    diesel_date_update = diesel_dateFrom.get()
+    equipmentID = diesel_equipmentID_entry_list.get()
+    withdrawalSlip = withdrawalslip_diesel_entry.get()
+    totalliter = total_diesel_entry.get()
+    dieselRate = diesel_rate_entry.get()
+    totalAmount = diesel_amount_entry.get()
+    
+    
+    try:
+        if diesel_search_entry.get() == '':
+            messagebox.showerror("Error", "Search ID  Must be required")
+        else:
+            cursor.execute('Select * from diesel_consumption where id = %s',
+                    (diesel_search_entry.get(),))
+            row = cursor.fetchone()
+            if row == None:
+                messagebox.showerror("Error", "This trans id is not exist")
 
+            else:
+               
+                cursor.execute(
+                                "UPDATE diesel_consumption SET  \
+                            equipment_id = '" + equipmentID + "', \
+                            withdrawal_slip = '" + withdrawalSlip + "', \
+                            use_liter = '" + totalliter + "',\
+                            price = '" + dieselRate + "',\
+                            amount = '" + totalAmount + "', \
+                            transaction_date = '" + diesel_date_update + "'\
+                    WHERE id = %s",(diesel_search_entry.get(),))
+
+                messagebox.showinfo('JRS','Data has been Updated')
+                mydb.commit()
+                mydb.close()
+                cursor.close()
+                diesel_registry_list()
+
+
+    except Exception as ex:
+        messagebox.showerror("Erro", f"Error due to :{str(ex)}")
+
+    
+    
+    
 
 def diesel_registry_search():
     """This function is for searching Diesel Registry tru Date Query"""
@@ -2292,6 +2343,11 @@ def diesel_registry():
                                font=('arial', 10), width=10, height=1, command=delete_diesel_registry)
     btn_diesel_delete.place(x=200, y=245)
     btn_diesel_delete.bind('<Return>', delete_diesel_registry)
+    
+    btn_diesel_update = Button(equipmentModule_frame, text='Update', bd=2, bg='red', fg='white',
+                               font=('arial', 10), width=10, height=1, command=update_diesel_registry)
+    btn_diesel_update.place(x=200, y=295)
+    btn_diesel_update.bind('<Return>', update_diesel_registry)
 
     btn_diesel_search = Button(equipmentModule_frame, text='Search', bd=2, bg='green', fg='white',
                                font=('arial', 10), width=10, height=1, command=diesel_registry_search)
