@@ -1956,6 +1956,79 @@ def cost_entry():
     if user_description.get() == "Employee":
         cost_btn_update['state'] = DISABLED
 
+
+def search_diesel_by_transaction_id():
+    """
+    This function is for
+    search transaction id 
+    of Diesel Withdrawal Transaction
+    """
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    trans_ID = diesel_search_entry.get()
+
+
+    try:
+        if diesel_search_entry.get() == '':
+            messagebox.showerror("Error", "Search ID  Must be required")
+        else:
+            cursor.execute('Select * from diesel_consumption where id = %s',
+                    (diesel_search_entry.get(),))
+            row = cursor.fetchone()
+            if row == None:
+                messagebox.showerror("Error", "This trans id is not exist")
+
+            else:
+
+                cursor.execute("SELECT transaction_date,\
+                       equipment_id,withdrawal_slip, \
+                        use_liter,price,amount   \
+                            FROM diesel_consumption WHERE id = '"+ trans_ID + "'\
+                      ")
+
+                myresult = cursor.fetchall()
+               
+    
+                for i in myresult:
+
+                    transDate = i[0]
+                    equipmentID = i[1]
+                    with_split = i[2]
+                    literuse = i[3]
+                    diesel_rate = i[4]
+                    diesel_amount = i[5]
+
+                    
+                    diesel_dateFrom.delete(0, END)
+                    diesel_dateFrom.insert(0, (transDate))
+
+                    diesel_equipmentID_entry_list.delete(0, END)
+                    diesel_equipmentID_entry_list.insert(0, (equipmentID))
+
+                    withdrawalslip_diesel_entry.delete(0, END)
+                    withdrawalslip_diesel_entry.insert(0, (with_split))
+
+                    total_diesel_entry.delete(0, END)
+                    total_diesel_entry.insert(0, (literuse))
+
+                    diesel_rate_entry.delete(0, END)
+                    diesel_rate_entry.insert(0, (diesel_rate))
+
+                    diesel_amount_entry.delete(0, END)
+                    diesel_amount_entry.insert(0, (diesel_amount))
+
+                    
+
+
+    except Exception as ex:
+        messagebox.showerror("Erro", f"Error due to :{str(ex)}")
+
+
+
+
+
+
 def diesel_registry_search_with_equipID():
     """This function is for searching Diesel Registry tru Date Query"""
     mydb._open_connection()
@@ -2339,15 +2412,23 @@ def diesel_registry():
     btn_diesel_save.place(x=10, y=195)
     btn_diesel_save.bind('<Return>', save_diesel_registry)
 
+    btn_diesel_search = Button(equipmentModule_frame, text='Search', bd=2, bg='green', fg='white',
+                               font=('arial', 10), width=10, height=1, command=search_diesel_by_transaction_id)
+    btn_diesel_search.place(x=200, y=245)
+    btn_diesel_search.bind('<Return>', search_diesel_by_transaction_id)
+
+
+    btn_diesel_update = Button(equipmentModule_frame, text='Update', bd=2, bg='blue', fg='white',
+                               font=('arial', 10), width=10, height=1, command=update_diesel_registry)
+    btn_diesel_update.place(x=200, y=285)
+    btn_diesel_update.bind('<Return>', update_diesel_registry)
+
     btn_diesel_delete = Button(equipmentModule_frame, text='Delete', bd=2, bg='red', fg='white',
                                font=('arial', 10), width=10, height=1, command=delete_diesel_registry)
-    btn_diesel_delete.place(x=200, y=245)
+    btn_diesel_delete.place(x=200, y=325)
     btn_diesel_delete.bind('<Return>', delete_diesel_registry)
     
-    btn_diesel_update = Button(equipmentModule_frame, text='Update', bd=2, bg='red', fg='white',
-                               font=('arial', 10), width=10, height=1, command=update_diesel_registry)
-    btn_diesel_update.place(x=200, y=295)
-    btn_diesel_update.bind('<Return>', update_diesel_registry)
+    
 
     btn_diesel_search = Button(equipmentModule_frame, text='Search', bd=2, bg='green', fg='white',
                                font=('arial', 10), width=10, height=1, command=diesel_registry_search)

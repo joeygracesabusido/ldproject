@@ -2639,12 +2639,76 @@ def not_subject():
             print(count,emp,lastName,taxAmount2)
         
     print(total)    
-        
-        
-        
+
+
+def select_diesel():
+
+    """
+    This function is for search diesel Trans
+    """
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    trans_ID = input('Enter Trans ID :  ')
+
+  
+
+    cursor.execute("SELECT transaction_date,\
+                       equipment_id,withdrawal_slip, \
+                        use_liter,price,amount   \
+                            FROM diesel_consumption WHERE id = '"+ trans_ID + "'\
+                      ")
+
+    myresult = cursor.fetchall()
+    for i in myresult:
+        print(i)
+
+    # print(tabulate(myresult, headers =['DATE','EQUIPMENT ID',
+    #                                 'WITDH SLIPT','LITERS','PRICE',
+    #                                 'AMOUNT'],
+    #                                     tablefmt='psql'))
+ 
+def total_liters():
+    """
+
+    This function is for
+    querying Total Liters
+    """ 
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    DateFrom = input('Enter Date From: ')
+    DateTo = input('Enter Date From: ')
+
+    cursor.execute("SELECT transaction_date,\
+                       equipment_id,withdrawal_slip, \
+                        use_liter,price,amount   \
+                        FROM diesel_consumption WHERE transaction_date BETWEEN '"+ DateFrom + "'\
+                      and '"+ DateTo + "'\
+                       ORDER BY id")
+
+    myresult = cursor.fetchall()
+
+    print(tabulate(myresult, headers =['DATE','EQUIPMENT ID',
+                                    'WITDH SLIPT','LITERS','PRICE',
+                                    'AMOUNT'],
+                                        tablefmt='psql'))
+    
+    cursor.execute("SELECT sum(use_liter), SUM(amount)\
+                        FROM diesel_consumption WHERE transaction_date BETWEEN '"+ DateFrom + "'\
+                      and '"+ DateTo + "'\
+                       ORDER BY id")
+
+    myresult = cursor.fetchall()
+
+    for i in myresult:
+        totalLiters =i[0]
+        totalaMOUNT =i[1]
+        print(f'Total Liters: {totalLiters}',f'Total aMOUNT: {totalaMOUNT}')
            
     
-    
+# select_diesel()    
     
     
     
@@ -2719,5 +2783,8 @@ def not_subject():
 # update_otherforms()
 
 # not_subject()
+
+
+total_liters()
 
 
