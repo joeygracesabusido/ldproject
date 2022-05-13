@@ -2060,7 +2060,7 @@ def diesel_registry_search_with_equipID():
         cnt += 1
         date1 = data[0]
         equip_id = data[1]
-
+        withSlipt = data[2]
         useLiter = data[3]
         price = data[4]
         amount = data[5]
@@ -2073,7 +2073,7 @@ def diesel_registry_search_with_equipID():
 
         equipment_diesel_treeview.insert('', 'end', values=(
             cnt, trans_id, date1, equip_id, useLiter, price, amount2, balance2,
-            userName_rental, dateUpdate))
+            withSlipt, dateUpdate))
 def update_diesel_registry():
     """
     This function is for 
@@ -2157,7 +2157,7 @@ def diesel_registry_search():
         cnt += 1
         date1 = data[0]
         equip_id = data[1]
-
+        withSlipt = data[2]
         useLiter = data[3]
         price = data[4]
         amount = data[5]
@@ -2170,7 +2170,7 @@ def diesel_registry_search():
 
         equipment_diesel_treeview.insert('', 'end', values=(
             cnt, trans_id, date1, equip_id, useLiter, price, amount2, balance2,
-            userName_rental, dateUpdate))
+            withSlipt, dateUpdate))
 
 
 
@@ -2253,7 +2253,7 @@ def diesel_registry_list():
         cnt += 1
         date1 = data[0]
         equip_id = data[1]
-
+        withSlipt = data[2]
         useLiter = data[3]
         price = data[4]
         amount = data[5]
@@ -2266,7 +2266,7 @@ def diesel_registry_list():
 
         equipment_diesel_treeview.insert('', 'end', values=(
             cnt, trans_id, date1, equip_id, useLiter, price, amount2, balance2,
-            userName_rental, dateUpdate))
+            withSlipt, dateUpdate))
 
 
 def save_diesel_registry():
@@ -2461,7 +2461,7 @@ def diesel_registry():
     equipment_diesel_treeview = ttk.Treeview(MidViewForm23,
                                              columns=("CNT", "Trans ID", "DATE", "Equipment ID",
                                                       "RENTAL HOUR", "Rental Rate", "Amount",
-                                                      "Balance", "UserName", "DateUpdate"),
+                                                      "Balance", "WithdrawalSlip", "DateUpdate"),
                                              selectmode="extended", height=21, yscrollcommand=scrollbary.set,
                                              xscrollcommand=scrollbarx.set)
     scrollbary.config(command=equipment_diesel_treeview.yview)
@@ -2477,7 +2477,7 @@ def diesel_registry():
     equipment_diesel_treeview.heading('Rental Rate', text="Price", anchor=CENTER)
     equipment_diesel_treeview.heading('Amount', text="Amount", anchor=CENTER)
     equipment_diesel_treeview.heading('Balance', text="Balance", anchor=CENTER)
-    equipment_diesel_treeview.heading('UserName', text="User", anchor=CENTER)
+    equipment_diesel_treeview.heading('WithdrawalSlip', text="Slipt", anchor=CENTER)
     equipment_diesel_treeview.heading('DateUpdate', text="Update", anchor=CENTER)
 
     equipment_diesel_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
