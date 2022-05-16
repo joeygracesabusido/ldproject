@@ -27,8 +27,8 @@ from PollyReports import *
 from os import startfile
 import xlsxwriter
 
-from docx import Document
-from docx.shared import Inches
+# from docx import Document
+# from docx.shared import Inches
 
 from datetime import date, timedelta
 from datetime import datetime
@@ -2901,7 +2901,49 @@ def chart_of_account_list():
     for x in agg_result:
         data.append(x['accountTitle'])
     return data
-        
+
+
+def insert_journalEntry_dictionary():
+    """
+    This function is for inserting
+    data in Dictionary for Journal Entry
+    """
+    answer = 'yes'
+    data ={}
+    # while answer == 'yes':
+    debit_entry = float(debit_manual_entry.get())
+    credit_entry = float(credit_manual_entry.get())
+    journal = journal_manual.get()
+    ref =  reference_manual_entry.get()
+    acountNumber = account_number_entry.get()
+    journalMemo = journal_memo_entry.get('1.0', 'end-1c')
+    accountTitle = chart_of_account_manual.get()
+    dateEntry =  journalEntryInsert_datefrom.get()
+    date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+    
+    
+    
+    answer = tkMessageBox.askquestion('JRS Software', 'Would you like to add Entry Transaction?', icon="warning").lower()
+    
+    if answer =='yes':
+    
+        data.update({len(data)+1:{
+            'date_entry': dateEntry,
+            'journal': journal,
+            'ref': ref,
+            'descriptions': journalMemo,
+            'acoount_number': acountNumber,
+            'account_disc': accountTitle,
+            'debit_amount': debit_entry,
+            'credit_amount': credit_entry,
+            'created':datetime.now()
+        }})
+    
+    
+    
+    
+    print(data)
+            
 
 def journal_entry_insert_frame():
     """
@@ -3069,6 +3111,12 @@ def journal_entry_insert_frame():
                               font=('arial', 10), width=14, height=1,
                                command=journalEntryManual_list_treeview)
     btn_search_ref.place(x=815, y=35)
+    
+    
+    btn_insert_dict = Button(accounting_frame, text='Insert Dictionary', bd=2, bg='khaki', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=insert_journalEntry_dictionary)
+    btn_insert_dict.place(x=815, y=70)
 
 
     # this is for treeview for payroll computation

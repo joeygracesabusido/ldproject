@@ -443,6 +443,7 @@ def journalEntryManual_list_treeview():
     
     journalEntryManual_treeview.delete(*journalEntryManual_treeview.get_children())
     return journalEntry_manual_list()
+
 def journalEntry_manual_list():
     """
     This function is for manual
@@ -487,6 +488,37 @@ def journalEntry_manual_list():
 
     except Exception as ex:
         messagebox.showerror("Error", f"Error due to :{str(ex)}")
+        
+def insert_journalEntry_dictionary():
+    """
+    This function is for inserting
+    data in Dictionary for Journal Entry
+    """
+    debit_entry = float(debit_manual_entry.get())
+    credit_entry = float(credit_manual_entry.get())
+    journal = journal_manual.get()
+    ref =  reference_manual_entry.get()
+    acountNumber = account_number_entry.get()
+    journalMemo = journal_memo_entry.get()
+    accountTitle = chart_of_account_manual.get()
+    dateEntry =  journalEntryInsert_datefrom.get()
+    date_time_obj = datetime.strptime(dateEntry, '%m/%d/%Y')
+    
+    data ={}
+    
+    data.update({len(data)+1:{
+        'date_entry': dateEntry,
+        'journal': journal,
+        'ref': ref,
+        'descriptions': journalMemo,
+        'acoount_number': acountNumber,
+        'account_disc': accountTitle,
+        'debit_amount': debit_entry,
+        'credit_amount': credit_entry,
+        'created':datetime.now()
+    }})
+    
+        
 def insert_journalEntry_manual():
     """
     this function is for inserting
@@ -757,6 +789,12 @@ def journal_entry_insert_frame():
                               font=('arial', 10), width=14, height=1,
                                command=journalEntryManual_list_treeview)
     btn_search_ref.place(x=815, y=35)
+    
+    
+    btn_insert_dict = Button(accounting_frame, text='Insert Entry', bd=2, bg='white', fg='black',
+                              font=('arial', 10), width=14, height=1,
+                               command=insert_journalEntry_dictionary)
+    btn_insert_dict.place(x=915, y=70)
 
 
     # this is for treeview for payroll computation

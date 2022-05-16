@@ -21,9 +21,9 @@ from PollyReports import *
 from os import startfile
 import xlsxwriter
 
-import PyPDF2
-from docx import Document
-from docx.shared import Inches
+# import PyPDF2
+# from docx import Document
+# from docx.shared import Inches
 
 from datetime import date, timedelta
 from datetime import datetime
@@ -234,48 +234,48 @@ def demo():
     """
     This function is for demosntration of printing Microsoft word
     """
-    document = Document()
+    # document = Document()
 
-    x = document.add_heading('ACCOUNT PAYABLE VOUCHER', 1)
-    x.alignment = 1
-    p = document.add_paragraph('A plain paragraph having some ')
-    p.add_run('bold').bold = True
-    p.add_run(' and some ')
-    p.add_run('italic.').italic = True
+    # x = document.add_heading('ACCOUNT PAYABLE VOUCHER', 1)
+    # x.alignment = 1
+    # p = document.add_paragraph('A plain paragraph having some ')
+    # p.add_run('bold').bold = True
+    # p.add_run(' and some ')
+    # p.add_run('italic.').italic = True
 
-    document.add_heading('Heading, level 1', level=1)
-    document.add_paragraph('Intense quote', style='Intense Quote')
+    # document.add_heading('Heading, level 1', level=1)
+    # document.add_paragraph('Intense quote', style='Intense Quote')
 
-    document.add_paragraph(
-        'first item in unordered list', style='List Bullet'
-    )
-    document.add_paragraph(
-        'first item in ordered list', style='List Number'
-    )
+    # document.add_paragraph(
+    #     'first item in unordered list', style='List Bullet'
+    # )
+    # document.add_paragraph(
+    #     'first item in ordered list', style='List Number'
+    # )
 
     # document.add_picture('D:\LD\ldproject\image\logo.jpg', width=Inches(1.25))
 
-    records = (
-        (3, '101', 'Spam'),
-        (7, '422', 'Eggs'),
-        (4, '631', 'Spam, spam, eggs, and spam')
-    )
+    # records = (
+    #     (3, '101', 'Spam'),
+    #     (7, '422', 'Eggs'),
+    #     (4, '631', 'Spam, spam, eggs, and spam')
+    # )
 
-    table = document.add_table(rows=1, cols=3)
-    hdr_cells = table.rows[0].cells
-    hdr_cells[0].text = 'Qty'
-    hdr_cells[1].text = 'Id'
-    hdr_cells[2].text = 'Desc'
-    for qty, id, desc in records:
-        row_cells = table.add_row().cells
-        row_cells[0].text = str(qty)
-        row_cells[1].text = id
-        row_cells[2].text = desc
+    # table = document.add_table(rows=1, cols=3)
+    # hdr_cells = table.rows[0].cells
+    # hdr_cells[0].text = 'Qty'
+    # hdr_cells[1].text = 'Id'
+    # hdr_cells[2].text = 'Desc'
+    # for qty, id, desc in records:
+    #     row_cells = table.add_row().cells
+    #     row_cells[0].text = str(qty)
+    #     row_cells[1].text = id
+    #     row_cells[2].text = desc
 
-    document.add_page_break()
+    # document.add_page_break()
 
-    document.save('demo.docx')
-    startfile("demo.docx")
+    # document.save('demo.docx')
+    # startfile("demo.docx")
 
 def testing_docx():
     """
@@ -324,26 +324,26 @@ def testing_docx():
             (result['account_disc'],result['debit_amount'])
         )
         
-        document = Document()
+        # document = Document()
 
-        x = document.add_heading('ACCOUNT PAYABLE VOUCHER', 1)
-        x.alignment = 1
+        # x = document.add_heading('ACCOUNT PAYABLE VOUCHER', 1)
+        # x.alignment = 1
         
-        table = document.add_table(rows=1, cols=1)
-        hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = ''
-        # hdr_cells[1].text = ''
-        # hdr_cells[2].text = ''
-        for qty, dbt in records:
-            row_cells = table.add_row().cells
-            row_cells[0].text = str(qty)
-            row_cells[1].text = dbt
-            # row_cells[2].text = float(credit)
+        # table = document.add_table(rows=1, cols=1)
+        # hdr_cells = table.rows[0].cells
+        # hdr_cells[0].text = ''
+        # # hdr_cells[1].text = ''
+        # # hdr_cells[2].text = ''
+        # for qty, dbt in records:
+        #     row_cells = table.add_row().cells
+        #     row_cells[0].text = str(qty)
+        #     row_cells[1].text = dbt
+        #     # row_cells[2].text = float(credit)
 
-        document.add_page_break()
+        # document.add_page_break()
 
-        document.save('demo.docx')
-        startfile("demo.docx")
+        # document.save('demo.docx')
+        # startfile("demo.docx")
 
 
 def pdf_to_word():
@@ -352,15 +352,15 @@ def pdf_to_word():
     document pdf to word
     """
 
-    FILE_PATH = 'd:\LD\ldproject\\apv.pdf'
+    # FILE_PATH = 'd:\LD\ldproject\\apv.pdf'
 
-    with open(FILE_PATH, mode='rb') as f:
+    # with open(FILE_PATH, mode='rb') as f:
 
-        reader = PyPDF2.PdfFileReader(f)
+    #     reader = PyPDF2.PdfFileReader(f)
 
-        page = reader.getPage(0)
+    #     page = reader.getPage(0)
 
-        print(page.extractText())
+    #     print(page.extractText())
     
         # startfile("apv.doc")
 
@@ -485,7 +485,7 @@ def search_fundrequest():
     except Exception as ex:
         print("Error", f"Error due to :{str(ex)}")  
 
-search_fundrequest()
+# search_fundrequest()
 
 
 # update_user_employee()
@@ -502,3 +502,5 @@ search_fundrequest()
 # apv()
 # testing_dictionary() 
 # test_lookup()
+
+testing_dictionary()
