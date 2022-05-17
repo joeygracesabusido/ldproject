@@ -2774,7 +2774,7 @@ def total_liters():
 # payroll_off_export()
 
 
-# payroll_perDepartment_export()
+payroll_perDepartment_export()
 
 
 # update_deminimis()
@@ -2785,6 +2785,6 @@ def total_liters():
 # not_subject()
 
 
-total_liters()
+# total_liters()
 
 
