@@ -1241,7 +1241,7 @@ def showtables():
     #     print(x)
 
 def showColumns():
-    query ='SHOW COLUMNS FROM ldglobal.diesel_consumption;'
+    query ='SHOW COLUMNS FROM ldglobal.payroll_computation;'
     cursor.execute(query)
     myresult = cursor.fetchall()
 
@@ -2706,7 +2706,69 @@ def total_liters():
         totalLiters =i[0]
         totalaMOUNT =i[1]
         print(f'Total Liters: {totalLiters}',f'Total aMOUNT: {totalaMOUNT}')
-           
+ 
+def get_attendance():
+    """
+    This function is for 
+    query attendance of Employee
+    """  
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    DateFrom = input('Enter Date From: ')
+    DateTo = input('Enter Date From: ')
+    department_search = input('Enter Department: ')
+    
+    
+    
+    
+    cursor.execute("SELECT employee_id,last_name,first_name, sum(regular_day) as TotalRegday,\
+                        sum(regularsunday) as TotalSun,  sum(spl) as TotalSpl,\
+                        sum(legal_day) as TotalLgl2,  sum(shoprate_day) as TotalShopRate,\
+                        sum(proviRate_day) as TotalproviRate,  sum(provisun_day) as TotalProviSun, \
+                        position_name \
+                            FROM payroll_computation\
+                                    where cut_off_date BETWEEN '" + DateFrom + "' and '" + DateTo + "' \
+                                        and department = '" + department_search + "'\
+                                            GROUP BY employee_id,last_name,first_name,position_name \
+                                                 ORDER BY last_name")
+
+    myresult = cursor.fetchall()
+    
+    
+    
+    number_of_days = {}
+    for i in myresult:
+        data = {i[0]:
+                    {
+                     'lastName': i[1],
+                     'first_name': i[2],
+                     'Total_Days': i[3] + i[4] + i[5] + i[6] + i[7] + i[8] + i[9],
+                     'position': i[10],
+                     }
+                }
+
+        number_of_days.update(data)
+
+    
+    menu = PrettyTable()
+    menu.field_names=['Employee ID','Last Name','First Name','Position', 'Total Days']
+        
+    for emp in number_of_days:
+        menu.add_row([emp,
+                   
+                     number_of_days[emp]['lastName'],
+                     number_of_days[emp]['first_name'],
+                     number_of_days[emp]['position'],
+                     number_of_days[emp]['Total_Days'],
+                     
+                     ])
+                                
+    print(menu)
+    
+    
+    
+            
     
 # select_diesel()    
     
@@ -2774,7 +2836,7 @@ def total_liters():
 # payroll_off_export()
 
 
-payroll_perDepartment_export()
+# payroll_perDepartment_export()
 
 
 # update_deminimis()
@@ -2786,5 +2848,8 @@ payroll_perDepartment_export()
 
 
 # total_liters()
+
+
+get_attendance()
 
 
