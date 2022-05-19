@@ -2423,12 +2423,11 @@ def payroll_perDepartment_export():
     mydb._open_connection()
     cursor = mydb.cursor()
     
-    
-    
-    
+
     date1 = input('Enter Date From:   ')
     date2 = input('Enter Date To:   ')
     department_query =  input("Enter Department: ")
+    
 
     workbook = xlsxwriter.Workbook("payroll_off_on.xlsx")
     worksheet = workbook.add_worksheet('rental')
@@ -2766,6 +2765,46 @@ def get_attendance():
                                 
     print(menu)
     
+
+
+def equipment_list():
+    """This function is to search for Equipment"""
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    
+    workbook = xlsxwriter.Workbook("equipment_list.xlsx")
+    worksheet = workbook.add_worksheet('equipment')
+    worksheet.write('A1', 'Equipment ID')
+   
+    rowIndex = 2
+    query = """
+            Select * 
+            from equipment_details
+            order by equipment_id
+            """
+    cursor.execute(query)
+    myresult = cursor.fetchall()
+    
+    for i in myresult:
+        Equipment_ID = i[1]
+    
+        worksheet.write('A' + str(rowIndex),Equipment_ID)
+       
+
+        
+        rowIndex += 1
+
+    workbook.close()
+       
+
+    # from os import startfile
+    startfile("equipment_list.xlsx")
+    
+    
+    
+
     
     
             
@@ -2850,6 +2889,8 @@ def get_attendance():
 # total_liters()
 
 
-get_attendance()
+# get_attendance()
+
+equipment_list()
 
 
