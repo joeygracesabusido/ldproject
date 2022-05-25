@@ -484,6 +484,22 @@ def search_fundrequest():
 
     except Exception as ex:
         print("Error", f"Error due to :{str(ex)}")  
+        
+        
+        
+def TestLogin():
+    """
+    This function is for
+    testing termux code
+    """
+    dataSearch = db['login']
+    
+    searchData = dataSearch.find()
+    
+    for i in searchData:
+        a = i['username']
+        b = i['password']
+        print(f'Username: {a}',f'Password: {b}')
 
 # search_fundrequest()
 
@@ -503,4 +519,6 @@ def search_fundrequest():
 # testing_dictionary() 
 # test_lookup()
 
-testing_dictionary()
+# testing_dictionary()
+
+TestLogin()
