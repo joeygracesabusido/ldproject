@@ -2282,7 +2282,7 @@ def searchEmployee_details():
         if department_list.get() == "Rizal-R&F" or   department_list.get() == "Admin-Site" :
             mwe = float(373)
         elif  department_list.get() == "Head Office":
-            mwe = float(570)
+            mwe = float(537)
         elif  department_list.get() == "Pampanga":
             mwe = float(420)
 
@@ -2916,7 +2916,7 @@ def payrollComputation_module():
     btn_netpay_conso.place(x=870, y=310)
     btn_netpay_conso.bind('<Return>', computation_cosolidated)
 
-    btn_netpay_conso_cal = Button(payroll_frame, text="Net Pay Conso ", bg='white', fg='black', font=('arial', 9),
+    btn_netpay_conso_cal = Button(payroll_frame, text="Net Pay Conso ", bg='brown', fg='white', font=('arial', 9),
                                 width=12, command= net_pay_conso_calculation)
     btn_netpay_conso_cal.place(x=970, y=310)
     btn_netpay_conso_cal.bind('<Return>', net_pay_conso_calculation)
@@ -3220,6 +3220,8 @@ def employee_update():
     tin_reg_update = tin_reg_entry.get()
     phic_reg_update = phic_reg_entry.get()
     hdmf_reg_update = hdmf_reg_entry.get()
+    salaRate_update = salaryRate__reg_entry.get()
+    
     try:
         if employee_id_entry.get()== "":
             messagebox.showerror("Error", "Employee ID fields  Must be required")
@@ -3240,8 +3242,9 @@ def employee_update():
                 tin ='" + tin_reg_update + "',\
                 sssNumber ='" + sss_reg_update + "',\
                 phicNumber ='" + phic_reg_update + "',\
-                hdmfNumber ='" + hdmf_reg_update + "'\
-                WHERE employee_id =%s", (employee_id_entry.get(),)
+                hdmfNumber ='" + hdmf_reg_update + "',\
+                salary_rate ='" + salaRate_update + "'\
+                    WHERE employee_id =%s", (employee_id_entry.get(),)
             )
             mydb.commit()
             mydb.close()

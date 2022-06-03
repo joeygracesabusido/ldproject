@@ -2605,6 +2605,8 @@ def update_otherforms():
         cursor.close()
         print("Data has been updated")
         
+
+        
 def not_subject():
     """
     This function is for querying
@@ -2849,7 +2851,7 @@ def equipment_list():
 # equipment_registry()
 # mwe_selection()
 # test_on()
-# selection()
+selection()
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()
@@ -2891,6 +2893,6 @@ def equipment_list():
 
 # get_attendance()
 
-equipment_list()
+# equipment_list()
 
 
