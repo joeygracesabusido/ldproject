@@ -2343,6 +2343,7 @@ def payroll_off_export():
     worksheet.write('J1', 'TAX WIDTHEL')
     worksheet.write('K1', 'TOTAL MANDATORY')
     worksheet.write('L1', 'TAX/MWE')
+    worksheet.write('M1', 'Date')
     
    
    
@@ -2361,11 +2362,11 @@ def payroll_off_export():
                         sum(taxable_amount) as TotaltaxAmount,\
                         sum(taxwitheld_save) as TotalWitheld,\
                         sum(total_mandatory)as totalMandatory,\
-                            taxable_mwe_detail\
+                            taxable_mwe_detail,cut_off_date\
                         FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
                             AND on_off_details = 'off' \
                       GROUP BY employee_id,last_name,first_name, position_name,salary_rate,department,\
-                          taxable_mwe_detail ")
+                          taxable_mwe_detail ,cut_off_date")
    
     myresult = cursor.fetchall()
 
@@ -2385,6 +2386,8 @@ def payroll_off_export():
         tax_WIDTHEL_xlx = data[20]
         total_mandatory_xlx = data[21]
         tax_mwe_detail_xlx = data[22]
+        
+        date_xlx = data[23]
       
 
        
@@ -2404,6 +2407,7 @@ def payroll_off_export():
         worksheet.write('J' + str(rowIndex),tax_WIDTHEL_xlx)
         worksheet.write('K' + str(rowIndex),total_mandatory_xlx)
         worksheet.write('L' + str(rowIndex),tax_mwe_detail_xlx)
+        worksheet.write('M' + str(rowIndex),date_xlx)
        
         
        
@@ -2805,12 +2809,105 @@ def equipment_list():
     startfile("equipment_list.xlsx")
     
     
+def payroll_conso():
+    """
+    This is for cosolidated query
+    """ 
     
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    date1 = input('Enter Date from: ') 
+    date2 = input('Enter Date to: ') 
+    cursor.execute("SELECT employee_id,last_name,\
+                        first_name,salary_rate,SUM(grosspay_save) as totalGross,\
+                       Sum(sss_save) as TotalSSS,\
+                        sum(phic_save) as totalphic,sum(hmdf_save) as totalhdmf,sum(totalDem_save) as totalDem,\
+                        sum(otherforms_save)as totalOtherforms\
+                            FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
+                            AND on_off_details = 'on' \
+                      GROUP BY employee_id,last_name,first_name, position_name,salary_rate\
+                           ")
+   
+    myresult = cursor.fetchall()
+    
+    print(tabulate(myresult, headers =['EMPLOYEE ID',
+                                    'LAST NAME','SALARY RATE',
+                                    'GROSS PAY','SSS','PHIC','HDMF'], tablefmt='psql'))
+
+    workbook = xlsxwriter.Workbook("payroll.xlsx")
+    worksheet = workbook.add_worksheet('rental')
+    worksheet.write('A1', 'ID')
+    worksheet.write('B1', 'EMPLOYEE NAME')
+    worksheet.write('C1', 'SALARY RATE')
+    worksheet.write('D1', 'GROSS PAY')
+    worksheet.write('E1', 'SSS')
+    worksheet.write('F1', 'PHIC')
+    worksheet.write('G1', 'HDMF')
+    worksheet.write('H1', 'DEMINIMIS')
+    worksheet.write('I1', 'OTHER FORMS')
+    
+    
+   
+    
+    rowIndex = 2
+    
+    
+    for data in myresult:
+        empIDxlx = data[0]
+        lastnamexlx = data[1]
+        fnamexls = data[2]
+        full_name_xlx = lastnamexlx + ',' + fnamexls
+        
+        salaryRate_xlx = data[3]
+        grosspay_xlx = data[4]
+        
+        
+        # otherforms_xlx = data[18]
+        # taxableAmount_xlx = data[19]
+        # tax_WIDTHEL_xlx = data[20]
+        # total_mandatory_xlx = data[21]
+        # tax_mwe_detail_xlx = data[22]
+        
+        sss_xlx = data[5]
+        phic_xlx = data[6]
+        hdmf_xlx = data[7]
+        deminimis_xlx = data[8]
+        otherforms_xlx = data[9]
+        
+      
+
+       
+       
+       
+
+        worksheet.write('A' + str(rowIndex),empIDxlx)
+        worksheet.write('B' + str(rowIndex),full_name_xlx)
+        worksheet.write('C' + str(rowIndex),salaryRate_xlx)
+        worksheet.write('D' + str(rowIndex),grosspay_xlx)
+        worksheet.write('E' + str(rowIndex),sss_xlx)
+        worksheet.write('F' + str(rowIndex),phic_xlx)
+        worksheet.write('G' + str(rowIndex),hdmf_xlx)
+        worksheet.write('H' + str(rowIndex),deminimis_xlx)
+        worksheet.write('I' + str(rowIndex),otherforms_xlx)
+       
+       
+        
+       
+        
+       
+        
+        rowIndex += 1
+
+    workbook.close()
+    
+    # from os import startfile
+    startfile("payroll.xlsx")
 
     
     
             
-    
+payroll_conso() 
 # select_diesel()    
     
     
@@ -2851,7 +2948,7 @@ def equipment_list():
 # equipment_registry()
 # mwe_selection()
 # test_on()
-selection()
+# selection()
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()

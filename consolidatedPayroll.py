@@ -428,13 +428,17 @@ def payroll_export():
     worksheet.write('D1', 'RATE')
     worksheet.write('E1', 'GROSS PAY')
     worksheet.write('F1', 'DEPARTMENT')
-    worksheet.write('G1', 'SSS PROVI')
     worksheet.write('G1', 'TOTALDEM')
     worksheet.write('H1', 'OTHER FORMS')
     worksheet.write('I1', 'TAXABLE AMOUNT')
     worksheet.write('J1', 'TAX WIDTHEL')
     worksheet.write('K1', 'TOTAL MANDATORY')
     worksheet.write('L1', 'TAX/MWE')
+    worksheet.write('M1', 'SSS')
+    worksheet.write('N1', 'PHIC')
+    worksheet.write('O1', 'HDMF')
+    worksheet.write('P1', 'DATE')
+     
     
    
    
@@ -453,11 +457,11 @@ def payroll_export():
                         sum(taxable_amount) as TotaltaxAmount,\
                         sum(taxwitheld_save) as TotalWitheld,\
                         sum(total_mandatory)as totalMandatory,\
-                            taxable_mwe_detail\
+                            taxable_mwe_detail,cut_off_date\
                         FROM payroll_computation where cut_off_date BETWEEN '"+ date1 +"' and '"+ date2 +"' \
                             AND on_off_details = 'on' \
                       GROUP BY employee_id,last_name,first_name, position_name,salary_rate,department,\
-                          taxable_mwe_detail ")
+                          taxable_mwe_detail,cut_off_date ")
    
     myresult = cursor.fetchall()
 
@@ -477,6 +481,12 @@ def payroll_export():
         tax_WIDTHEL_xlx = data[20]
         total_mandatory_xlx = data[21]
         tax_mwe_detail_xlx = data[22]
+        
+        sss_xlx = data[7]
+        phic_xlx = data[8]
+        hdmf_xlx = data[9]
+        
+        date_xlx = data[23]
       
 
        
@@ -489,13 +499,17 @@ def payroll_export():
         worksheet.write('D' + str(rowIndex),salaryRate_xlx)
         worksheet.write('E' + str(rowIndex),grosspay_xlx)
         worksheet.write('F' + str(rowIndex),department_xlx)
-        worksheet.write('G' + str(rowIndex),sss_provi_xlx)
         worksheet.write('G' + str(rowIndex),totalDem_xlx)
+       
         worksheet.write('H' + str(rowIndex),otherforms_xlx)
         worksheet.write('I' + str(rowIndex),taxableAmount_xlx)
         worksheet.write('J' + str(rowIndex),tax_WIDTHEL_xlx)
         worksheet.write('K' + str(rowIndex),total_mandatory_xlx)
         worksheet.write('L' + str(rowIndex),tax_mwe_detail_xlx)
+        worksheet.write('M' + str(rowIndex),sss_xlx)
+        worksheet.write('N' + str(rowIndex),phic_xlx)
+        worksheet.write('O' + str(rowIndex),hdmf_xlx)
+        worksheet.write('P' + str(rowIndex),date_xlx)
        
         
        
@@ -1265,7 +1279,7 @@ def net_pay():
         if department_list.get() == "Rizal-R&F" or   department_list.get() == "Admin-Site" :
             mwe_monthly = float(373 * 13)
         elif  department_list.get() == "Head Office":
-            mwe_monthly = float(570 * 13)
+            mwe_monthly = float(537 * 13)
         elif  department_list.get() == "Pampanga":
             mwe_monthly = float(420 * 13)
 
