@@ -1,3 +1,4 @@
+from cgi import test
 import mysql.connector
 from reportlab.lib import colors, pagesizes
 from tabulate import tabulate
@@ -2905,9 +2906,84 @@ def payroll_conso():
     startfile("payroll.xlsx")
 
     
+def testing_for_array():
     
+    """
+    This function is for 
+    testing for array function
+    """
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter date from: ')
+    date2 = input('Enter date to: ')
+    
+    query =  "Select\
+                equipment_details.equipment_id,\
+                sum(diesel_consumption.use_liter) as TotalLiters,\
+                sum(diesel_consumption.amount) as Totalamount\
+                from equipment_details\
+                INNER JOIN diesel_consumption \
+                ON equipment_details.equipment_id=diesel_consumption.equipment_id  \
+                where diesel_consumption.transaction_date \
+                 BETWEEN '" + date1 + "' and\
+                 '" + date2 + "' \
+                 GROUP BY equipment_id \
+                 ORDER BY equipment_id"   
+    cursor.execute(query)
+    myresult = cursor.fetchall()  
+
+    test_array1 = {}
+    for i in myresult: 
+        equipID = i[0] 
+        totalliters = i[1]
+        total_amount_diesel = i[2]
+        
+        data = {
+            'equip_id': i[0],
+            'totalLiters': i[1],
+            'totalAmount': i[2],
             
-payroll_conso() 
+            
+        }
+        test_array1.update(data)
+    
+
+        query_disel =  "Select\
+                equipment_details.equipment_id,\
+                sum(equipment_rental.total_rental_hour) as TotalHours\
+                from equipment_details\
+                INNER JOIN equipment_rental \
+                ON equipment_details.equipment_id=equipment_rental.equipment_id  \
+                where equipment_rental.transaction_date \
+                    BETWEEN '" + date1 + "' and\
+                    '" + date2 + "' \
+                    GROUP BY equipment_id \
+                    "   
+        cursor.execute(query_disel)
+        myresult2 = cursor.fetchall()
+
+        test_array = []
+        count = 0
+        total_equipment = 0
+        for l in myresult2:
+            equipID_diesel = l[0] 
+            totalHours = l[1]
+            
+            if equipID_diesel == test_array1['equip_id']:
+                count=+1
+                test_array.append(i)
+        # print(test_array)
+                total_equipment = len(test_array)     
+        print(tabulate(test_array, headers =['Equipment ID','Rental','Diesel'], tablefmt='psql'))   
+        print(f'Total Equipment: {total_equipment}')
+        # print(test_array1['totalAmount'])
+
+
+
+   
+# testing_for_array()           
+# payroll_conso() 
 # select_diesel()    
     
     
@@ -2985,7 +3061,7 @@ payroll_conso()
 # not_subject()
 
 
-# total_liters()
+total_liters()
 
 
 # get_attendance()
