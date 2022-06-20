@@ -14,6 +14,7 @@ from PollyReports import *
 
 
 from datetime import date, timedelta
+from datetime import datetime
 
 
 mydb = mysql.connector.connect(
@@ -2979,9 +2980,52 @@ def testing_for_array():
         print(f'Total Equipment: {total_equipment}')
         # print(test_array1['totalAmount'])
 
+def average_per_month():
+    """
+    This function is for
+    calculating per month of
+    Rental Rate
+    """
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    start_date = input("Enter Date From: ")
+    timeNow = ('00:00:00')
+    date_time_str2 = start_date + ' ' + timeNow
+    date_time_ob1 = datetime.strptime(date_time_str2, '%Y-%m-%d %H:%M:%S')
+    
+    end_date = input("Enter Date to: ")
+    timeNow = ('00:00:00')
+    date_time_str3 = end_date + ' ' + timeNow
+    date_time_obj2 = datetime.strptime(date_time_str3, '%Y-%m-%d %H:%M:%S')
+    
+    
 
+    num_months = (date_time_obj2.year - date_time_ob1.year) * 12 + (date_time_obj2.month - date_time_ob1.month)
+    num_months2 = num_months + 1
+    print(num_months2)
+    query =  "Select\
+                sum(rental_amount) as TotalHours\
+                from equipment_rental \
+                where transaction_date \
+                    BETWEEN '" + start_date + "' and\
+                    '" + end_date + "' "   
+    cursor.execute(query)
+    myresult2 = cursor.fetchall()
+    
+    average = 0
+    a = 0
+    for i in myresult2:
+        a = i[0]
+        average = float(a) / num_months2
+        average2 = '{:,.2f}'.format(average)
+        a2 = '{:,.2f}'.format(a)
+    print(f'Total Rental Amount: {a2}')
+    print(f'Average per Month: {average2}')
+        
+    
 
-   
+average_per_month()
 # testing_for_array()           
 # payroll_conso() 
 # select_diesel()    
@@ -3061,7 +3105,7 @@ def testing_for_array():
 # not_subject()
 
 
-total_liters()
+# total_liters()
 
 
 # get_attendance()

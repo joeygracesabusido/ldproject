@@ -2296,7 +2296,7 @@ def searchEmployee_details():
         if department_list.get() == "Rizal-R&F" or   department_list.get() == "Admin-Site" :
             mwe = float(373)
         elif  department_list.get() == "Head Office":
-            mwe = float(537)
+            mwe = float(570)
         elif  department_list.get() == "Pampanga":
             mwe = float(420)
 
