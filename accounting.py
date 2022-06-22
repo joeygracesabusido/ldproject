@@ -74,7 +74,7 @@ x = (screen_width / 2) - (width / 2)
 y = (screen_height / 2) - (height / 2)
 root.geometry("%dx%d+%d+%d" % (width, height, x, y))
 root.resizable(0, 0)
-root.config(bg="skyblue")
+root.config(bg="cyan")
 
 #load = Image.open("image\login.png").convert("RGB")
 load = PIL.Image.open("image\login.png")
@@ -238,7 +238,7 @@ def print_fund_request():
     printFR.cell(205,10, date_request_form.get(),ln=1,align=('C'))
     printFR.cell(73,10,'',ln=0,align=('C'))
     printFR.multi_cell(120,8, particular_requestion_form.get('1.0', 'end-1c'),
-                            border=0,align='L',ln=2)
+                            border=0)
     
     
     printFR.cell(150,10, amount_fr2,ln=1,align=('L'))
@@ -3871,8 +3871,17 @@ def importEntry_frame():
    
 
     journalEntry_treeview.pack()
-    
-    
+# ===============================================This is for inserting chart of account ==========================
+def insert_chart_of_account():
+    """
+    This function is for
+    inserting Chart of account
+    """  
+    clearFrame()
+    insert_chart_of_account_frame = Frame(MidViewForm9, width=1120, height=575, bd=2, bg='gray', relief=SOLID)
+    insert_chart_of_account_frame.place(x=160, y=8)
+
+
     
 
 
@@ -3912,6 +3921,12 @@ def accounting_frame():
     btn_importChartofAccount = Button(MidViewForm9, text='Import CoA', bd=2, bg='blue', fg='white',
                               font=('arial', 12), width=15, height=2, command=importChartofAccount)
     btn_importChartofAccount.place(x=2, y=340)
+
+    
+
+    btn_insert_chartofaccount = Button(MidViewForm9, text='Insert Chart of Account', bd=2, bg='blue', fg='white',
+                              font=('arial', 12), width=15, height=2, command=insert_chart_of_account)
+    btn_insert_chartofaccount.place(x=2, y=400)
     
 # this button is for Employee Details
     # btn_employeeDetails = Button(MidViewForm9, text='Employee Details', bd=2, bg='blue', fg='white',
@@ -4490,11 +4505,13 @@ def dashboard():
     x = (screen_width / 2) - (width / 2)
     y = (screen_height / 2) - (height / 2)
     reportFrame.geometry("%dx%d+%d+%d" % (width, height, x, y))
-    reportFrame.resizable = True
+    reportFrame.resizable = False
+    reportFrame.config(bg="cyan")
 
 #=============================================Frame for time & others in DashBoard======================================
     TopdashboardForm = Frame(reportFrame, width=1295, height=50, bd=2, relief=SOLID)
     TopdashboardForm.place(x=1,y=8)
+    TopdashboardForm.config(bg="cyan")
 #============================================================= menu Bar=================================================
     
     global filemenu2
@@ -4539,7 +4556,7 @@ def dashboard():
     disable_userApproval()
     MidViewForm9 = Frame(reportFrame, width=1295, height=600,bd=2,relief=SOLID)
     MidViewForm9.place(x=1, y=58)
-    MidViewForm9.config(bg="skyblue")
+    MidViewForm9.config(bg="cyan")
 
 
     load2 = PIL.Image.open("image\search2.jpg")
@@ -4651,7 +4668,7 @@ def user_regsitration_frame():
     y = (screen_height / 2) - (height / 2)
     registration_frame.geometry("%dx%d+%d+%d" % (width, height, x, y))
     registration_frame.resizable = True
-    registration_frame.config(bg="skyblue")
+    registration_frame.config(bg="cyan")
 
    
 
@@ -4726,26 +4743,36 @@ def Login():
 
             # query = dataSearch.find_one({'name': USERNAME.get(), 'password':PASSWORD.get()})
             query = {'username': USERNAME.get(), 'password':PASSWORD.get(),'status':'approved'}
-            agg_result = dataSearch.find(query)
-            # agg_result = dataSearch.find_one({'$and' :[{'username': USERNAME.get()} ,
-            #                                    {'password':PASSWORD.get()},
-            #                                    {'status':'approved'}
-            #                                    ]})
+            agg_result = dataSearch.count_documents(query)
+            
+             
+            if agg_result > 0:
+
+                PASSWORD.set("")
+                lbl_result.config(text="")
+                root.withdraw()
+                dashboard()
+
+            else:
+
+                lbl_result.config(text="Invalid Username or Password", fg="red")
+                USERNAME.set("")
+                PASSWORD.set("")
 
 
-            a = ''
-            for x in agg_result:
-                a = x['username']
-                if a == '':
-                    lbl_result.config(text="Invalid username or password", fg="red")
-                    USERNAME.set("")
-                    PASSWORD.set("")
+            # a = ''
+            # for x in agg_result:
+            #     a = x['username']
+            #     if a == '':
+            #         lbl_result.config(text="Invalid username or password", fg="red")
+            #         USERNAME.set("")
+            #         PASSWORD.set("")
 
-                else:
-                    PASSWORD.set("")
-                    lbl_result.config(text="")
-                    root.withdraw()
-                    dashboard()
+            #     else:
+            #         PASSWORD.set("")
+            #         lbl_result.config(text="")
+            #         root.withdraw()
+            #         dashboard()
 
     elif user_description.get() =="Employee":
         if USERNAME.get == "" or PASSWORD.get() == "":
@@ -4755,39 +4782,21 @@ def Login():
 
             # query = dataSearch.find_one({'name': USERNAME.get(), 'password':PASSWORD.get()})
             query = {'username': USERNAME.get(), 'password':PASSWORD.get(),'status':'approved'}
-            agg_result = dataSearch.find(query)
+            agg_result = dataSearch.count_documents(query)
            
 
-            a = ''
-            for x in agg_result:
-                a = x['username']
-                if a == '':
-                    lbl_result.config(text="Invalid username or password", fg="red")
-                    USERNAME.set("")
-                    PASSWORD.set("")
+            if agg_result > 0:
 
-                else:
-                    PASSWORD.set("")
-                    lbl_result.config(text="")
-                    root.withdraw()
-                    dashboard()
+                PASSWORD.set("")
+                lbl_result.config(text="")
+                root.withdraw()
+                dashboard()
 
-            # agg_result= dataSearch.aggregate( [
-            #         {"$match": {'status':'approved',
-            #             '$and': [
-            #             {'username': USERNAME.get()},
-            #             {'password': PASSWORD.get()}           
-            #             ]}},
-                    
-                                                        
-            #         {"$group" : 
-            #             {"_id" : '$username',
-            #             "count" : {"$sum" : 1},
-                        
-            #             }},
-                    
-            #         ])
+            else:
 
+                lbl_result.config(text="Invalid Username or Password", fg="red")
+                USERNAME.set("")
+                PASSWORD.set("")
 
           
            
