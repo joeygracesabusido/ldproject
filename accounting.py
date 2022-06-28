@@ -3974,11 +3974,11 @@ def insert_chart_of_account():
     balancesheet_class_entry = ttk.Combobox(insert_chart_of_account_frame, width=19,font=('Arial',13))
     balancesheet_class_entry['values'] = ("Asset", "Liability","Equity",
                                             "Income","Cost of Sales","General & Administrative")
-    balancesheet_class_entry.place(x=185, y=110)
+    balancesheet_class_entry.place(x=100, y=110)
 
     btn_Save = Button(insert_chart_of_account_frame, text='Save', bd=2, bg='blue', fg='white',
                               font=('arial', 12), width=15, height=2, command=insert_ChartofAccount)
-    btn_Save.place(x=2, y=340)
+    btn_Save.place(x=2, y=150)
 
 
     

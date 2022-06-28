@@ -501,6 +501,40 @@ def TestLogin():
         b = i['password']
         print(f'Username: {a}',f'Password: {b}')
 
+def delete_chart_of_account():
+    """
+    This function is for deleting
+    chart of account
+
+    """
+
+    dataSearch = db['chart_of_account']
+    # query = {'accountNum': fundRequest_number_entry.get()}
+
+    for x in dataSearch.find():
+        a = x['accountNum']
+        b= x['accountTitle']
+
+        print(a,b)
+
+    
+    # accountNumber = int(input('Enter Account Number:'))
+
+    # key = input('Are you sure you want to delete? :')
+
+    # x = dataSearch.delete_many({})
+    # print(x.deleted_count, " documents deleted.")
+    # # try:
+    #     dataSearch = db['chart_of_account']
+    #     query = {'accountNum': accountNumber}
+    #     dataSearch.delete_one(query)
+    #     print('Account Number has been deleted')
+
+    #     delete_chart_of_account()
+    # except Exception as ex:
+    #     print("Error", f"Error due to :{str(ex)}")
+
+# delete_chart_of_account()
 # search_fundrequest()
 
 
@@ -521,4 +555,4 @@ def TestLogin():
 
 # testing_dictionary()
 
-TestLogin()
+# TestLogin()
