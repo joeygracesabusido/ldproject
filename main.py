@@ -7171,7 +7171,7 @@ def dashboard():
 
 
     load2 = PIL.Image.open("image\search2.jpg")
-    load2 = load2.resize((125, 50), PIL.Image.ANTIALIAS)
+    load2 = load2.resize((125, 50), PIL.Image.Resampling.LANCZOS)
     logo_icon2 = ImageTk.PhotoImage(load2)
 
     UserName = userName_entry.get()

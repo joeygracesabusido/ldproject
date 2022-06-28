@@ -78,7 +78,7 @@ root.config(bg="cyan")
 
 #load = Image.open("image\login.png").convert("RGB")
 load = PIL.Image.open("image\login.png")
-load =load.resize((130, 130), PIL.Image.ANTIALIAS)
+load =load.resize((130, 130), PIL.Image.Resampling.LANCZOS)
 logo_icon = ImageTk.PhotoImage(load)
 
 def clearpayrollFrame():
@@ -234,19 +234,37 @@ def print_fund_request():
     # printFR.set_line_width(1)
     printFR.cell(100,10, fundRequest_number_entry.get(),ln=2 )
     printFR.cell(180,10,'',ln=2,align=('C'))
+    printFR.cell(90,10,'',ln=2,align=('C'))
+    
     printFR.cell(190,10, name_request_form_entry.get(),ln=2, align=('C'))
     printFR.cell(205,10, date_request_form.get(),ln=1,align=('C'))
     printFR.cell(73,10,'',ln=0,align=('C'))
+##   printFR.multi_cell(120,8, particular_requestion_form.get('1.0', 'end-1c'),
+##                            border=0,align='L')
+##    
+##    printFR.cell(73,10,'',ln=0,align=('C'))
+##    printFR.cell(150,10, amount_fr2,ln=1,align=('L'))
+##    
+##   
+##    printFR.cell(100,10,'',ln=1,align=('L'))
+##    printFR.cell(100,10,'',ln=1,align=('L'))
+##    printFR.cell(100,10,'',ln=1,align=('L'))
+##    printFR.cell(150,10,'Prepared by:',ln=2,align=('L'))
+   
     printFR.multi_cell(120,8, particular_requestion_form.get('1.0', 'end-1c'),
-                            border=0)
-    
-    
-    printFR.cell(150,10, amount_fr2,ln=1,align=('L'))
-    
+                            border=0,align='L')
+   
    
     printFR.cell(100,10,'',ln=1,align=('L'))
+    printFR.cell(175,10, amount_fr2,ln=1,align=('C'))
+    
     printFR.cell(100,10,'',ln=1,align=('L'))
     printFR.cell(100,10,'',ln=1,align=('L'))
+    printFR.cell(100,10,'',ln=1,align=('L'))
+
+    
+   
+    
     printFR.cell(150,10,'Prepared by:',ln=2,align=('L'))
     
     
@@ -3872,14 +3890,95 @@ def importEntry_frame():
 
     journalEntry_treeview.pack()
 # ===============================================This is for inserting chart of account ==========================
+def insert_ChartofAccount():
+    """
+    This function is for 
+    importing chart of account
+    """   
+    accountNum = coa_number_entry.get()
+    accountTitle = chart_of_account_entry.get()
+    bsClass = chart_of_account_entry.get()
+
+
+    dataSearch = db['chart_of_account']
+    agg_result= dataSearch.find()
+
+    a = ""
+    for x in agg_result:
+        a = x['accountNum']
+        b = x['accountTitle']
+
+    
+                
+            
+
+        if a == accountNum or b == accountTitle:
+            messagebox.showinfo('JRS',f'Account Number {accountNum} or Account Number {accountTitle}  already taken')
+
+        
+        else:
+        
+            collection = db['chart_of_account'] # this is to create collection and save as table
+            dataInsert = {
+            'accountNum': accountNum,
+            'accountTitle': accountTitle,
+            'bsClass': bsClass,
+            'user': USERNAME.get(),
+            'created':datetime.now()
+            
+            }
+            
+            try:
+                result = tkMessageBox.askquestion('JRS System', 'you want to save data', icon="warning")
+                if result == 'yes':
+                    collection.insert_one(dataInsert)
+                    messagebox.showinfo('JRS', 'Data has been exported and save')
+                
+            except Exception as ex:
+                messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+          
+
+
 def insert_chart_of_account():
     """
     This function is for
     inserting Chart of account
     """  
-    clearFrame()
+    # clearFrame()
     insert_chart_of_account_frame = Frame(MidViewForm9, width=1120, height=575, bd=2, bg='gray', relief=SOLID)
     insert_chart_of_account_frame.place(x=160, y=8)
+
+    coa_number_lbl = Label(insert_chart_of_account_frame,text='',width=14,height=1,bg='yellow',fg='black',
+                                font=('Arial',11),anchor='c')
+    coa_number_lbl.place(x=100,y=50)
+
+    global coa_number_entry
+    coa_number_entry = Entry(insert_chart_of_account_frame, width=15, font=('Arial', 12))
+    #userName_entry.insert(0, u'enter username')
+    coa_number_entry.place(x=250, y=50)
+
+    coa_number_lbl = Label(insert_chart_of_account_frame,text='Position',width=14,height=1,bg='yellow',fg='black',
+                                font=('Arial',11),anchor='c')
+    coa_number_lbl.place(x=100,y=80)
+
+    global chart_of_account_entry
+    chart_of_account_entry = Entry(insert_chart_of_account_frame, width=15, font=('Arial', 12))
+    #userName_entry.insert(0, u'enter username')
+    chart_of_account_entry.place(x=250, y=80)
+
+    coa_number_lbl = Label(insert_chart_of_account_frame,text='Position',width=14,height=1,bg='yellow',fg='black',
+                                font=('Arial',11),anchor='c')
+    coa_number_lbl.place(x=100,y=110)
+
+    global balancesheet_class_entry
+    balancesheet_class_entry = ttk.Combobox(insert_chart_of_account_frame, width=19,font=('Arial',13))
+    balancesheet_class_entry['values'] = ("Asset", "Liability","Equity",
+                                            "Income","Cost of Sales","General & Administrative")
+    balancesheet_class_entry.place(x=185, y=110)
+
+    btn_Save = Button(insert_chart_of_account_frame, text='Save', bd=2, bg='blue', fg='white',
+                              font=('arial', 12), width=15, height=2, command=insert_ChartofAccount)
+    btn_Save.place(x=2, y=340)
 
 
     
@@ -3924,8 +4023,8 @@ def accounting_frame():
 
     
 
-    btn_insert_chartofaccount = Button(MidViewForm9, text='Insert Chart of Account', bd=2, bg='blue', fg='white',
-                              font=('arial', 12), width=15, height=2, command=insert_chart_of_account)
+    btn_insert_chartofaccount = Button(MidViewForm9, text='Insert COA', bd=2, bg='blue', fg='white',
+                              font=('arial', 10), width=15, height=2, command=insert_chart_of_account)
     btn_insert_chartofaccount.place(x=2, y=400)
     
 # this button is for Employee Details
@@ -4560,7 +4659,7 @@ def dashboard():
 
 
     load2 = PIL.Image.open("image\search2.jpg")
-    load2 = load2.resize((125, 50), PIL.Image.ANTIALIAS)
+    load2 = load2.resize((125, 50), PIL.Image.Resampling.LANCZOS)
     logo_icon2 = ImageTk.PhotoImage(load2)
 
     UserName = userName_entry.get()
