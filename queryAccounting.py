@@ -518,10 +518,15 @@ def delete_chart_of_account():
         print(a,b)
 
     
-    # accountNumber = int(input('Enter Account Number:'))
+    # accountNumber = input('Enter Account Number:')
+    accountTile = input('Enter Account account title:')
 
     # key = input('Are you sure you want to delete? :')
-
+   
+    x = dataSearch.delete_one({'accountTitle':{"$regex":accountTile}})
+    print(x.deleted_count, " documents deleted.")
+    
+    
     # x = dataSearch.delete_many({})
     # print(x.deleted_count, " documents deleted.")
     # # try:
@@ -534,7 +539,20 @@ def delete_chart_of_account():
     # except Exception as ex:
     #     print("Error", f"Error due to :{str(ex)}")
 
-# delete_chart_of_account()
+
+def testing_query():
+    accountNum = input('Enter Account Number:')
+    dataSearch = db['chart_of_account']
+    query = {'accountNum':accountNum}
+    agg_result= dataSearch.count_documents(query)
+
+    if agg_result > 0:
+       print(agg_result)
+    else:
+        print('Nothing')
+
+# testing_query()
+delete_chart_of_account()
 # search_fundrequest()
 
 

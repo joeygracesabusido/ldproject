@@ -3897,42 +3897,46 @@ def insert_ChartofAccount():
     """   
     accountNum = coa_number_entry.get()
     accountTitle = chart_of_account_entry.get()
-    bsClass = chart_of_account_entry.get()
+    bsClass = balancesheet_class_entry.get()
 
 
     dataSearch = db['chart_of_account']
-    agg_result= dataSearch.find()
+    query = {'$or':[{'accountNum':accountNum},
+                    {'accountTitle':accountTitle}
+                    ]}
+    agg_result= dataSearch.count_documents(query)
 
-    a = ""
-    for x in agg_result:
-        a = x['accountNum']
-        b = x['accountTitle']
-
-    
-                
-            
-
-        if a == accountNum or b == accountTitle:
-            messagebox.showinfo('JRS',f'Account Number {accountNum} or Account Number {accountTitle}  already taken')
+    # a = ""
+    # for x in agg_result:
+    #     a = x['accountNum']
+    #     b = x['accountTitle']
+    if agg_result > 0:
+        messagebox.showinfo('JRS',f'Account Number {accountNum}  already taken')
 
         
+    else:
+
+        collection = db['chart_of_account'] # this is to create collection and save as table
+        dataInsert = {
+        'accountNum': accountNum,
+        'accountTitle': accountTitle,
+        'bsClass': bsClass,
+        'user': USERNAME.get(),
+        'created':datetime.now()
+        
+        }
+        
+        if coa_number_entry.get() == '' or chart_of_account_entry.get()=='' or balancesheet_class_entry.get()=='':
+            messagebox.showinfo('JRS', 'please fill up entry box')
         else:
-        
-            collection = db['chart_of_account'] # this is to create collection and save as table
-            dataInsert = {
-            'accountNum': accountNum,
-            'accountTitle': accountTitle,
-            'bsClass': bsClass,
-            'user': USERNAME.get(),
-            'created':datetime.now()
-            
-            }
-            
             try:
                 result = tkMessageBox.askquestion('JRS System', 'you want to save data', icon="warning")
                 if result == 'yes':
                     collection.insert_one(dataInsert)
-                    messagebox.showinfo('JRS', 'Data has been exported and save')
+                    messagebox.showinfo('JRS', 'Data has been  and save')
+                    coa_number_entry.delete(0, END)
+                    chart_of_account_entry.delete(0, END)
+                    balancesheet_class_entry.delete(0, END)
                 
             except Exception as ex:
                 messagebox.showerror("Error", f"Error due to :{str(ex)}")    
@@ -3948,7 +3952,7 @@ def insert_chart_of_account():
     insert_chart_of_account_frame = Frame(MidViewForm9, width=1120, height=575, bd=2, bg='gray', relief=SOLID)
     insert_chart_of_account_frame.place(x=160, y=8)
 
-    coa_number_lbl = Label(insert_chart_of_account_frame,text='',width=14,height=1,bg='yellow',fg='black',
+    coa_number_lbl = Label(insert_chart_of_account_frame,text='Account No.',width=14,height=1,bg='yellow',fg='black',
                                 font=('Arial',11),anchor='c')
     coa_number_lbl.place(x=100,y=50)
 
@@ -3957,16 +3961,16 @@ def insert_chart_of_account():
     #userName_entry.insert(0, u'enter username')
     coa_number_entry.place(x=250, y=50)
 
-    coa_number_lbl = Label(insert_chart_of_account_frame,text='Position',width=14,height=1,bg='yellow',fg='black',
+    coa_number_lbl = Label(insert_chart_of_account_frame,text='Chart of Account',width=14,height=1,bg='yellow',fg='black',
                                 font=('Arial',11),anchor='c')
     coa_number_lbl.place(x=100,y=80)
 
     global chart_of_account_entry
-    chart_of_account_entry = Entry(insert_chart_of_account_frame, width=15, font=('Arial', 12))
+    chart_of_account_entry = Entry(insert_chart_of_account_frame, width=25, font=('Arial', 12))
     #userName_entry.insert(0, u'enter username')
     chart_of_account_entry.place(x=250, y=80)
 
-    coa_number_lbl = Label(insert_chart_of_account_frame,text='Position',width=14,height=1,bg='yellow',fg='black',
+    coa_number_lbl = Label(insert_chart_of_account_frame,text='BS-Type',width=14,height=1,bg='yellow',fg='black',
                                 font=('Arial',11),anchor='c')
     coa_number_lbl.place(x=100,y=110)
 
@@ -3974,7 +3978,7 @@ def insert_chart_of_account():
     balancesheet_class_entry = ttk.Combobox(insert_chart_of_account_frame, width=19,font=('Arial',13))
     balancesheet_class_entry['values'] = ("Asset", "Liability","Equity",
                                             "Income","Cost of Sales","General & Administrative")
-    balancesheet_class_entry.place(x=100, y=110)
+    balancesheet_class_entry.place(x=250, y=110)
 
     btn_Save = Button(insert_chart_of_account_frame, text='Save', bd=2, bg='blue', fg='white',
                               font=('arial', 12), width=15, height=2, command=insert_ChartofAccount)
