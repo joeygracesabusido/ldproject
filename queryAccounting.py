@@ -511,19 +511,20 @@ def delete_chart_of_account():
     dataSearch = db['chart_of_account']
     # query = {'accountNum': fundRequest_number_entry.get()}
 
-    for x in dataSearch.find():
+    for x in dataSearch.find().sort('accountNum', pymongo.ASCENDING):
         a = x['accountNum']
         b= x['accountTitle']
 
         print(a,b)
 
     
-    # accountNumber = input('Enter Account Number:')
-    accountTile = input('Enter Account account title:')
+    accountNumber = input('Enter Account Number:')
+    # accountTile = input('Enter Account account title:')
 
     # key = input('Are you sure you want to delete? :')
    
-    x = dataSearch.delete_one({'accountTitle':{"$regex":accountTile}})
+    x = dataSearch.delete_one({'accountNum':{"$regex":accountNumber}
+                                })
     print(x.deleted_count, " documents deleted.")
     
     
@@ -550,6 +551,11 @@ def testing_query():
        print(agg_result)
     else:
         print('Nothing')
+
+def edit_chartOf_account():
+    """
+    This function is to edit
+    """
 
 # testing_query()
 delete_chart_of_account()

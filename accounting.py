@@ -78,7 +78,8 @@ root.config(bg="cyan")
 
 #load = Image.open("image\login.png").convert("RGB")
 load = PIL.Image.open("image\login.png")
-load =load.resize((130, 130), PIL.Image.Resampling.LANCZOS)
+# load =load.resize((130, 130), PIL.Image.Resampling.LANCZOS)
+load =load.resize((130, 130), PIL.Image.ANTIALIAS)
 logo_icon = ImageTk.PhotoImage(load)
 
 def clearpayrollFrame():
@@ -107,6 +108,9 @@ def clearFrame():
     # this will clear frame and frame will be empty
     # if you want to hide the empty panel then
     MidViewForm9.pack_forget()
+
+
+
 #======================================Account Payable Frame===================================================
 def testing_dictionary2():
     """
@@ -2969,6 +2973,7 @@ def journal_entry_insert_frame():
     inserting journal entry 
     """
     cleartrialbalanceFrame()
+    # clear_chartof_accountFrame()
    
     entry_date_label = Label(accounting_frame, text='Date from:', width=14, height=1, bg='yellow', fg='black',
                           font=('Arial', 10), anchor='e')
@@ -3292,6 +3297,7 @@ def incomeStatement_frame():
     income statement frame
     """
     cleartrialbalanceFrame()
+    # clear_chartof_accountFrame()
     global entry_datefrom
     entry_date_label = Label(accounting_frame, text='Date from:', width=10, height=1, bg='yellow', fg='gray',
                           font=('Arial', 10), anchor='e')
@@ -3477,6 +3483,7 @@ def trialBalance_frame():
     is for trialbalance frame or button
     """
     cleartrialbalanceFrame()
+    # clear_chartof_accountFrame()
     global entry_datefrom
     entry_date_label = Label(accounting_frame, text='Date from:', width=10, height=1, bg='yellow', fg='gray',
                           font=('Arial', 10), anchor='e')
@@ -3791,6 +3798,7 @@ def importEntry_frame():
     entry from csv
     """
     cleartrialbalanceFrame()
+    
     global entry_datefrom
     entry_date_label = Label(accounting_frame, text='Date from:', width=10, height=1, bg='yellow', fg='gray',
                           font=('Arial', 10), anchor='e')
@@ -3948,39 +3956,41 @@ def insert_chart_of_account():
     This function is for
     inserting Chart of account
     """  
-    # clearFrame()
-    insert_chart_of_account_frame = Frame(MidViewForm9, width=1120, height=575, bd=2, bg='gray', relief=SOLID)
-    insert_chart_of_account_frame.place(x=160, y=8)
+    
+    cleartrialbalanceFrame()
+    # global insert_chart_of_account_frame
+    # insert_chart_of_account_frame = Frame(MidViewForm9, width=1120, height=575, bd=2, bg='gray', relief=SOLID)
+    # insert_chart_of_account_frame.place(x=160, y=8)
 
-    coa_number_lbl = Label(insert_chart_of_account_frame,text='Account No.',width=14,height=1,bg='yellow',fg='black',
+    coa_number_lbl = Label(accounting_frame,text='Account No.',width=14,height=1,bg='yellow',fg='black',
                                 font=('Arial',11),anchor='c')
     coa_number_lbl.place(x=100,y=50)
 
     global coa_number_entry
-    coa_number_entry = Entry(insert_chart_of_account_frame, width=15, font=('Arial', 12))
+    coa_number_entry = Entry(accounting_frame, width=15, font=('Arial', 12))
     #userName_entry.insert(0, u'enter username')
     coa_number_entry.place(x=250, y=50)
 
-    coa_number_lbl = Label(insert_chart_of_account_frame,text='Chart of Account',width=14,height=1,bg='yellow',fg='black',
+    coa_number_lbl = Label(accounting_frame,text='Chart of Account',width=14,height=1,bg='yellow',fg='black',
                                 font=('Arial',11),anchor='c')
     coa_number_lbl.place(x=100,y=80)
 
     global chart_of_account_entry
-    chart_of_account_entry = Entry(insert_chart_of_account_frame, width=25, font=('Arial', 12))
+    chart_of_account_entry = Entry(accounting_frame, width=25, font=('Arial', 12))
     #userName_entry.insert(0, u'enter username')
     chart_of_account_entry.place(x=250, y=80)
 
-    coa_number_lbl = Label(insert_chart_of_account_frame,text='BS-Type',width=14,height=1,bg='yellow',fg='black',
+    coa_number_lbl = Label(accounting_frame,text='BS-Type',width=14,height=1,bg='yellow',fg='black',
                                 font=('Arial',11),anchor='c')
     coa_number_lbl.place(x=100,y=110)
 
     global balancesheet_class_entry
-    balancesheet_class_entry = ttk.Combobox(insert_chart_of_account_frame, width=19,font=('Arial',13))
+    balancesheet_class_entry = ttk.Combobox(accounting_frame, width=19,font=('Arial',13))
     balancesheet_class_entry['values'] = ("Asset", "Liability","Equity",
                                             "Income","Cost of Sales","General & Administrative")
     balancesheet_class_entry.place(x=250, y=110)
 
-    btn_Save = Button(insert_chart_of_account_frame, text='Save', bd=2, bg='blue', fg='white',
+    btn_Save = Button(accounting_frame, text='Save', bd=2, bg='blue', fg='white',
                               font=('arial', 12), width=15, height=2, command=insert_ChartofAccount)
     btn_Save.place(x=2, y=150)
 
@@ -4663,7 +4673,8 @@ def dashboard():
 
 
     load2 = PIL.Image.open("image\search2.jpg")
-    load2 = load2.resize((125, 50), PIL.Image.Resampling.LANCZOS)
+    # load2 = load2.resize((125, 50), PIL.Image.Resampling.LANCZOS)
+    load2 = load2.resize((125, 50), PIL.Image.ANTIALIAS)
     logo_icon2 = ImageTk.PhotoImage(load2)
 
     UserName = userName_entry.get()
