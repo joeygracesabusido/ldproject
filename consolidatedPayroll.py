@@ -154,6 +154,19 @@ def print1601c_report():
             gross_payT = '{:,.2f}'.format(row[0])
 
     # this query is for total MWE Gross
+        # cursor.execute("SELECT sum(grosspay_save) as GROSS, SUM(total_mandatory) AS TOTALMAN,\
+        #                where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' \
+        #                 AND  taxable_mwe_detail = 'MWE'  and on_off_details = 'on' ")
+
+        # myresult = list(cursor.fetchall())
+
+        # for row in myresult:
+            
+        #     mwe_gross1 = row[0]
+        #     totalMan = row[1]
+        #     mwe_gross3 = mwe_gross1-totalMan-reg_ot-sun_ot-spl_ot-lgl2_ot-provi_ot-provisun_ot-nightdiff
+        #     mwe_gross = '{:,.2f}'.format(mwe_gross1)
+        
         cursor.execute("SELECT sum(grosspay_save) as GROSS, SUM(total_mandatory) AS TOTALMAN,\
                        sum(regularday_ot_cal) as REGOT,sum(regularsunday_ot_cal) as SUNOT,\
                        sum(spl_ot_cal) as SPLOT,sum(legal_day_ot_cal) as LGL2OT,\
@@ -1689,17 +1702,17 @@ def govt_mandatory_comp():
             hdmf_entry.insert(0, (hdmf2))
 
         if salary_base <= 10000:
-            phic = 300 / 2
+            phic = 400 / 2
             phic2 = '{:,.2f}'.format(phic)
             phic_entry.delete(0, END)
             phic_entry.insert(0, (phic2))
-        elif  salary_base < 60000 and salary_base > 10000:
-            phic = salary_base * .03 / 2
+        elif  salary_base < 79999.99 and salary_base > 10000:
+            phic = salary_base * .04 / 2
             phic2 = '{:,.2f}'.format(phic)
             phic_entry.delete(0, END)
             phic_entry.insert(0, (phic2))
-        elif salary_base >= 60000:
-            phic = 1800
+        elif salary_base >= 80000:
+            phic = 3200
             phic2 = '{:,.2f}'.format(phic)
             phic_entry.delete(0, END)
             phic_entry.insert(0, (phic2))
@@ -2301,7 +2314,7 @@ def searchEmployee_details():
             mwe = float(420)
 
         elif  department_list.get() == "Surigao":
-            mwe = float(320)
+            mwe = float(350)
         
         # this is for determination of on & off employee!!!
         
