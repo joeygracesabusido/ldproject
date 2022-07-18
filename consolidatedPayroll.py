@@ -1290,14 +1290,14 @@ def net_pay():
         # mwe_monthly determinition!!!
         mwe_monthly = 0
         if department_list.get() == "Rizal-R&F" or   department_list.get() == "Admin-Site" :
-            mwe_monthly = float(373 * 13)
+            mwe_monthly = float(401 * 13)
         elif  department_list.get() == "Head Office":
             mwe_monthly = float(570 * 13)
         elif  department_list.get() == "Pampanga":
             mwe_monthly = float(420 * 13)
 
         elif  department_list.get() == "Surigao":
-            mwe_monthly = float(420 * 13)
+            mwe_monthly = float(350 * 13)
 
         # print(mwe_monthly)
         # print(salRate)
@@ -2307,7 +2307,7 @@ def searchEmployee_details():
         mwe = 0
         # this statement is for getting the mwe per propective place !!!!!
         if department_list.get() == "Rizal-R&F" or   department_list.get() == "Admin-Site" :
-            mwe = float(373)
+            mwe = float(401)
         elif  department_list.get() == "Head Office":
             mwe = float(570)
         elif  department_list.get() == "Pampanga":
