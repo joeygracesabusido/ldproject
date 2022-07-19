@@ -2010,7 +2010,7 @@ def gross_computation():
     regdaycal =0
     details = salaDetails_entry.get()
     salary_rate_grossComp = salaryRate_entry.get()
-    rateProvi = provincialRate_entry.get()
+    rateProvi = 401
 
     if details == 'Monthly':
         salary_rate_grossComp = float(salaryRate_entry.get()) / 26
