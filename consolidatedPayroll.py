@@ -3248,6 +3248,7 @@ def employee_update():
     phic_reg_update = phic_reg_entry.get()
     hdmf_reg_update = hdmf_reg_entry.get()
     salaRate_update = salaryRate__reg_entry.get()
+    taxCode_Update = taxCode_reg_entry.get()
     
     try:
         if employee_id_entry.get()== "":
@@ -3270,6 +3271,7 @@ def employee_update():
                 sssNumber ='" + sss_reg_update + "',\
                 phicNumber ='" + phic_reg_update + "',\
                 hdmfNumber ='" + hdmf_reg_update + "',\
+                taxCode ='" + taxCode_Update + "',\
                 salary_rate ='" + salaRate_update + "'\
                     WHERE employee_id =%s", (employee_id_entry.get(),)
             )

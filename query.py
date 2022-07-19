@@ -3068,7 +3068,7 @@ def average_per_month():
 # equipment_registry()
 # mwe_selection()
 # test_on()
-selection()
+# selection()
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()
@@ -3086,7 +3086,7 @@ selection()
 
 # searchPayroll()
 
-# salaryQuery_per_employee()
+salaryQuery_per_employee()
 
 # update_department()
 
