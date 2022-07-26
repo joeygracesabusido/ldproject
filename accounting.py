@@ -3229,6 +3229,7 @@ def incomeStatement_calculation():
     dateto = incomeStament_dateto.get()
     date_time_obj_to = datetime.strptime(dateto, '%Y-%m-%d')
 
+    netIncome = 0
     agg_result= dataSearch.aggregate(
         [
         {"$match":{'date_entry': {'$gte':date_time_obj_from, '$lte':date_time_obj_to},
@@ -3280,14 +3281,88 @@ def incomeStatement_calculation():
                                                         debit_amount2,
                                                         credit_amount2 ))
 
+    # this is for edited 7.26.22 4:28
+    agg_resultIncome= dataSearch.aggregate(     # this is for total income query
+        [
+        {"$match":{'date_entry': {'$gte':date_time_obj_from, '$lte':date_time_obj_to},
+            '$or': [
+            {'acoount_number': {"$regex": "^4"}},
+           
+        ] }},
+        # {"$match": { "cut_off_period": date } },
+        # {'$sort' : { '$meta': "textScore" }, '$account_disc': -1 },
+        {"$group" : 
+            {"_id" :  '$acoount_number',
+            "accountName": {'$first':'$account_disc'},
+            "totalDebit" : {"$sum" : '$debit_amount'},
+            "totalCredit" : {"$sum" : '$credit_amount'},
+            
+            }},
+        {'$sort':{'_id': 1}}
+            
+        ])
+    total_debit_amount_income = 0
+    total_credit_amount_income = 0
+    totalIncome = 0
+    for x in agg_resultIncome:
+        debit_amount = x['totalDebit']
+        total_debit_amount_income+=debit_amount
+
+        credit_amount = x['totalCredit']
+        total_credit_amount_income+=credit_amount
+
+        totalIncome = float(total_credit_amount_income) - float(total_debit_amount_income)
+        totalIncome2 = '{:,.2f}'.format(totalIncome)
+
         totalIncome_entry.delete(0, END)
-        totalIncome_entry.insert(0, (total_credit_amount2))
+        totalIncome_entry.insert(0, (totalIncome2))
+
+        # totalExpenses_entry.delete(0, END)
+        # totalExpenses_entry.insert(0, (total_debit_amount2))
+
+    agg_resultExpense= dataSearch.aggregate( # this is for total expenses
+        [
+        {"$match":{'date_entry': {'$gte':date_time_obj_from, '$lte':date_time_obj_to},
+            '$or': [
+            {'acoount_number': {"$regex": "^5"}},
+           
+        ] }},
+        # {"$match": { "cut_off_period": date } },
+        # {'$sort' : { '$meta': "textScore" }, '$account_disc': -1 },
+        {"$group" : 
+            {"_id" :  '$acoount_number',
+            "accountName": {'$first':'$account_disc'},
+            "totalDebit" : {"$sum" : '$debit_amount'},
+            "totalCredit" : {"$sum" : '$credit_amount'},
+            
+            }},
+        {'$sort':{'_id': 1}}
+            
+        ])
+    total_debit_amount_expense = 0
+    total_credit_amount_expense = 0
+    totalexpense = 0
+    for x in agg_resultExpense:
+        debit_amount = x['totalDebit']
+        total_debit_amount_income+=debit_amount
+
+        credit_amount = x['totalCredit']
+        total_credit_amount_income+=credit_amount
+
+        totalexpense = float(total_debit_amount_income) - float(total_credit_amount_income)
+        totalexpense2 = '{:,.2f}'.format(totalexpense)
+
+       
 
         totalExpenses_entry.delete(0, END)
-        totalExpenses_entry.insert(0, (total_debit_amount2))
+        totalExpenses_entry.insert(0, (totalexpense2))
 
-        netIncome_entry.delete(0, END)
-        netIncome_entry.insert(0, (netIncome2))
+    
+    netIncome = totalIncome - totalexpense
+    netIncome2 = '{:,.2f}'.format(netIncome)
+
+    netIncome_entry.delete(0, END)
+    netIncome_entry.insert(0, (netIncome2))
 
 
 
