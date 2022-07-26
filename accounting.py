@@ -3213,6 +3213,69 @@ def incomeStatement_list_treeview():
     incomeStatement_treeview.delete(*incomeStatement_treeview.get_children())
     return incomeStatement_calculation()
 
+def incomeStatement_export():
+    """This function is for exporting payroll """
+    dataSearch = db['journal_entry']
+    datefrom = incomeStament_datefrom.get()
+    date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
+
+    dateto = incomeStament_dateto.get()
+    date_time_obj_to = datetime.strptime(dateto, '%Y-%m-%d')
+    
+
+    workbook = xlsxwriter.Workbook("incomeStatement.xlsx")
+    worksheet = workbook.add_worksheet('rental')
+    worksheet.write('A1', 'Account Title')
+    worksheet.write('B1', 'Debit')
+    worksheet.write('C1', 'Credit')
+    
+    
+    
+    rowIndex = 2
+
+    agg_result= dataSearch.aggregate(
+        [
+        {"$match":{'date_entry': {'$gte':date_time_obj_from, '$lte':date_time_obj_to},
+            '$or': [
+            {'acoount_number': {"$regex": "^5"}},
+            {'acoount_number': {"$regex": "^4"}}
+        ] }},
+        # {"$match": { "cut_off_period": date } },
+        # {'$sort' : { '$meta': "textScore" }, '$account_disc': -1 },
+        {"$group" : 
+            {"_id" :  '$acoount_number',
+            "accountName": {'$first':'$account_disc'},
+            "totalDebit" : {"$sum" : '$debit_amount'},
+            "totalCredit" : {"$sum" : '$credit_amount'},
+            
+            }},
+        {'$sort':{'_id': 1}}
+            
+        ])
+
+
+    for x in agg_result:
+        account_number = x['accountName']
+        debit_amount = x['totalDebit']
+        debit_amount2 = '{:,.2f}'.format(debit_amount)
+        credit_amount = x['totalCredit']
+        credit_amount2 = '{:,.2f}'.format(credit_amount)
+
+        
+        worksheet.write('A' + str(rowIndex),account_number)
+        worksheet.write('B' + str(rowIndex),debit_amount)
+        worksheet.write('C' + str(rowIndex),credit_amount)
+       
+        
+        rowIndex += 1
+
+    workbook.close()
+    messagebox.showinfo('JRS', 'Data has been exported')    
+
+    # from os import startfile
+    startfile("incomeStatement.xlsx")
+
+
 def incomeStatement_calculation():
     """
     This function is for calculation
@@ -3305,6 +3368,7 @@ def incomeStatement_calculation():
     total_credit_amount_income = 0
     totalIncome = 0
     for x in agg_resultIncome:
+        
         debit_amount = x['totalDebit']
         total_debit_amount_income+=debit_amount
 
@@ -3342,20 +3406,24 @@ def incomeStatement_calculation():
     total_debit_amount_expense = 0
     total_credit_amount_expense = 0
     totalexpense = 0
+
     for x in agg_resultExpense:
+        accountNumber = x['_id'] 
+        accountName = x['accountName'] 
         debit_amount = x['totalDebit']
-        total_debit_amount_income+=debit_amount
+        total_debit_amount_expense+=debit_amount
 
         credit_amount = x['totalCredit']
-        total_credit_amount_income+=credit_amount
+        total_credit_amount_expense+=credit_amount
 
-        totalexpense = float(total_debit_amount_income) - float(total_credit_amount_income)
+        totalexpense = float(total_debit_amount_expense) - float(total_credit_amount_expense)
         totalexpense2 = '{:,.2f}'.format(totalexpense)
 
        
 
         totalExpenses_entry.delete(0, END)
         totalExpenses_entry.insert(0, (totalexpense2))
+       
 
     
     netIncome = totalIncome - totalexpense
@@ -3363,6 +3431,9 @@ def incomeStatement_calculation():
 
     netIncome_entry.delete(0, END)
     netIncome_entry.insert(0, (netIncome2))
+
+
+
 
 
 
@@ -3428,6 +3499,10 @@ def incomeStatement_frame():
     btn_search_incomeStatment = Button(accounting_frame, text='Search', bd=2, bg='green', fg='white',
                               font=('arial', 10), width=10, height=1, command=incomeStatement_list_treeview)
     btn_search_incomeStatment.place(x=720, y=35)
+
+    btn_search_export = Button(accounting_frame, text='Export', bd=2, bg='gray', fg='white',
+                              font=('arial', 10), width=10, height=1, command=incomeStatement_export)
+    btn_search_export.place(x=840, y=35)
     
     
     # this is for treeview for trial Balance
@@ -4107,7 +4182,7 @@ def accounting_frame():
     btn_manualJournalEntry.place(x=2, y=280)
 
     btn_importChartofAccount = Button(MidViewForm9, text='Import CoA', bd=2, bg='blue', fg='white',
-                              font=('arial', 12), width=15, height=2, command=importChartofAccount)
+                              font=('arial', 12), width=15, height=2)
     btn_importChartofAccount.place(x=2, y=340)
 
     
