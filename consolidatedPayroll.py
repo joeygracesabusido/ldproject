@@ -1298,6 +1298,8 @@ def net_pay():
 
         elif  department_list.get() == "Surigao":
             mwe_monthly = float(350 * 13)
+        elif  department_list.get() == "Zamboanga":
+            mwe_monthly = float(351 * 13)
 
         # print(mwe_monthly)
         # print(salRate)
@@ -2010,7 +2012,7 @@ def gross_computation():
     regdaycal =0
     details = salaDetails_entry.get()
     salary_rate_grossComp = salaryRate_entry.get()
-    rateProvi = 401
+    rateProvi = float(provincialRate_entry.get())
 
     if details == 'Monthly':
         salary_rate_grossComp = float(salaryRate_entry.get()) / 26
@@ -2315,6 +2317,9 @@ def searchEmployee_details():
 
         elif  department_list.get() == "Surigao":
             mwe = float(350)
+
+        elif  department_list.get() == "Zamboanga":
+            mwe = float(351 * 13)
         
         # this is for determination of on & off employee!!!
         
@@ -2459,7 +2464,7 @@ def payrollComputation_module():
     department_list_label.place(x=150, y=5)
 
     department_list = ttk.Combobox(payroll_frame, width=20)
-    department_list['values'] = ("Head Office", "Admin-Site", "Pampanga", "Rizal-R&F", "Surigao")
+    department_list['values'] = ("Head Office", "Admin-Site", "Pampanga", "Rizal-R&F", "Surigao","Zamboanga")
     department_list.place(x=285, y=5)
 
     payCal_date_label = Label(payroll_frame, text='Date:', width=10, height=1, bg='yellow', fg='gray',
@@ -3628,7 +3633,7 @@ def employee_details():
 
     global department_reg_entry
     department_reg_entry = ttk.Combobox(payroll_frame, width=20)
-    department_reg_entry['values'] = ("Head Office", "Admin-Site", "Pampanga", "Rizal-R&F")
+    department_reg_entry['values'] = ("Head Office", "Admin-Site", "Pampanga", "Rizal-R&F","Surigao","Zamboanga")
     department_reg_entry.place(x=120, y=340)
 
     date_from2_label = Label(payroll_frame, text='Date EOC:', width=11, height=1, bg='red', fg='white',
