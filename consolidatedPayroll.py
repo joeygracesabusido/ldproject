@@ -2319,7 +2319,7 @@ def searchEmployee_details():
             mwe = float(350)
 
         elif  department_list.get() == "Zamboanga":
-            mwe = float(351 * 13)
+            mwe = float(351)
         
         # this is for determination of on & off employee!!!
         

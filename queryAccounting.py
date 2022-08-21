@@ -556,9 +556,21 @@ def edit_chartOf_account():
     """
     This function is to edit
     """
+def viewChartof_account():
+    """This is to view chart of account"""
 
+    dataSearch = db['chart_of_account']
+
+    myresult = dataSearch.find().sort('accountNum', pymongo.ASCENDING)
+
+    for i in myresult:
+        accountTitle = i['accountTitle']
+        print(accountTitle)
+
+
+viewChartof_account()
 # testing_query()
-delete_chart_of_account()
+# delete_chart_of_account()
 # search_fundrequest()
 
 

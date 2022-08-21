@@ -3743,6 +3743,246 @@ def journalEntry_list_treeview():
     journalEntry_treeview.delete(*journalEntry_treeview.get_children())
     return searchJournalEntry_treeview()
 
+def export_journalEntry_excel():
+    """This function is for exporting excel"""
+    dataSearch = db['journal_entry']
+    
+    
+
+    datefrom =  journal_entry_datefrom.get()
+    date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
+
+    dateto = journal_entry_dateto.get()
+    date_time_obj_to = datetime.strptime(dateto, '%Y-%m-%d')
+
+    account_search = accountNumber_entry.get()
+    ref_search2 = str(account_search)
+    
+    if  accountNumber_entry.get() == "" and reference_entry.get() =="": 
+        workbook = xlsxwriter.Workbook("journalEntry.xlsx")
+        worksheet = workbook.add_worksheet('journalEntry')
+        worksheet.write('A1', 'Date')
+        worksheet.write('B1', 'Journal')
+        worksheet.write('C1', 'Reference')
+        worksheet.write('D1', 'Particular')
+        worksheet.write('E1', 'Account Number')
+        worksheet.write('F1', 'Account Title')
+        worksheet.write('G1', 'Debit')
+        worksheet.write('H1', 'Credit')
+        
+
+        rowIndex = 2
+        
+        try:
+            cnt = 0
+            agg_result= dataSearch.find({'date_entry': {'$gte':date_time_obj_from, '$lte':date_time_obj_to}})
+           
+            for x in agg_result:
+                cnt+=1
+                date_entry = x['date_entry']
+                journal = x['journal']
+                ref = x['ref']
+                descriptions = x['descriptions']
+                account_number = x['acoount_number']
+                account_disc = x['account_disc']
+                debit_amount = x['debit_amount']
+                debit_amount2 = '{:,.2f}'.format(debit_amount)
+                credit_amount = x['credit_amount']
+                credit_amount2 = '{:,.2f}'.format(credit_amount)
+                
+                
+            
+                worksheet.write('A' + str(rowIndex),date_entry)
+                worksheet.write('B' + str(rowIndex),journal)
+                worksheet.write('C' + str(rowIndex),ref)
+                worksheet.write('D' + str(rowIndex),descriptions)
+                worksheet.write('E' + str(rowIndex),account_number)
+                worksheet.write('F' + str(rowIndex),account_disc)
+                worksheet.write('G' + str(rowIndex),debit_amount)
+            
+                worksheet.write('H' + str(rowIndex),credit_amount)
+               
+        
+                
+                rowIndex += 1
+
+            workbook.close()
+            messagebox.showinfo('JRS', 'Data has been exported')    
+
+            # from os import startfile
+            startfile("journalEntry.xlsx")
+                
+                
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+    elif reference_entry.get() =="": # this is for date and accountNumber search
+        # query = {'date_entry': {'$gte':datefrom, '$lte':dateto}},{'ref':accountNumber_entry.get()}
+        workbook = xlsxwriter.Workbook("journalEntry.xlsx")
+        worksheet = workbook.add_worksheet('journalEntry')
+        worksheet.write('A1', 'Date')
+        worksheet.write('B1', 'Journal')
+        worksheet.write('C1', 'Reference')
+        worksheet.write('D1', 'Particular')
+        worksheet.write('E1', 'Account Number')
+        worksheet.write('F1', 'Account Title')
+        worksheet.write('G1', 'Debit')
+        worksheet.write('H1', 'Credit')
+        
+
+        rowIndex = 2
+        try:
+            cnt = 0
+            # for x in dataSearch.find({'$and' :[{'date_entry': {'$gte':datefrom, '$lte':dateto}},
+            #                                    {'acoount_number':accountNumber_entry.get()}]}):
+
+            for x in dataSearch.find({'acoount_number':accountNumber_entry.get()}):
+                cnt+=1
+                date_entry = x['date_entry']
+                journal = x['journal']
+                ref = x['ref']
+                descriptions = x['descriptions']
+                account_number = x['acoount_number']
+                account_disc = x['account_disc']
+                debit_amount = x['debit_amount']
+                debit_amount2 = '{:,.2f}'.format(debit_amount)
+                credit_amount = x['credit_amount']
+                credit_amount2 = '{:,.2f}'.format(credit_amount)
+                
+                
+                worksheet.write('A' + str(rowIndex),date_entry)
+                worksheet.write('B' + str(rowIndex),journal)
+                worksheet.write('C' + str(rowIndex),ref)
+                worksheet.write('D' + str(rowIndex),descriptions)
+                worksheet.write('E' + str(rowIndex),account_number)
+                worksheet.write('F' + str(rowIndex),account_disc)
+                worksheet.write('G' + str(rowIndex),debit_amount)
+            
+                worksheet.write('H' + str(rowIndex),credit_amount)
+               
+        
+                
+                rowIndex += 1
+
+            workbook.close()
+            messagebox.showinfo('JRS', 'Data has been exported')   
+             # from os import startfile
+            startfile("journalEntry.xlsx")
+              
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")  
+        
+    elif accountNumber_entry.get() =="": # this is for date and reference Number search
+        # query = {'date_entry': {'$gt':datefrom, '$lt':dateto}},{'ref':accountNumber_entry.get()}
+        workbook = xlsxwriter.Workbook("journalEntry.xlsx")
+        worksheet = workbook.add_worksheet('journalEntry')
+        worksheet.write('A1', 'Date')
+        worksheet.write('B1', 'Journal')
+        worksheet.write('C1', 'Reference')
+        worksheet.write('D1', 'Particular')
+        worksheet.write('E1', 'Account Number')
+        worksheet.write('F1', 'Account Title')
+        worksheet.write('G1', 'Debit')
+        worksheet.write('H1', 'Credit')
+        
+
+        rowIndex = 2
+        try:
+            cnt = 0
+            for x in dataSearch.find({'ref':reference_entry.get()}):
+                cnt+=1
+                date_entry = x['date_entry']
+                journal = x['journal']
+                ref = x['ref']
+                descriptions = x['descriptions']
+                account_number = x['acoount_number']
+                account_disc = x['account_disc']
+                debit_amount = x['debit_amount']
+                debit_amount2 = '{:,.2f}'.format(debit_amount)
+                credit_amount = x['credit_amount']
+                credit_amount2 = '{:,.2f}'.format(credit_amount)
+                
+                
+                worksheet.write('A' + str(rowIndex),date_entry)
+                worksheet.write('B' + str(rowIndex),journal)
+                worksheet.write('C' + str(rowIndex),ref)
+                worksheet.write('D' + str(rowIndex),descriptions)
+                worksheet.write('E' + str(rowIndex),account_number)
+                worksheet.write('F' + str(rowIndex),account_disc)
+                worksheet.write('G' + str(rowIndex),debit_amount)
+            
+                worksheet.write('H' + str(rowIndex),credit_amount)
+               
+        
+                
+                rowIndex += 1
+
+            workbook.close()
+            messagebox.showinfo('JRS', 'Data has been exported') 
+             # from os import startfile
+            startfile("journalEntry.xlsx")  
+              
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}") 
+
+
+    elif accountNumber_entry.get() !="" and  accountNumber_entry.get() != "" and accountNumber_entry.get() !="": # this is for date and accountNumber search
+        # query = {'date_entry': {'$gte':datefrom, '$lte':dateto}},{'ref':accountNumber_entry.get()}
+        workbook = xlsxwriter.Workbook("journalEntry.xlsx")
+        worksheet = workbook.add_worksheet('journalEntry')
+        worksheet.write('A1', 'Date')
+        worksheet.write('B1', 'Journal')
+        worksheet.write('C1', 'Reference')
+        worksheet.write('D1', 'Particular')
+        worksheet.write('E1', 'Account Number')
+        worksheet.write('F1', 'Account Title')
+        worksheet.write('G1', 'Debit')
+        worksheet.write('H1', 'Credit')
+        
+
+        rowIndex = 2
+        try:
+            cnt = 0
+            
+
+            for x in dataSearch.find({ '$and': [ {'date_entry': {'$gte':date_time_obj_from,'$lte':date_time_obj_to}},
+                                                {'acoount_number':accountNumber_entry.get()} ] } ):
+                cnt+=1
+                date_entry = x['date_entry']
+                journal = x['journal']
+                ref = x['ref']
+                descriptions = x['descriptions']
+                account_number = x['acoount_number']
+                account_disc = x['account_disc']
+                debit_amount = x['debit_amount']
+                debit_amount2 = '{:,.2f}'.format(debit_amount)
+                credit_amount = x['credit_amount']
+                credit_amount2 = '{:,.2f}'.format(credit_amount)
+                
+                worksheet.write('A' + str(rowIndex),date_entry)
+                worksheet.write('B' + str(rowIndex),journal)
+                worksheet.write('C' + str(rowIndex),ref)
+                worksheet.write('D' + str(rowIndex),descriptions)
+                worksheet.write('E' + str(rowIndex),account_number)
+                worksheet.write('F' + str(rowIndex),account_disc)
+                worksheet.write('G' + str(rowIndex),debit_amount)
+            
+                worksheet.write('H' + str(rowIndex),credit_amount)
+               
+        
+                
+                rowIndex += 1
+
+            workbook.close()
+            messagebox.showinfo('JRS', 'Data has been exported') 
+             # from os import startfile
+            startfile("journalEntry.xlsx")  
+              
+              
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")  
+  
+
+
 def searchJournalEntry_treeview():
     """
     This function is for
@@ -3788,7 +4028,39 @@ def searchJournalEntry_treeview():
                 
                 
         except Exception as ex:
-            messagebox.showerror("Error", f"Error due to :{str(ex)}")    
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")  
+
+    # this is for querying eccount Number and dates Parameters
+
+    elif accountNumber_entry.get() !="" and  accountNumber_entry.get() != "" and accountNumber_entry.get() !="": # this is for date and accountNumber search
+        # query = {'date_entry': {'$gte':datefrom, '$lte':dateto}},{'ref':accountNumber_entry.get()}
+        try:
+            cnt = 0
+            
+
+            for x in dataSearch.find({ '$and': [ {'date_entry': {'$gte':date_time_obj_from,'$lte':date_time_obj_to}},
+                                                {'acoount_number':accountNumber_entry.get()} ] } ):
+                cnt+=1
+                date_entry = x['date_entry']
+                journal = x['journal']
+                ref = x['ref']
+                descriptions = x['descriptions']
+                account_number = x['acoount_number']
+                account_disc = x['account_disc']
+                debit_amount = x['debit_amount']
+                debit_amount2 = '{:,.2f}'.format(debit_amount)
+                credit_amount = x['credit_amount']
+                credit_amount2 = '{:,.2f}'.format(credit_amount)
+                
+                
+                journalEntry_treeview.insert('', 'end', values=(date_entry,journal,
+                                    ref,descriptions, account_number,account_disc,debit_amount2,
+                                    credit_amount2 ))
+              
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")  
+  
+    
     elif reference_entry.get() =="": # this is for date and accountNumber search
         # query = {'date_entry': {'$gte':datefrom, '$lte':dateto}},{'ref':accountNumber_entry.get()}
         try:
@@ -3991,6 +4263,10 @@ def importEntry_frame():
     btn_searchEntry = Button(accounting_frame, text='Search Entry', bd=2, bg='green', fg='white',
                               font=('arial', 10), width=10, height=1, command=journalEntry_list_treeview)
     btn_searchEntry.place(x=910, y=35)
+
+    btn_excel_export = Button(accounting_frame, text='Excel Export', bd=2, bg='white', fg='black',
+                              font=('arial', 10), width=10, height=1, command=export_journalEntry_excel)
+    btn_excel_export.place(x=1025, y=35)
     
     btn_importEntry = Button(accounting_frame, text='Import Entry', bd=2, bg='yellow', fg='black',
                               font=('arial', 10), width=10, height=1, command=import_journal_entry)
@@ -4048,6 +4324,32 @@ def importEntry_frame():
 
     journalEntry_treeview.pack()
 # ===============================================This is for inserting chart of account ==========================
+def chart_of_account_treeview_list():
+    """"
+    This function is for
+    searching for payroll computation treeview
+    """
+    
+    chartOFAccount_treeview.delete(*chartOFAccount_treeview.get_children())
+    return chart_of_account_treeview()
+
+
+def chart_of_account_treeview():
+    """This function is for querying chart of account"""
+
+    dataSearch = db['chart_of_account']
+
+    myresult = dataSearch.find().sort('accountNum', pymongo.ASCENDING)
+
+    for i in myresult:
+        accountNum =  i['accountNum']
+        accountTitle = i['accountTitle']
+        bsClass = i['bsClass']
+
+        chartOFAccount_treeview.insert('', 'end', values=(accountNum,
+                                                            accountTitle,
+                                                                bsClass ))
+
 def insert_ChartofAccount():
     """
     This function is for 
@@ -4095,6 +4397,9 @@ def insert_ChartofAccount():
                     coa_number_entry.delete(0, END)
                     chart_of_account_entry.delete(0, END)
                     balancesheet_class_entry.delete(0, END)
+                    
+                    chart_of_account_treeview_list()
+
                 
             except Exception as ex:
                 messagebox.showerror("Error", f"Error due to :{str(ex)}")    
@@ -4143,6 +4448,56 @@ def insert_chart_of_account():
     btn_Save = Button(accounting_frame, text='Save', bd=2, bg='blue', fg='white',
                               font=('arial', 12), width=15, height=2, command=insert_ChartofAccount)
     btn_Save.place(x=2, y=150)
+
+   
+
+    chartofAccount_frame_Form = Frame(accounting_frame, width=500, height=25)
+    chartofAccount_frame_Form.place(x=500, y=30)
+
+    style = ttk.Style(accounting_frame)
+    style.theme_use("clam")
+    style.configure("Treeview",
+                    background="black",
+                    foreground="white",
+                    fieldbackground="yellow")
+    # change selected color
+
+    # style.map('Treeview',
+    #             background[('selected','green')])
+    
+    
+     
+
+    scrollbarx = Scrollbar(chartofAccount_frame_Form, orient=HORIZONTAL)
+    scrollbary = Scrollbar(chartofAccount_frame_Form, orient=VERTICAL)
+    global chartOFAccount_treeview
+    chartOFAccount_treeview = ttk.Treeview(chartofAccount_frame_Form,
+                                             columns=("Account No.","Account Title","Balance Sheet Type"),
+                                             selectmode="extended", height=20, yscrollcommand=scrollbary.set,
+                                             xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=chartOFAccount_treeview.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=chartOFAccount_treeview.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    chartOFAccount_treeview.heading('Account No.', text="Account #", anchor=CENTER)
+    chartOFAccount_treeview.heading('Account Title', text="Account Title", anchor=CENTER)
+    chartOFAccount_treeview.heading('Balance Sheet Type', text="Balance Sheet Type", anchor=CENTER)
+   
+    
+    
+
+
+    chartOFAccount_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
+    chartOFAccount_treeview.column('#1', stretch=NO, minwidth=0, width=150, anchor='e')
+    chartOFAccount_treeview.column('#2', stretch=NO, minwidth=0, width=300, anchor='e')
+    chartOFAccount_treeview.column('#3', stretch=NO, minwidth=0, width=150, anchor='e')
+   
+   
+   
+
+    chartOFAccount_treeview.pack()
+
+    chart_of_account_treeview_list()
 
 
     
