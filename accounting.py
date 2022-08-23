@@ -2861,31 +2861,151 @@ def autoIncrement_journal_manual_ref():
     for reference in
     journala Entry
     """
+
+    # ("Payments", "Receipts", "Sales", "Purchases",'General')
+    # agg_result = dataSearch.count_documents(query)
+    # journal
+    # agg_result = dataSearch.find().sort('ref',-1).limit(1)
+
     dataSearch = db['journal_entry']
-    agg_result = dataSearch.find().sort('ref',-1).limit(1)
 
-    a = ""
-    for x in agg_result :
-        a = x['ref']
+    if journal_manual.get() == 'Payments':
+        query = 'Payments'
+        agg_result = dataSearch.find({'journal':query}).sort('ref',-1).limit(1)
 
-        # current_year =  datetime.today().year
-    if a =="":
-        test_str = 'GJ000'
-        res = test_str
+        a = ""
+        for x in agg_result :
+            a = x['ref']
 
-        reference_manual_entry.delete(0, END)
-        reference_manual_entry.insert(0, (res))
-        
-    else:
-        
+            # current_year =  datetime.today().year
+        if a =="":
+            test_str = 'P000'
+            res = test_str
 
-        reference_manual = a 
-        res = re.sub(r'[0-9]+$',
-                lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
-                reference_manual)
+            reference_manual_entry.delete(0, END)
+            reference_manual_entry.insert(0, (res))
+            
+        else:
+            
 
-        reference_manual_entry.delete(0, END)
-        reference_manual_entry.insert(0, (res))
+            reference_manual = a 
+            res = re.sub(r'[0-9]+$',
+                    lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
+                    reference_manual)
+
+            reference_manual_entry.delete(0, END)
+            reference_manual_entry.insert(0, (res))
+    
+    elif journal_manual.get() == 'Receipts':
+        query = 'Receipts'
+        agg_result = dataSearch.find({'journal':query}).sort('ref',-1).limit(1)
+
+        a = ""
+        for x in agg_result :
+            a = x['ref']
+
+            # current_year =  datetime.today().year
+        if a =="":
+            test_str = 'Sales-000'
+            res = test_str
+
+            reference_manual_entry.delete(0, END)
+            reference_manual_entry.insert(0, (res))
+            
+        else:
+            
+
+            reference_manual = a 
+            res = re.sub(r'[0-9]+$',
+                    lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
+                    reference_manual)
+
+            reference_manual_entry.delete(0, END)
+            reference_manual_entry.insert(0, (res))
+
+    elif journal_manual.get() == 'Sales':
+        query = 'Sales'
+        agg_result = dataSearch.find({'journal':query}).sort('ref',-1).limit(1)
+
+        a = ""
+        for x in agg_result :
+            a = x['ref']
+
+            # current_year =  datetime.today().year
+        if a =="":
+            test_str = 'Sales-000'
+            res = test_str
+
+            reference_manual_entry.delete(0, END)
+            reference_manual_entry.insert(0, (res))
+            
+        else:
+            
+
+            reference_manual = a 
+            res = re.sub(r'[0-9]+$',
+                    lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
+                    reference_manual)
+
+            reference_manual_entry.delete(0, END)
+            reference_manual_entry.insert(0, (res))
+
+    elif journal_manual.get() == 'Purchases':
+        query = 'Purchases'
+        agg_result = dataSearch.find({'journal':query}).sort('ref',-1).limit(1)
+
+        a = ""
+        for x in agg_result :
+            a = x['ref']
+
+            # current_year =  datetime.today().year
+        if a =="":
+            test_str = 'Purchases-000'
+            res = test_str
+
+            reference_manual_entry.delete(0, END)
+            reference_manual_entry.insert(0, (res))
+            
+        else:
+            
+
+            reference_manual = a 
+            res = re.sub(r'[0-9]+$',
+                    lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
+                    reference_manual)
+
+            reference_manual_entry.delete(0, END)
+            reference_manual_entry.insert(0, (res))
+
+    elif journal_manual.get() == 'General':
+        query = 'General'
+        agg_result = dataSearch.find({'journal':query}).sort('ref',-1).limit(1)
+
+        a = ""
+        for x in agg_result :
+            a = x['ref']
+
+            # current_year =  datetime.today().year
+        if a =="":
+            test_str = 'GL-000'
+            res = test_str
+
+            reference_manual_entry.delete(0, END)
+            reference_manual_entry.insert(0, (res))
+            
+        else:
+            
+
+            reference_manual = a 
+            res = re.sub(r'[0-9]+$',
+                    lambda x: f"{str(int(x.group())+1).zfill(len(x.group()))}", 
+                    reference_manual)
+
+            reference_manual_entry.delete(0, END)
+            reference_manual_entry.insert(0, (res))
+
+
+
 def auto_account_num(e):
     """
     this function
@@ -4324,6 +4444,54 @@ def importEntry_frame():
 
     journalEntry_treeview.pack()
 # ===============================================This is for inserting chart of account ==========================
+def export_chart_of_account():
+    """This function is for exporting chart of account"""
+
+
+    dataSearch = db['chart_of_account']
+    workbook = xlsxwriter.Workbook("chart_of_account.xlsx")
+    worksheet = workbook.add_worksheet('journalEntry')
+    worksheet.write('A1', 'Account No')
+    worksheet.write('B1', 'Account Title')
+    worksheet.write('C1', 'Balance Sheet Type')
+    
+
+
+    rowIndex = 2
+
+    try:
+      
+        agg_result= dataSearch.find().sort('accountNum', pymongo.ASCENDING)
+        
+        for x in agg_result:
+            
+            accountName = x['accountNum']
+            accountTitle = x['accountTitle']
+            BsClass = x['bsClass']
+            
+            
+            
+        
+            worksheet.write('A' + str(rowIndex),accountName)
+            worksheet.write('B' + str(rowIndex),accountTitle)
+            worksheet.write('C' + str(rowIndex),BsClass)
+            
+            
+
+            
+            rowIndex += 1
+
+        workbook.close()
+        messagebox.showinfo('JRS', 'Data has been exported')    
+
+        # from os import startfile
+        startfile("chart_of_account.xlsx")
+            
+            
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+
 def chart_of_account_treeview_list():
     """"
     This function is for
@@ -4450,9 +4618,12 @@ def insert_chart_of_account():
     btn_Save.place(x=2, y=150)
 
    
+    btn_Save = Button(accounting_frame, text='Export', bd=2, bg='blue', fg='white',
+                              font=('arial', 11), width=13, height=1, command=export_chart_of_account)
+    btn_Save.place(x=950, y=10)
 
     chartofAccount_frame_Form = Frame(accounting_frame, width=500, height=25)
-    chartofAccount_frame_Form.place(x=500, y=30)
+    chartofAccount_frame_Form.place(x=500, y=50)
 
     style = ttk.Style(accounting_frame)
     style.theme_use("clam")
