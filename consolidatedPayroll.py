@@ -2211,7 +2211,7 @@ def gross_computation():
         proviSunOTCal_entry.insert(0, (proviSunRateOTcal))
     else:
         proviSunRateOT = proviSunOT_entry.get()
-        proviSunRateOTcal = float(proviSunRateOT) * (rateProvi / 8 * 1.25)
+        proviSunRateOTcal = float(proviSunRateOT) * (rateProvi / 8 * 1.69)
         proviSunRateOTcal2 = '{:,.2f}'.format(proviSunRateOTcal)
         proviSunOTCal_entry.delete(0, END)
         proviSunOTCal_entry.insert(0, (proviSunRateOTcal2))

@@ -3345,9 +3345,10 @@ def incomeStatement_export():
 
     workbook = xlsxwriter.Workbook("incomeStatement.xlsx")
     worksheet = workbook.add_worksheet('rental')
-    worksheet.write('A1', 'Account Title')
-    worksheet.write('B1', 'Debit')
-    worksheet.write('C1', 'Credit')
+    worksheet.write('A1', 'Account Number')
+    worksheet.write('B1', 'Account Title')
+    worksheet.write('C1', 'Debit')
+    worksheet.write('D1', 'Credit')
     
     
     
@@ -3375,16 +3376,18 @@ def incomeStatement_export():
 
 
     for x in agg_result:
-        account_number = x['accountName']
+        accountNumber = x['_id']
+        account_title = x['accountName']
         debit_amount = x['totalDebit']
         debit_amount2 = '{:,.2f}'.format(debit_amount)
         credit_amount = x['totalCredit']
         credit_amount2 = '{:,.2f}'.format(credit_amount)
 
         
-        worksheet.write('A' + str(rowIndex),account_number)
-        worksheet.write('B' + str(rowIndex),debit_amount)
-        worksheet.write('C' + str(rowIndex),credit_amount)
+        worksheet.write('A' + str(rowIndex),accountNumber)
+        worksheet.write('B' + str(rowIndex),account_title)
+        worksheet.write('C' + str(rowIndex),debit_amount)
+        worksheet.write('D' + str(rowIndex),credit_amount)
        
         
         rowIndex += 1
@@ -4644,7 +4647,7 @@ def insert_chart_of_account():
     global chartOFAccount_treeview
     chartOFAccount_treeview = ttk.Treeview(chartofAccount_frame_Form,
                                              columns=("Account No.","Account Title","Balance Sheet Type"),
-                                             selectmode="extended", height=20, yscrollcommand=scrollbary.set,
+                                             selectmode="extended", height=21, yscrollcommand=scrollbary.set,
                                              xscrollcommand=scrollbarx.set)
     scrollbary.config(command=chartOFAccount_treeview.yview)
     scrollbary.pack(side=RIGHT, fill=Y)
