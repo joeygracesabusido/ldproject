@@ -3035,14 +3035,14 @@ def average_per_month():
             
 # cost_analysis_report()
 
-# edit_cash_advances()
+
 # edit_off_on()
 # tin_Query()
 # searchPayroll()
 # deleteCut_offPeriod() 
 # employee_salaryQuery()
 # cf1604()
-# insert_cash_advance_data()
+
 
 # UpdatetaxWithheld()   
 
@@ -3056,13 +3056,12 @@ def average_per_month():
     
 # edit_tax_table()
 # insert_equipment()
-# insert_sssloan_deduction()
+
 # taxable_amount()
 # total_notsubject()
 # showdatabases() 
 
-# update_sssloan_deduction()
-# show_sss_loandeduction()
+
 # showColumns()
 
 # equipment_registry()
@@ -3072,12 +3071,12 @@ def average_per_month():
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()
-# cash_advance_data()
+
 
 # search_payroll()
 # search_payroll_withUpdate()
 
-# update_hdmfloan_deduction()
+
 
 
 # computation_cosolidated()
@@ -3086,7 +3085,7 @@ def average_per_month():
 
 # searchPayroll()
 
-salaryQuery_per_employee()
+# salaryQuery_per_employee()
 
 # update_department()
 
@@ -3112,4 +3111,18 @@ salaryQuery_per_employee()
 
 # equipment_list()
 
+
+#===============================SSS Transaction==============================
+
+# insert_sssloan_deduction()
+# update_sssloan_deduction()
+# show_sss_loandeduction()
+
+#===================================Cash Advance========================
+# cash_advance_data()
+# insert_cash_advance_data()
+edit_cash_advances()
+
+#===================================HDMF================================
+# update_hdmfloan_deduction()
 

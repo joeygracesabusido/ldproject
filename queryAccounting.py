@@ -561,14 +561,17 @@ def viewChartof_account():
 
     dataSearch = db['chart_of_account']
 
-    myresult = dataSearch.find().sort('accountNum', pymongo.ASCENDING)
+    myresult = dataSearch.find()
 
     for i in myresult:
-        accountTitle = i['accountTitle']
-        print(accountTitle)
+        id = i['_id']
+        
 
+        print(id)
 
 viewChartof_account()
+
+# viewChartof_account()
 # testing_query()
 # delete_chart_of_account()
 # search_fundrequest()
