@@ -3023,7 +3023,13 @@ def average_per_month():
     print(f'Total Rental Amount: {a2}')
     print(f'Average per Month: {average2}')
         
-    
+#================================Cash advance function=======================================
+# edit_cash_advances() 
+insert_cash_advance_data()  
+
+#=======================================Selections==============================================
+# selection()
+#===============================================================================================
 
 # average_per_month()
 # testing_for_array()           
@@ -3067,7 +3073,7 @@ def average_per_month():
 # equipment_registry()
 # mwe_selection()
 # test_on()
-# selection()
+
 # update_employee_details_mwe_taxable()
 # update_employee_details_on()
 # showtables()
