@@ -1301,6 +1301,9 @@ def net_pay():
         elif  department_list.get() == "Zamboanga":
             mwe_monthly = float(351 * 13)
 
+        elif  department_list.get() == "Bayug":
+            mwe_monthly = float(351 * 13)
+
         # print(mwe_monthly)
         # print(salRate)
         #salRate = salaryRate * 13
@@ -2320,6 +2323,9 @@ def searchEmployee_details():
 
         elif  department_list.get() == "Zamboanga":
             mwe = float(351)
+
+        elif  department_list.get() == "Bayug":
+            mwe = float(351)
         
         # this is for determination of on & off employee!!!
         
@@ -2464,7 +2470,7 @@ def payrollComputation_module():
     department_list_label.place(x=150, y=5)
 
     department_list = ttk.Combobox(payroll_frame, width=20)
-    department_list['values'] = ("Head Office", "Admin-Site", "Pampanga", "Rizal-R&F", "Surigao","Zamboanga")
+    department_list['values'] = ("Head Office", "Admin-Site", "Pampanga", "Rizal-R&F", "Surigao","Zamboanga","Bayug")
     department_list.place(x=285, y=5)
 
     payCal_date_label = Label(payroll_frame, text='Date:', width=10, height=1, bg='yellow', fg='gray',
