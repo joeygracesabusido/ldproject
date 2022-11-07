@@ -3639,7 +3639,7 @@ def employee_details():
 
     global department_reg_entry
     department_reg_entry = ttk.Combobox(payroll_frame, width=20)
-    department_reg_entry['values'] = ("Head Office", "Admin-Site", "Pampanga", "Rizal-R&F","Surigao","Zamboanga")
+    department_reg_entry['values'] = ("Head Office", "Admin-Site", "Pampanga", "Rizal-R&F","Surigao","Zamboanga","Bayug")
     department_reg_entry.place(x=120, y=340)
 
     date_from2_label = Label(payroll_frame, text='Date EOC:', width=11, height=1, bg='red', fg='white',
