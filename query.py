@@ -1297,6 +1297,40 @@ def cash_advance_data():
     myresult = cursor
     for x in myresult:
         print(x)
+def update_equipment():
+    """This function is to insert equipment"""   
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    data = "SELECT * FROM equipment_details ORDER BY equipment_id"
+
+    cursor.execute(data)
+    myresult = cursor
+
+    for i in myresult:
+        print(i)
+
+    id = input('Enter  ID: ')
+    rental_rate = input('Enter rental Rate: ')
+    
+
+    try:
+
+        data = ('UPDATE equipment_details SET rental_rate=%s\
+                            WHERE id = %s')
+    
+        val = (rental_rate, id)
+
+        cursor.execute(data,val)
+
+        mydb.commit()
+        mydb.close()
+        cursor.close()
+        
+   
+    except Exception as ex:
+        print("Error", f"Error due to :{str(ex)}")
+
 def insert_equipment():
     """This function is to insert equipment"""   
     mydb._open_connection()
@@ -3122,11 +3156,14 @@ def average_per_month():
 #===================================Cash Advance========================
 # cash_advance_data()
 # insert_cash_advance_data()
-edit_cash_advances()
+# edit_cash_advances()
 
 #===================================HDMF================================
 # update_hdmfloan_deduction()
 
+
+#========================================Equipment=============================================
+update_equipment()
 
 #=======================================Selections==============================================
 # selection()
