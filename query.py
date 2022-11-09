@@ -1918,7 +1918,7 @@ def salaryQuery_per_employee():
     
     
     cursor.execute(
-            "SELECT id,cut_off_date,employee_id,last_name,first_name,on_off_details\
+            "SELECT id,cut_off_date,employee_id,last_name,first_name,salary_rate,on_off_details\
             from payroll_computation \
             WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"' \
                 AND employee_id='" + empID +"'\
@@ -1933,10 +1933,11 @@ def salaryQuery_per_employee():
         empId = row[2]
         lastName = row[3]
         firstName = row[4]
-        trans = row[5]
+        salaryRate = row[5]
+        trans = row[6]
         
         print(count,transID,
-              cut_offDate,empId,lastName,firstName,trans)
+              cut_offDate,empId,lastName,firstName,salaryRate,trans)
     
     
 def employee_salaryQuery():
@@ -3125,7 +3126,7 @@ def average_per_month():
 # update_department()
 
 
-# payroll_off_export()
+
 
 
 # payroll_perDepartment_export()
@@ -3163,7 +3164,7 @@ def average_per_month():
 
 
 #========================================Equipment=============================================
-update_equipment()
+# update_equipment()
 # insert_equipment()
 
 
@@ -3171,4 +3172,8 @@ update_equipment()
 # selection()
 #===============================================================================================
 
+
+#======================================Employee Query=======================================
+# salaryQuery_per_employee()
+payroll_off_export()
 
