@@ -1257,10 +1257,10 @@ def searchJournalEntry_treeview():
     # dateto = journal_entry_dateto.get()
 
     datefrom =  journal_entry_datefrom.get()
-    date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
+    date_time_obj_from = datetime.datetime.strptime(datefrom, '%Y-%m-%d')
 
     dateto = journal_entry_dateto.get()
-    date_time_obj_to = datetime.strptime(dateto, '%Y-%m-%d')
+    date_time_obj_to = datetime.datetime.strptime(dateto, '%Y-%m-%d')
 
     account_search = accountNumber_entry.get()
     ref_search2 = str(account_search)

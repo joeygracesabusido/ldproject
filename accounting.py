@@ -2751,7 +2751,7 @@ def journalEntry_manual_list():
     entry list
     """
     dataSearch = db['journal_entry']
-    query = {'ref':reference_manual_entry.get() }
+    query = {'ref':{"$regex":reference_manual_entry.get(),'$options':'i'} }
 
     # query ==""
     # if query == "":
