@@ -910,6 +910,10 @@ def print_payroll():
                 defp_fields  = 'RIZAL  PAYROLL'
             elif department == 'Surigao':
                 defp_fields  = 'SURIGAO  PAYROLL'
+            elif department == 'Bayug':
+                defp_fields  = 'BAYUG  PAYROLL'
+            elif department == 'Zamboanga':
+                defp_fields  = 'Vitali  PAYROLL'
 
             else:
                 defp_fields = 'LD HO PAYROLL'

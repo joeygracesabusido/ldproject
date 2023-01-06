@@ -25,6 +25,16 @@ mydb = mysql.connector.connect(
             auth_plugin='mysql_native_password')
 cursor = mydb.cursor()
 
+
+
+mydb2 = mysql.connector.connect(
+            host="192.46.225.247",
+            user="joeysabusido",
+            password="Genesis@11",
+            database="ldTviDB",
+            auth_plugin='mysql_native_password')
+cursor2 = mydb.cursor()
+
 # THIS IS TO CREATE TABLE FOR allowance
 cursor.execute(
         "CREATE TABLE IF NOT EXISTS allowance (employee_id VARCHAR(250),\
@@ -1859,9 +1869,9 @@ def cf1604():
                 sum(totalDem_save)  as TotalDem,\
                     count(employee_id) as TotalNumber\
             from payroll_computation \
-            WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"'  \
+            WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"' AND on_off_details = 'on'  \
             GROUP BY employee_id ,last_name,first_name \
-            ORDER BY employee_id")
+            ORDER BY last_name")
 
     myresult = cursor.fetchall()
     count = 0
@@ -1938,6 +1948,55 @@ def salaryQuery_per_employee():
         
         print(count,transID,
               cut_offDate,empId,lastName,firstName,salaryRate,trans)
+
+
+def salaryQuery_per_employee2():
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    employee_id = input('Enter Employee ID: ')
+     
+    try:
+        
+        query = ("SELECT cut_off_date, employee_id, last_name, first_name, grosspay_save, netpay_save,department \
+            FROM payroll_computation\
+            WHERE employee_id='" + employee_id +"' \
+            ORDER BY cut_off_date ")
+            
+        
+
+        # Execute the query
+        cursor.execute(query)
+
+        # Return the results of the query
+        myresult = cursor.fetchall()
+
+        for x in myresult:
+            transaction_date = x[0]
+            employee_id = x[1]
+            lastname = x[2]
+            first_name = x[3]
+            grosspay_save = x[4]
+            netpay_save = x[5]
+            department = x[6]
+
+        
+        
+            grosspay_save2 = '{:,.2f}'.format(grosspay_save)
+            netpay_save2 = '{:,.2f}'.format(netpay_save)
+
+            print(transaction_date,employee_id,
+              lastname,first_name,grosspay_save2,netpay_save2,department)
+
+
+
+    except Exception as ex:
+        # Handle any errors that may occur
+        print("Error", f"Error due to: {ex}")
+
+    finally:
+        
+        mydb.close()
     
     
 def employee_salaryQuery():
@@ -3060,6 +3119,136 @@ def average_per_month():
         
 
 
+def comp13thMonth2():
+    """
+    This function is for compution of 13 month fee
+    for 
+    """
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    date1 = input('Enter Date From : ')
+    date2 = input('Enter date to : ')
+    department = input('Enter Department: ')
+
+    # department = 'Rizal-R&F'
+
+
+    workbook = xlsxwriter.Workbook("site_13month.xlsx")
+    worksheet = workbook.add_worksheet('rental')
+    worksheet.write('A1', 'EMPLOYEE ID')
+    worksheet.write('B1', 'LAST NAME')
+    worksheet.write('C1', 'FIRST NAME')
+    worksheet.write('D1', 'REGDAY CAL')
+    worksheet.write('E1', 'REGSUN CAL')
+    worksheet.write('F1', 'SPL CAL')
+    worksheet.write('G1', 'LGL2 CAL')
+    worksheet.write('H1', 'SHOP RATE CAL')
+    worksheet.write('I1', 'PROVI RATE CAL')
+    worksheet.write('J1', 'SUNDAY PROVI CAL')
+    worksheet.write('K1', '13TH MONTH FEE CALL')
+    worksheet.write('L1', 'DEPARTMENT')
+   
+
+    rowIndex = 2
+
+    cursor.execute(
+            "SELECT employee_id,last_name,\
+                sum(regularday_cal)  as TotalRegday,\
+                sum(regularsunday_cal) / 1.30  as TotalRegSun,\
+                sum(spl_cal) / 1.30 as TotalSpl,\
+                sum(legal_day_cal) / 2 as Totallgl2,\
+                sum(shoprate_day_cal)  as Totalshoprate,\
+                sum(proviRate_day_cal)  as TotalproviRate,\
+                sum(provisun_day_cal)/1.30  as TotalproviSun,\
+                first_name, department \
+            from payroll_computation \
+            WHERE cut_off_date BETWEEN '" + date1 +"'AND '" + date2 +"' AND department LIKE '%" + department +"%' \
+            GROUP BY employee_id ,last_name,first_name,department  ")
+
+    # department = '" + department +"' AND \
+    myresult = cursor.fetchall()
+    count = 0
+    for row in myresult:
+        count+=1
+        empId = row[0]
+        lastName = row[1]
+        regdayCal = row[2]
+        regsunCal = row[3]
+        splCal = row[4]
+        lgl2Cal = row[5]
+        shoprateCal = row[6]
+        provirateCal = row[7]
+        sunproviRateCal  = row[8]
+        firstNameCal = row[9]
+        Department = row[10]
+
+        comp13th = float(regdayCal + regsunCal + splCal + lgl2Cal
+                    + shoprateCal + provirateCal + sunproviRateCal) / 12
+
+        comp13th_sample = float(regdayCal + regsunCal + splCal + lgl2Cal
+                    + shoprateCal + provirateCal + sunproviRateCal)
+        # print(empId, lastName, regdayCal,regsunCal,
+        #  splCal, lgl2Cal, shoprateCal, provirateCal,
+        #  sunproviRateCal, comp13th)
+        # print(lastName,regdayCal,regsunCal,splCal,
+        #       lgl2Cal,shoprateCal,provirateCal,
+        #       sunproviRateCal,comp13th_sample)
+        
+
+        worksheet.write('A' + str(rowIndex),empId)
+        worksheet.write('B' + str(rowIndex),lastName)
+        worksheet.write('C' + str(rowIndex),firstNameCal)
+        worksheet.write('D' + str(rowIndex),regdayCal)
+        worksheet.write('E' + str(rowIndex),regsunCal)
+        worksheet.write('F' + str(rowIndex),splCal)
+        worksheet.write('G' + str(rowIndex),lgl2Cal)
+        worksheet.write('H' + str(rowIndex),shoprateCal)
+        worksheet.write('I' + str(rowIndex),provirateCal)
+        worksheet.write('J' + str(rowIndex),sunproviRateCal)
+        worksheet.write('K' + str(rowIndex),comp13th)
+        worksheet.write('L' + str(rowIndex),Department)
+
+        
+
+        rowIndex += 1
+
+    workbook.close()
+    print('JRS', 'Data has been exported')    
+
+    # from os import startfile
+    startfile("site_13month.xlsx")
+        
+    print(count)
+
+
+def selectEquipment(id):
+        """
+        This function is for querying all equipment
+        """
+
+        try:
+            # Open the database connection and create a cursor
+            with mydb2:
+                cursor = mydb2.cursor()
+
+                # Use a parameterized query to prevent SQL injection attacks
+                cursor.execute("SELECT * FROM equipment WHERE id = %s", (id,))
+
+                # Return the results of the query
+                equipment = cursor.fetchall()
+
+                # Check if no equipment was found
+                if equipment is None:
+                    return "No equipment found with ID {}".format(id)
+
+                # Return the equipment data
+                # print(equipment)
+        except Exception as ex:
+            print("Error", f"Error occurred: {str(ex)}")
+
+
+selectEquipment(1)
 
 # average_per_month()
 # testing_for_array()           
@@ -3077,13 +3266,13 @@ def average_per_month():
 # searchPayroll()
 # deleteCut_offPeriod() 
 # employee_salaryQuery()
-# cf1604()
+
 
 
 # UpdatetaxWithheld()   
 
         
-# comp13thMonth()
+
 # updatesalaryRate()
 # search_for_splOT()
 # diesel_edit()
@@ -3124,10 +3313,6 @@ def average_per_month():
 # salaryQuery_per_employee()
 
 # update_department()
-
-
-
-
 
 # payroll_perDepartment_export()
 
@@ -3174,6 +3359,10 @@ def average_per_month():
 
 
 #======================================Employee Query=======================================
+# cf1604()
+# comp13thMonth2()
+# comp13thMonth()
 # salaryQuery_per_employee()
-payroll_off_export()
+salaryQuery_per_employee2()
+# payroll_off_export()
 
