@@ -3248,7 +3248,7 @@ def selectEquipment(id):
             print("Error", f"Error occurred: {str(ex)}")
 
 
-selectEquipment(1)
+# selectEquipment(1)
 
 # average_per_month()
 # testing_for_array()           
@@ -3351,6 +3351,9 @@ selectEquipment(1)
 #========================================Equipment=============================================
 # update_equipment()
 # insert_equipment()
+# average_per_month()
+# test_test2()
+# cost_analysis_report()
 
 
 #=======================================Selections==============================================
@@ -3362,7 +3365,7 @@ selectEquipment(1)
 # cf1604()
 # comp13thMonth2()
 # comp13thMonth()
-# salaryQuery_per_employee()
-salaryQuery_per_employee2()
-# payroll_off_export()
+salaryQuery_per_employee()
+# salaryQuery_per_employee2()
+# payroll_off_export() 
 

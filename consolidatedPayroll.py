@@ -2316,7 +2316,7 @@ def searchEmployee_details():
         mwe = 0
         # this statement is for getting the mwe per propective place !!!!!
         if department_list.get() == "Rizal-R&F" or   department_list.get() == "Admin-Site" :
-            mwe = float(401)
+            mwe = float(429)
         elif  department_list.get() == "Head Office":
             mwe = float(570)
         elif  department_list.get() == "Pampanga":
