@@ -116,7 +116,7 @@ def print1601c_report():
 
 
 
-    miminum_wage = str(420)
+    miminum_wage = str(429)
 
     cursor.execute("SELECT employee_id,department\
                             FROM payroll_computation where cut_off_date BETWEEN '" + date1 + "' and '" + date2 + "' ")
@@ -1294,7 +1294,7 @@ def net_pay():
         # mwe_monthly determinition!!!
         mwe_monthly = 0
         if department_list.get() == "Rizal-R&F" or   department_list.get() == "Admin-Site" :
-            mwe_monthly = float(401 * 13)
+            mwe_monthly = float(429 * 13)
         elif  department_list.get() == "Head Office":
             mwe_monthly = float(570 * 13)
         elif  department_list.get() == "Pampanga":
