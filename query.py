@@ -3246,7 +3246,13 @@ def selectEquipment(id):
                 # print(equipment)
         except Exception as ex:
             print("Error", f"Error occurred: {str(ex)}")
+from sqlmodels import updateSalaryRate
 
+def updateRate():
+    id = input("Enter trans ID :")
+    salaryRate = input("Enter salary Rate  :")
+
+    updateSalaryRate(salary_rate=salaryRate,id=id)
 
 # selectEquipment(1)
 
@@ -3365,7 +3371,8 @@ def selectEquipment(id):
 # cf1604()
 # comp13thMonth2()
 # comp13thMonth()
-salaryQuery_per_employee()
+# salaryQuery_per_employee()
 # salaryQuery_per_employee2()
 # payroll_off_export() 
+updateRate()
 
