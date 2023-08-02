@@ -1121,7 +1121,7 @@ def save_payroll():
         hdmfdeduct_save = hdmfdeduct
 
         ca_deduct_save2 = ca_deduct_save
-        sss_loandeduct_save = sss_loandeduct
+        # sss_loandeduct_save = sss_loandeduct.get()
         # netPay_save = float(netpay_entry.get())
 
         netPay_save2 = netPay
@@ -1170,7 +1170,7 @@ def save_payroll():
                 sss_save, phic_save, hdmf_save, provshare_save, totalMadatory_save, uniform_save, rice_save, laundry_save,
                 medical1_save,
                 medical2_save, totalDem_save,otherForms_save, taxable_amount_save, taxWitheld_entry.get(), ca_deduct_save2,
-                sss_loandeduct_save, hdmfdeduct_save, netPay_save2,
+                sssLoan_entry.get(), hdmfdeduct_save, netPay_save2,
                 user_reg,
                 date_time_update,on_off_saving,tax_mwe_entry.get()))
             # 58
@@ -1214,7 +1214,7 @@ def save_payroll():
                 sss_save, phic_save, hdmf_save, provshare_save, totalMadatory_save, uniform_save, rice_save, laundry_save,
                 medical1_save,
                 medical2_save, totalDem_save,otherForms_save, taxable_amount_save, taxWitheld_entry.get(), ca_deduct_save2,
-                sss_loandeduct_save, hdmfdeduct_save, netPayConso,
+                sssLoan_entry.get(), hdmfdeduct_save, netPayConso,
                 user_reg,
                 date_time_update,on_off_saving,tax_mwe_entry.get()))
             # 58
@@ -1620,7 +1620,7 @@ def net_pay():
 
 
 
-    netPay = grossPay - taxWithheld - totalMadatory - float(sss_loandeduct) - float(hdmfdeduct) - float(ca_deduct_save)
+    netPay = grossPay - taxWithheld - totalMadatory - float(sssLoan_entry.get()) - float(hdmfdeduct) - float(ca_deduct_save)
     netPay2 = '{:,.2f}'.format(netPay)
     netpay_entry.delete(0, END)
     netpay_entry.insert(0, (netPay2))
@@ -1629,7 +1629,7 @@ def net_pay():
 def net_pay_conso_calculation():
     """This function is for calculation of Net pay with consolidation of Taxwithheld"""
     global netPay_conso
-    netPay_conso = grosspay - float(taxWitheld_entry.get()) - totalMadatory - float(sss_loandeduct) - float(hdmfdeduct) - float(ca_deduct_save)
+    netPay_conso = grosspay - float(taxWitheld_entry.get()) - totalMadatory - float(sssLoan_entry.get()) - float(hdmfdeduct) - float(ca_deduct_save)
     netPay_conso2 = '{:,.2f}'.format(netPay_conso)
     netpay_entry.delete(0, END)
     netpay_entry.insert(0, (netPay_conso2))
@@ -1647,6 +1647,44 @@ def sum_total_mandatory():
     totalMadatory2 = '{:.2f}'.format(totalMadatory)
     totl_mandatory_entry.delete(0, END)
     totl_mandatory_entry.insert(0, (totalMadatory2))
+
+def sssLoanSearch():
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+    empID = empID_entry.get()
+    cursor.execute("SELECT employee_id,loan_deduction\
+                              FROM sss_loanDeduction\
+                               WHERE employee_id ='" + empID + "'  \
+                       ")
+
+    fetch = cursor.fetchall()
+    row_count = cursor.rowcount
+
+    if row_count == 0:
+        sss_loandeduct = 0
+        sss_loandeduct2 = '{:.2f}'.format(sss_loandeduct)
+        sssLoan_entry.delete(0, END)
+        sssLoan_entry.insert(0, (sss_loandeduct2))
+
+    else:
+        cursor.execute("SELECT employee_id,loan_deduction\
+                            FROM sss_loanDeduction\
+                            WHERE employee_id ='" + empID + "'  \
+                    ")
+
+        fetch = cursor.fetchall()
+        
+
+        for row in fetch:
+            deduct = row[1]
+
+            sss_loandeduct = deduct
+            sss_loandeduct2 = '{:.2f}'.format(sss_loandeduct)
+            sssLoan_entry.delete(0, END)
+            sssLoan_entry.insert(0, (sss_loandeduct2))
+
 
 
 def govt_mandatory_comp():
@@ -1727,6 +1765,8 @@ def govt_mandatory_comp():
             phic_entry.insert(0, (phic2))
         
         # this function is for getting the hdmf loan deduction
+
+        
         cursor.execute("SELECT employee_id,loan_deduction\
                               FROM HDMF_loanDeduction\
                                WHERE employee_id ='" + empID + "'  \
@@ -1761,36 +1801,37 @@ def govt_mandatory_comp():
                 hdmfLoan_entry.insert(0, (hdmfdeduct2))
                 
         # this function is for getting the sss loan deduction
-        cursor.execute("SELECT employee_id,loan_deduction\
-                              FROM sss_loanDeduction\
-                               WHERE employee_id ='" + empID + "'  \
-                       ")
+        # edited August 2, 2023
+        # cursor.execute("SELECT employee_id,loan_deduction\
+        #                       FROM sss_loanDeduction\
+        #                        WHERE employee_id ='" + empID + "'  \
+        #                ")
 
-        fetch = cursor.fetchall()
-        row_count = cursor.rowcount
+        # fetch = cursor.fetchall()
+        # row_count = cursor.rowcount
 
-        if row_count == 0:
-            sss_loandeduct = 0
-            sss_loandeduct2 = '{:,.2f}'.format(sss_loandeduct)
-            sssLoan_entry.delete(0, END)
-            sssLoan_entry.insert(0, (sss_loandeduct2))
+        # if row_count == 0:
+        #     sss_loandeduct = 0
+        #     sss_loandeduct2 = '{:,.2f}'.format(sss_loandeduct)
+        #     sssLoan_entry.delete(0, END)
+        #     sssLoan_entry.insert(0, (sss_loandeduct2))
 
-        else:
-            cursor.execute("SELECT employee_id,loan_deduction\
-                              FROM sss_loanDeduction\
-                               WHERE employee_id ='" + empID + "'  \
-                       ")
+        # else:
+        #     cursor.execute("SELECT employee_id,loan_deduction\
+        #                       FROM sss_loanDeduction\
+        #                        WHERE employee_id ='" + empID + "'  \
+        #                ")
 
-            fetch = cursor.fetchall()
+        #     fetch = cursor.fetchall()
             
 
-            for row in fetch:
-                deduct = row[1]
+        #     for row in fetch:
+        #         deduct = row[1]
 
-                sss_loandeduct = deduct
-                sss_loandeduct2 = '{:,.2f}'.format(sss_loandeduct)
-                sssLoan_entry.delete(0, END)
-                sssLoan_entry.insert(0, (sss_loandeduct2))
+        #         sss_loandeduct = deduct
+        #         sss_loandeduct2 = '{:,.2f}'.format(sss_loandeduct)
+        #         sssLoan_entry.delete(0, END)
+        #         sssLoan_entry.insert(0, (sss_loandeduct2))
 
        
 
@@ -1798,7 +1839,7 @@ def govt_mandatory_comp():
 
     else:
         sss = 0
-        sss2 = '{:,.2f}'.format(sss)
+        sss2 = '{:.2f}'.format(sss)
         sss_entry.delete(0, END)
         sss_entry.insert(0, (sss2))
 
@@ -1828,7 +1869,7 @@ def govt_mandatory_comp():
 
 
         sss_loandeduct = 0
-        sss_loandeduct2 = '{:,.2f}'.format(sss_loandeduct)
+        sss_loandeduct2 = '{:.2f}'.format(sss_loandeduct)
         sssLoan_entry.delete(0, END)
         sssLoan_entry.insert(0, (sss_loandeduct2))
 
@@ -2865,6 +2906,11 @@ def payrollComputation_module():
     global sssLoan_entry
     sssLoan_entry = Entry(payroll_frame, width=10, font=('Arial', 10), justify='right', fg='red')
     sssLoan_entry.place(x=860, y=233)
+
+    btn_sssloan = Button(payroll_frame, text="SSS Loan", bg='brown', fg='yellow', font=('arial', 9),
+                                width=12, command= sssLoanSearch)
+    btn_sssloan.place(x=650, y=233)
+    btn_sssloan.bind('<Return>', sssLoanSearch)
 
     hdmfLoan_label = Label(payroll_frame, text='HDMF loan:', width=10, height=1, bg='yellow', fg='gray',
                           font=('Arial', 10), anchor='e')

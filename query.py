@@ -1768,6 +1768,35 @@ def update_hdmfloan_deduction():
     else:
         exit
 
+
+def insert_hdmfloan_deduction():
+    mydb._open_connection()
+    cursor = mydb.cursor()
+    
+    show_hdmf_loandeduction()
+    
+    trans_id =input('Enter id: ')
+    employee_id =input('Enter Employee ID: ')
+    loan_deduction = input('Enter Amount Deduction: ')
+    
+
+    cursor.execute(
+        "UPDATE HDMF_loanDeduction SET loan_deduction='" + loan_deduction +"' \
+            WHERE id = '" + trans_id +"' ")
+       
+
+    mydb.commit()
+    mydb.close()
+    cursor.close()
+    
+
+    
+    key = input('would you like to Transact another: ').lower()
+    if key == 'yes':
+        return update_hdmfloan_deduction()
+    else:
+        exit
+
 def UpdatetaxWithheld():
     """
     This function is to update Tax Withheld
@@ -3254,6 +3283,39 @@ def updateRate():
 
     updateSalaryRate(salary_rate=salaryRate,id=id)
 
+
+def searchPayroll_sum():
+    """
+    This function is for
+    searching individual payroll
+    """
+
+    mydb._open_connection()
+    cursor = mydb.cursor()
+
+
+    date1 = input('Enter Date Beginning: ')
+    date2 = input('Enter Date End:')
+   
+    
+
+    
+    
+
+    query = "SELECT SUM(grosspay_save) AS TotalAmount FROM payroll_computation \
+                    WHERE cut_off_date BETWEEN %s AND %s AND position_name LIKE %s"
+    parameters = (date1, date2, '%dt%')
+
+    cursor.execute(query, parameters)
+
+    myresult = cursor.fetchall()
+
+    print(myresult)
+
+    # print(tabulate(myresult, headers =['DATE','EMPLOYEE ID', 
+    #                                     'LAST NAME','FIRST NAME','T-AMOUNT','Posistion'], tablefmt='psql'))
+
+
 # selectEquipment(1)
 
 # average_per_month()
@@ -3363,9 +3425,9 @@ def updateRate():
 
 
 #=======================================Selections==============================================
-# selection()
+selection()
 #===============================================================================================
-
+# searchPayroll()
 
 #======================================Employee Query=======================================
 # cf1604()
@@ -3374,5 +3436,7 @@ def updateRate():
 # salaryQuery_per_employee()
 # salaryQuery_per_employee2()
 # payroll_off_export() 
-updateRate()
+# updateRate()
+# searchPayroll_sum()
+
 
