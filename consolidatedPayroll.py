@@ -1296,7 +1296,7 @@ def net_pay():
         if department_list.get() == "Rizal-R&F" or   department_list.get() == "Admin-Site" :
             mwe_monthly = float(429 * 13)
         elif  department_list.get() == "Head Office":
-            mwe_monthly = float(570 * 13)
+            mwe_monthly = float(610 * 13)
         elif  department_list.get() == "Pampanga":
             mwe_monthly = float(420 * 13)
 

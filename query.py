@@ -1775,14 +1775,20 @@ def insert_hdmfloan_deduction():
     
     show_hdmf_loandeduction()
     
-    trans_id =input('Enter id: ')
-    employee_id =input('Enter Employee ID: ')
-    loan_deduction = input('Enter Amount Deduction: ')
     
+    employee_id =input('Enter Employee ID: ')
+    lastName = input('Enter last Name: ')
+    firstName = input('Enter First Name:')
+    loan_deduction = input('Enter Amount Deduction: ')
+
 
     cursor.execute(
-        "UPDATE HDMF_loanDeduction SET loan_deduction='" + loan_deduction +"' \
-            WHERE id = '" + trans_id +"' ")
+        "INSERT INTO HDMF_loanDeduction (employee_id,lastname,firstname,loan_deduction)"
+        "VALUES(%s,%s,%s,%s)",
+        (employee_id,lastName,firstName,loan_deduction))
+    
+
+    
        
 
     mydb.commit()
@@ -1793,7 +1799,7 @@ def insert_hdmfloan_deduction():
     
     key = input('would you like to Transact another: ').lower()
     if key == 'yes':
-        return update_hdmfloan_deduction()
+        pass
     else:
         exit
 
@@ -3414,6 +3420,7 @@ def searchPayroll_sum():
 
 #===================================HDMF================================
 # update_hdmfloan_deduction()
+# insert_hdmfloan_deduction()
 
 
 #========================================Equipment=============================================
